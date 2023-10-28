@@ -1,6 +1,6 @@
 <?php
 
-require_once('DB.php');
+
 
 /*
 function check_login()
@@ -77,7 +77,7 @@ function current_user_is_owner($where_field, $where_value, $table_name, $fields_
 // input: $where_field, $where_value, $table_name (to identify the record), $fields_labels_ar
 // output: true|false
 
-	global $current_user, $conn, $db_name, $host, $user,	$pass;
+	global $current_user, $conn, $db_name, $host, $user, $pass;
 
 	$db = new DB();
 	$db->connect($host, $user, $pass, $db_name);
@@ -90,17 +90,17 @@ function current_user_is_owner($where_field, $where_value, $table_name, $fields_
 	} // end if
 	else {
 		// check if the owner of the record is current_user
-		$sql = "SELECT " . $ID_user_field_name . " FROM "  . $table_name  . " WHERE " .  $where_field  . " = '" . $where_value . "' AND "  . $ID_user_field_name . " = '" . addslashes($current_user) . "'";
+		$sql = "SELECT " . $ID_user_field_name . " FROM " . $table_name . " WHERE " . $where_field . " = '" . $where_value . "' AND " . $ID_user_field_name . " = '" . addslashes($current_user) . "'";
 
 		$res = $db->execute($sql);
-//		$num_rows = get_num_rows_db($res);
+		//		$num_rows = get_num_rows_db($res);
 
-/*		if ($num_rows === 1) {
-			return true;
-		} // end if
-		else {
-			return false;
-		} // end else*/
+		/*		if ($num_rows === 1) {
+					return true;
+				} // end if
+				else {
+					return false;
+				} // end else*/
 	} // end else
 
 } // end function current_user_is_owner()
@@ -130,7 +130,7 @@ function get_user_infos_ar_from_username_password($username_user, $password_user
 // input: $username_user, $password_user
 // output: the array $user_infos_ar or FALSE if no user is associated to the username and password couple
 {
-	global $db_name, $host, $user,	$pass, $users_table_name, $users_table_username_field, $users_table_password_field, $users_table_user_type_field, $quote;
+	global $db_name, $host, $user, $pass, $users_table_name, $users_table_username_field, $users_table_password_field, $users_table_user_type_field, $quote;
 
 	$sql = "SELECT " . $quote . $users_table_username_field . $quote . ", " . $quote . $users_table_user_type_field . $quote . " FROM " . $quote . $users_table_name . $quote . " WHERE " . $quote . $users_table_username_field . $quote . " = '" . $username_user . "' AND " . $quote . $users_table_password_field . $quote . " = '" . md5($password_user) . "'";
 
@@ -138,17 +138,17 @@ function get_user_infos_ar_from_username_password($username_user, $password_user
 	$db->connect($host, $user, $pass, $db_name);
 	$db->execute($sql);
 
-/*
-	if (get_num_rows_db($res) === 1) {
-		$row = fetch_row_db($res);
-		$user_infos_ar['username_user'] = $row[$users_table_username_field];
-		$user_infos_ar['user_type_user'] = $row[$users_table_user_type_field];
-		return $user_infos_ar;
-	} // end if
-	else {
-		return false;
-	} // end else
-*/
+	/*
+		if (get_num_rows_db($res) === 1) {
+			$row = fetch_row_db($res);
+			$user_infos_ar['username_user'] = $row[$users_table_username_field];
+			$user_infos_ar['user_type_user'] = $row[$users_table_user_type_field];
+			return $user_infos_ar;
+		} // end if
+		else {
+			return false;
+		} // end else
+	*/
 } // end function get_user_infos_ar_from_username_password()
 
 
@@ -198,7 +198,7 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 		case "update":
 			$number_cols = 4;
 			$field_to_ceck = "present_insert_form_field";
-			$details_row = fetch_row_db($res_details); // get the values of the details
+			//			$details_row = fetch_row_db($res_details); // get the values of the details
 			if ($show_top_buttons == 1) {
 				$form .= "<tr class=\"tr_button_form\"><td colspan=\"" . $number_cols . "\" class=\"td_button_form\"><input class=\"button_form\" type=\"submit\" value=\"" . $submit_buttons_ar[$form_type] . "\"></td></tr>";
 			}
@@ -206,7 +206,7 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 		case "ext_update":
 			$number_cols = 4;
 			$field_to_ceck = "present_ext_update_form_field";
-			$details_row = fetch_row_db($res_details); // get the values of the details
+			//			$details_row = fetch_row_db($res_details); // get the values of the details
 			if ($show_top_buttons == 1) {
 				$form .= "<tr class=\"tr_button_form\"><td colspan=\"" . $number_cols . "\" class=\"td_button_form\"><input class=\"button_form\" type=\"submit\" value=\"" . $submit_buttons_ar[$form_type] . "\"></td></tr>";
 			}
@@ -250,11 +250,11 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 			$primary_key_field_field = $fields_labels_ar[$i]["primary_key_field_field"];
 			if ($primary_key_field_field != "") {
 				/*
-							if (substr($foreign_key_temp, 0, 4) == "SQL:"){
-								$sql = substr($foreign_key_temp, 4, strlen($foreign_key_temp)-4);
-							} // end if
-							else{
-							*/
+										if (substr($foreign_key_temp, 0, 4) == "SQL:"){
+											$sql = substr($foreign_key_temp, 4, strlen($foreign_key_temp)-4);
+										} // end if
+										else{
+										*/
 				$primary_key_field_field = $fields_labels_ar[$i]["primary_key_field_field"];
 				$primary_key_table_field = $fields_labels_ar[$i]["primary_key_table_field"];
 				$primary_key_db_field = $fields_labels_ar[$i]["primary_key_db_field"];
@@ -279,14 +279,14 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 				$sql .= " FROM " . $quote . $primary_key_table_field . $quote;
 
 				/*
-							   if ($enable_authentication === 1 && $enable_browse_authorization === 1) { // $ID_user_field_name = '$current_user' where clause part in order to select only the records the current user owns
-								   $ID_user_field_name = get_ID_user_field_name($fields_labels_ar);
+										   if ($enable_authentication === 1 && $enable_browse_authorization === 1) { // $ID_user_field_name = '$current_user' where clause part in order to select only the records the current user owns
+											   $ID_user_field_name = get_ID_user_field_name($fields_labels_ar);
 
-								   if ($ID_user_field_name !== false) { // no ID_user fields available, don't use authorization
-									   $sql .= " WHERE ".$quote.$ID_user_field_name.$quote." = '".$current_user."'";
-								   } // end if
-							   } // end if
-							   */
+											   if ($ID_user_field_name !== false) { // no ID_user fields available, don't use authorization
+												   $sql .= " WHERE ".$quote.$ID_user_field_name.$quote." = '".$current_user."'";
+											   } // end if
+										   } // end if
+										   */
 
 				if (isset($linked_fields_order_by_ar)) {
 					$sql .= " ORDER BY ";
@@ -299,28 +299,28 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 				} // end if
 
 				/*
-							   29/04/2003 old version
+										   29/04/2003 old version
 
-							   $primary_key_field_temp = substr( $foreign_key_temp, (strpos($foreign_key_temp, ".") + 1) ); // remove "table_name."
+										   $primary_key_field_temp = substr( $foreign_key_temp, (strpos($foreign_key_temp, ".") + 1) ); // remove "table_name."
 
-							   $primary_key_table_temp = substr($foreign_key_temp, 0, strpos($foreign_key_temp, ".")); // remove ".field_name"
+										   $primary_key_table_temp = substr($foreign_key_temp, 0, strpos($foreign_key_temp, ".")); // remove ".field_name"
 
-							   $sql = "SELECT DISTINCT ".$quote.$primary_key_field_temp.$quote." FROM ".$quote.$primary_key_table_temp.$quote; // e.g. select distinct ID from my_table
-							   */
+										   $sql = "SELECT DISTINCT ".$quote.$primary_key_field_temp.$quote." FROM ".$quote.$primary_key_table_temp.$quote; // e.g. select distinct ID from my_table
+										   */
 				//} // end else
 				/*
-							// select the primary key database
-							if ($fields_labels_ar[$i]["primary_key_db_field"] != ""){
-								select_db($fields_labels_ar[$i]["primary_key_db_field"], $conn);
-							} // end if
-							*/
+										// select the primary key database
+										if ($fields_labels_ar[$i]["primary_key_db_field"] != ""){
+											select_db($fields_labels_ar[$i]["primary_key_db_field"], $conn);
+										} // end if
+										*/
 
-				$res_primary_key = execute_db($sql, $conn);
+				//				$res_primary_key = execute_db($sql, $conn);
 
 				/*
-							// re-select the main database
-							select_db($db_name, $conn);
-							*/
+										// re-select the main database
+										select_db($db_name, $conn);
+										*/
 			} // end if
 
 			if ($form_type == "search") {
@@ -342,7 +342,7 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 					} // end if
 					$form .= " maxlength=\"" . $fields_labels_ar[$i]["maxlength_field"] . "\"";
 					if ($form_type == "update" or $form_type == "ext_update") {
-						$form .= " value=\"" . htmlspecialchars($details_row[$field_name_temp]) . "\"";
+						//						$form .= " value=\"" . htmlspecialchars($details_row[$field_name_temp]) . "\"";
 					} // end if
 					if ($form_type == "insert") {
 						$form .= " value=\"" . $fields_labels_ar[$i]["prefix_field"] . $fields_labels_ar[$i]["default_value_field"] . "\"";
@@ -361,14 +361,14 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 						$form .= "<td class=\"td_input_form\"><input type=\"file\" name=\"" .
 							$field_name_temp . "\" size=\"" . $fields_labels_ar[$i]["width_field"] . "\">";
 						if ($form_type == "update" or $form_type == "ext_update") {
-							$file_name_temp = $details_row[$field_name_temp];
-							if ($file_name_temp != "") {
+							//							$file_name_temp = $details_row[$field_name_temp];
+/*							if ($file_name_temp != "") {
 								$form .= "<br>" . $normal_messages_ar["current_upload"] . ": <a href=\"" . $upload_relative_url;
 								$form .= rawurlencode($file_name_temp);
 								$form .= "\">";
 								$form .= htmlspecialchars($file_name_temp);
 								$form .= "</a> <input type=\"checkbox\" value=\"" . htmlspecialchars($file_name_temp) . "\" name=\"" . $field_name_temp . "_file_uploaded_delete\"> (" . $normal_messages_ar['delete'] . ")";
-							} // end if
+							} // end if*/
 						} // end if
 					}
 					$form .= "</td>"; // add the second coloumn to the form
@@ -377,7 +377,7 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 					$form .= "<td class=\"td_input_form\">" . $select_type_select . "</td>";
 					$form .= "<td class=\"td_input_form\"><textarea cols=\"" . $fields_labels_ar[$i]["width_field"] . "\" rows=\"" . $fields_labels_ar[$i]["height_field"] . "\" name=\"" . $field_name_temp . "\">";
 					if ($form_type == "update" or $form_type == "ext_update") {
-						$form .= htmlspecialchars($details_row[$field_name_temp]);
+						//						$form .= htmlspecialchars($details_row[$field_name_temp]);
 					} // end if
 					if ($form_type == "insert") {
 						$form .= $fields_labels_ar[$i]["prefix_field"] . $fields_labels_ar[$i]["default_value_field"];
@@ -389,7 +389,7 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 					$form .= "<td class=\"td_input_form\">" . $select_type_select . "</td>";
 					$form .= "<td class=\"td_input_form\"><textarea cols=\"" . $fields_labels_ar[$i]["width_field"] . "\" rows=\"" . $fields_labels_ar[$i]["height_field"] . "\" name=\"" . $field_name_temp . "\">";
 					if ($form_type == "update" or $form_type == "ext_update") {
-						$form .= htmlspecialchars($details_row[$field_name_temp]);
+						//						$form .= htmlspecialchars($details_row[$field_name_temp]);
 					} // end if
 					if ($form_type == "insert") {
 						$form .= $fields_labels_ar[$i]["prefix_field"] . $fields_labels_ar[$i]["default_value_field"];
@@ -401,7 +401,7 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 				case "password":
 					$form .= "<td class=\"td_input_form\">" . $select_type_select . "<input type=\"password\" name=\"" . $field_name_temp . "\" size=\"" . $fields_labels_ar[$i]["width_field"] . "\" maxlength=\"" . $fields_labels_ar[$i]["maxlength_field"] . "\"";
 					if ($form_type == "update" or $form_type == "ext_update") {
-						$form .= " value=\"" . htmlspecialchars($details_row[$field_name_temp]) . "\"";
+						//						$form .= " value=\"" . htmlspecialchars($details_row[$field_name_temp]) . "\"";
 					} // end if
 
 					$form .= "></td>"; // add the second coloumn to the form
@@ -410,8 +410,8 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 					//$operator_select = "";
 					switch ($form_type) {
 						case "update":
-							split_date($details_row[$field_name_temp], $day, $month, $year);
-							$date_select = build_date_select($field_name_temp, $day, $month, $year);
+							//							split_date($details_row[$field_name_temp], $day, $month, $year);
+							//$date_select = build_date_select($field_name_temp, $day, $month, $year);
 							break;
 						case "insert":
 							$date_select = build_date_select($field_name_temp, "", "", "");
@@ -462,37 +462,37 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 							} // end elseif
 
 							if ($form_type == "update" or $form_type == "ext_update") {
-								$options_values_temp = substr($details_row[$field_name_temp], 1, -1); // delete the first and the last separator
+								//								$options_values_temp = substr($details_row[$field_name_temp], 1, -1); // delete the first and the last separator
 
-								$select_values_ar = explode($fields_labels_ar[$i]["separator_field"], $options_values_temp);
+								//								$select_values_ar = explode($fields_labels_ar[$i]["separator_field"], $options_values_temp);
 
-								if (in_array($select_labels_ar[$j], $select_values_ar)) {
-									if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu") {
-										$form .= " selected";
-									} // end if
-									elseif ($fields_labels_ar[$i]["type_field"] == "select_multiple_checkbox") {
-										$form .= " checked";
-									} // end elseif
-								}
-
+								/*								if (in_array($select_labels_ar[$j], $select_values_ar)) {
+																	if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu") {
+																		$form .= " selected";
+																	} // end if
+																	elseif ($fields_labels_ar[$i]["type_field"] == "select_multiple_checkbox") {
+																		$form .= " checked";
+																	} // end elseif
+																}
+								*/
 								/*
-														$found_flag = 0;
-														$z = 0;
-														$count_temp = count($select_values_ar)
-														
-														while ($z < $count_temp and $found_flag == 0){
-															if ($select_labels_ar[$j] == $select_values_ar[$z]){
-																if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu"){
-																	$form .= " selected";
-																} // end if
-																elseif ($fields_labels_ar[$i]["type_field"] == "select_multiple_checkbox"){
-																	$form .= " checked";
-																} // end elseif
-																$found_flag = 1;
-															} // end if
-															$z++;
-														} // end while
-														*/
+																				$found_flag = 0;
+																				$z = 0;
+																				$count_temp = count($select_values_ar)
+																				
+																				while ($z < $count_temp and $found_flag == 0){
+																					if ($select_labels_ar[$j] == $select_values_ar[$z]){
+																						if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu"){
+																							$form .= " selected";
+																						} // end if
+																						elseif ($fields_labels_ar[$i]["type_field"] == "select_multiple_checkbox"){
+																							$form .= " checked";
+																						} // end elseif
+																						$found_flag = 1;
+																					} // end if
+																					$z++;
+																				} // end while
+																				*/
 							} // end if
 							if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu") {
 								$form .= "> " . $select_labels_ar[$j] . "</option>";
@@ -506,62 +506,51 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 					// second part, retreive value from the foreign key
 
 					if ($fields_labels_ar[$i]["foreign_key_field"] != "") {
-						if (get_num_rows_db($res_primary_key) > 0) {
-							$fields_number = num_fields_db($res_primary_key);
-							while ($primary_key_row = fetch_row_db($res_primary_key)) {
+						/*						if (get_num_rows_db($res_primary_key) > 0) {
+													$fields_number = num_fields_db($res_primary_key);
+													while ($primary_key_row = fetch_row_db($res_primary_key)) {
 
-								$primary_key_value = "";
-								for ($z = 0; $z < $fields_number; $z++) {
-									$primary_key_value .= $primary_key_row[$z];
-									$primary_key_value .= " - ";
-								} // end for
-								$primary_key_value = substr($primary_key_value, 0, -3); // delete the last " - "
+														$primary_key_value = "";
+														for ($z = 0; $z < $fields_number; $z++) {
+															$primary_key_value .= $primary_key_row[$z];
+															$primary_key_value .= " - ";
+														} // end for
+														$primary_key_value = substr($primary_key_value, 0, -3); // delete the last " - "
 
-								if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu") {
-									$form .= "<option value=\"" . htmlspecialchars($primary_key_value) . "\"";
-								} // end if
-								elseif ($fields_labels_ar[$i]["type_field"] == "select_multiple_checkbox") {
-									$form .= "<input type=\"checkbox\" name=\"" . $field_name_temp . "[]\" value=\"" . htmlspecialchars($primary_key_value) . "\"";
-								} // end elseif
+														if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu") {
+															$form .= "<option value=\"" . htmlspecialchars($primary_key_value) . "\"";
+														} // end if
+														elseif ($fields_labels_ar[$i]["type_field"] == "select_multiple_checkbox") {
+															$form .= "<input type=\"checkbox\" name=\"" . $field_name_temp . "[]\" value=\"" . htmlspecialchars($primary_key_value) . "\"";
+														} // end elseif
 
-								if ($form_type == "update" or $form_type == "ext_update") {
-									$options_values_temp = substr($details_row[$field_name_temp], 1, -1); // delete the first and the last separator
-									$select_values_ar = explode($fields_labels_ar[$i]["separator_field"], $options_values_temp);
+														if ($form_type == "update" or $form_type == "ext_update") {
+															$options_values_temp = substr($details_row[$field_name_temp], 1, -1); // delete the first and the last separator
+															$select_values_ar = explode($fields_labels_ar[$i]["separator_field"], $options_values_temp);
 
-									if (in_array($primary_key_value, $select_values_ar)) {
-										if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu") {
-											$form .= " selected";
-										} // end if
-										elseif ($fields_labels_ar[$i]["type_field"] == "select_multiple_checkbox") {
-											$form .= " checked";
-										} // end elseif
-									}
+															if (in_array($primary_key_value, $select_values_ar)) {
+																if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu") {
+																	$form .= " selected";
+																} // end if
+																elseif ($fields_labels_ar[$i]["type_field"] == "select_multiple_checkbox") {
+																	$form .= " checked";
+																} // end elseif
+															}
 
-									/*
-															   while ($z<$count_temp and $found_flag == 0){
-																   if ($primary_key_value == $select_values_ar[$z]){
-																	   if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu"){
-																		   $form .= " selected";
-																	   } // end if
-																	   elseif ($fields_labels_ar[$i]["type_field"] == "select_multiple_checkbox"){
-																		   $form .= " checked";
-																	   } // end elseif
-																	   $found_flag = 1;
-																   } // end if
-																   $z++;
-															   } // end while
-															   */
+															
 
-								} // end if
-								if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu") {
-									$form .= "> " . $primary_key_value . "</option>";
-								} // end if
-								elseif ($fields_labels_ar[$i]["type_field"] == "select_multiple_checkbox") {
-									$form .= "> " . $primary_key_value . "<br>"; // second part of the form row
-								} // end elseif
-							} // end while
-						} // end if
+														} // end if
+														if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu") {
+															$form .= "> " . $primary_key_value . "</option>";
+														} // end if
+														elseif ($fields_labels_ar[$i]["type_field"] == "select_multiple_checkbox") {
+															$form .= "> " . $primary_key_value . "<br>"; // second part of the form row
+														} // end elseif
+													} // end while
+												} // end if
+						*/
 					} // end if ($fields_labels_ar[$i]["foreign_key_field"] != "")
+
 
 					if ($fields_labels_ar[$i]["type_field"] == "select_multiple_menu") {
 						$form .= "</select>";
@@ -584,36 +573,37 @@ function build_form($table_name, $action, $fields_labels_ar, $form_type, $res_de
 						for ($j = 0; $j < $count_temp; $j++) {
 							$form .= "<option value=\"" . htmlspecialchars($select_values_ar[$j]) . "\"";
 
-							if (($form_type == "update" or $form_type == "ext_update") and $select_values_ar[$j] == $details_row[$field_name_temp]) {
-								$form .= " selected";
-							} // end if
-
+							/*							if (($form_type == "update" or $form_type == "ext_update") and $select_values_ar[$j] == $details_row[$field_name_temp]) {
+															$form .= " selected";
+														} // end if
+							*/
 							$form .= ">" . $select_values_ar[$j] . "</option>"; // second part of the form row
 						} // end for
 					} // end if
 
 					if ($fields_labels_ar[$i]["primary_key_field_field"] != "") {
-						if (get_num_rows_db($res_primary_key) > 0) {
-							$fields_number = num_fields_db($res_primary_key);
-							while ($primary_key_row = fetch_row_db($res_primary_key)) {
+						/*						if (get_num_rows_db($res_primary_key) > 0) {
+													$fields_number = num_fields_db($res_primary_key);
+													while ($primary_key_row = fetch_row_db($res_primary_key)) {
 
-								$primary_key_value = $primary_key_row[0];
-								$linked_fields_value = "";
-								for ($z = 1; $z < $fields_number; $z++) {
-									$linked_fields_value .= $primary_key_row[$z];
-									$linked_fields_value .= " - ";
-								} // end for
-								$linked_fields_value = substr($linked_fields_value, 0, -3); // delete the last " - 
+														$primary_key_value = $primary_key_row[0];
+														$linked_fields_value = "";
+														for ($z = 1; $z < $fields_number; $z++) {
+															$linked_fields_value .= $primary_key_row[$z];
+															$linked_fields_value .= " - ";
+														} // end for
+														$linked_fields_value = substr($linked_fields_value, 0, -3); // delete the last " - 
 
-								$form .= "<option value=\"" . htmlspecialchars($primary_key_value) . "\"";
+														$form .= "<option value=\"" . htmlspecialchars($primary_key_value) . "\"";
 
-								if (($form_type == "update" or $form_type == "ext_update") and $primary_key_value == $details_row[$field_name_temp]) {
-									$form .= " selected";
-								} // end if
+														if (($form_type == "update" or $form_type == "ext_update") and $primary_key_value == $details_row[$field_name_temp]) {
+															$form .= " selected";
+														} // end if
 
-								$form .= ">" . $linked_fields_value . "</option>"; // second part of the form row
-							} // end while
-						} // end if
+														$form .= ">" . $linked_fields_value . "</option>"; // second part of the form row
+													} // end while
+												} // end if
+						*/
 					} // end if ($fields_labels_ar[$i]["foreign_key_field"] != "")
 
 					if ($fields_labels_ar[$i]["other_choices_field"] == "1" and ($form_type == "insert" or $form_type == "update")) {
@@ -961,11 +951,11 @@ function build_select_duplicated_query($post, $table_name, $fields_labels_ar, &$
 	if ($unique_field_name != "") { // a unique key exists, ok, otherwise I'm not able to select the similar record, which field should I use to indicate it?
 
 		/*
-			  reset ($_POST);
-			  while (list($key, $value) = each ($_POST)){
-				  $$key = $value;
-			  } // end while
-			  */
+					reset ($_POST);
+					while (list($key, $value) = each ($_POST)){
+						$$key = $value;
+					} // end while
+					*/
 
 		$sql = "";
 		$sql_select_all = "";
@@ -995,35 +985,35 @@ function build_select_duplicated_query($post, $table_name, $fields_labels_ar, &$
 		// at the end of the above procedure I'll have, for example, "select ID, name, email from table" if ID is the unique key, name and email are field to check
 
 		// execute the select query
-		$res_contacts = execute_db($sql_select_all, $conn);
+//		$res_contacts = execute_db($sql_select_all, $conn);
 
-		if (get_num_rows_db($res_contacts) > 0) {
-			while ($contacts_row = fetch_row_db($res_contacts)) { // *A* for each record in the table
-				$count_temp = count($fields_to_check_ar);
-				for ($i = 0; $i < $count_temp; $i++) { // *B* and for each field the user has inserted
-					$z = 0;
-					$found_similarity = 0; // set to 1 when a similarity is found, so that it's possible to exit the loop (if I found that a record is similar it doesn't make sense to procede with other fields of the same record)
+		/*		if (get_num_rows_db($res_contacts) > 0) {
+					while ($contacts_row = fetch_row_db($res_contacts)) { // *A* for each record in the table
+						$count_temp = count($fields_to_check_ar);
+						for ($i = 0; $i < $count_temp; $i++) { // *B* and for each field the user has inserted
+							$z = 0;
+							$found_similarity = 0; // set to 1 when a similarity is found, so that it's possible to exit the loop (if I found that a record is similar it doesn't make sense to procede with other fields of the same record)
 
-					// *C* check if the field inserted are similiar to the other fields to be checked in this record (*A*)
-					$count_temp_2 = count($fields_to_check_ar);
-					while ($z < $count_temp_2 and $found_similarity == 0) {
-						$string1_temp = $_POST[$fields_to_check_ar[$i]]; // the field the user has inserted
-						$string2_temp = $contacts_row[$z + 1]; // the field of this record (*A*); I start with 1 because 0 is alwais the unique field (e.g. ID, name, email)
+							// *C* check if the field inserted are similiar to the other fields to be checked in this record (*A*)
+							$count_temp_2 = count($fields_to_check_ar);
+							while ($z < $count_temp_2 and $found_similarity == 0) {
+								$string1_temp = $_POST[$fields_to_check_ar[$i]]; // the field the user has inserted
+								$string2_temp = $contacts_row[$z + 1]; // the field of this record (*A*); I start with 1 because 0 is alwais the unique field (e.g. ID, name, email)
 
-						similar_text(strtolower($string1_temp), strtolower($string2_temp), $percentage);
-						if ($percentage >= $percentage_similarity) { // the two strings are similar
-							$where_clause .= $quote . $unique_field_name . $quote . " = \"" . $contacts_row[$unique_field_name] . "\" or ";
-							$found_similarity = 1;
-							$string1_similar_ar[] = $string1_temp;
-							$string2_similar_ar[] = $string2_temp;
-						} // end if the two strings are similar
-						$z++;
-					} // end while
+								similar_text(strtolower($string1_temp), strtolower($string2_temp), $percentage);
+								if ($percentage >= $percentage_similarity) { // the two strings are similar
+									$where_clause .= $quote . $unique_field_name . $quote . " = \"" . $contacts_row[$unique_field_name] . "\" or ";
+									$found_similarity = 1;
+									$string1_similar_ar[] = $string1_temp;
+									$string2_similar_ar[] = $string2_temp;
+								} // end if the two strings are similar
+								$z++;
+							} // end while
 
-				} // end for loop for each field to check
-			} // end while loop for each record
-		} // end if (get_num_rows_db($res_contacts) > 0)
-
+						} // end for loop for each field to check
+					} // end while loop for each record
+				} // end if (get_num_rows_db($res_contacts) > 0)
+		*/
 		$where_clause = substr($where_clause, 0, -4); // delete the last " or "
 		if ($where_clause != "") {
 			$sql = $select . " where " . $where_clause . " limit 0," . $number_duplicated_records;
@@ -1053,12 +1043,12 @@ function build_insert_duplication_form($post, $fields_labels_ar, $table_name, $t
 	$form .= "<form action=\"" . $dadabik_main_file . "?table_name=" . urlencode($table_name) . "&function=insert&insert_duplication=1\" method=\"post\">";
 
 	/*
-	   // re-post all the fields values
-	   reset ($_POST);
-	   while (list($key, $value) = each ($_POST)){
-		   $$key = $value;
-	   } // end while
-	   */
+		  // re-post all the fields values
+		  reset ($_POST);
+		  while (list($key, $value) = each ($_POST)){
+			  $$key = $value;
+		  } // end while
+		  */
 
 	$count_temp = count($fields_labels_ar);
 	for ($i = 0; $i < $count_temp; $i++) {
@@ -1319,34 +1309,35 @@ function build_mailing_select($show_sent_mailing)
 	$sql .= " GROUP BY mailing_tab.name_mailing ORDER BY sent_mailing, date_created_mailing DESC";
 
 	// execute the query
-	$res_mailing = execute_db($sql, $conn);
+//	$res_mailing = execute_db($sql, $conn);
 
-	if (get_num_rows_db($res_mailing) > 0) {
-		$mailing_select .= "<select name=\"name_mailing\">";
+	/*	if (get_num_rows_db($res_mailing) > 0) {
+			$mailing_select .= "<select name=\"name_mailing\">";
 
-		while ($mailing_row = fetch_row_db($res_mailing)) {
-			$name_mailing = $mailing_row["name_mailing"];
-			$name_mailing_2 = $mailing_row["name_mailing_2"];
-			if ($name_mailing_2 === NULL) { // it means that no contacts are associated with the mailing, I set $mailing_contact_number to 0 to avoid (1)
-				$mailing_contact_number = 0;
-			} // end if
-			else {
-				$mailing_contact_number = $mailing_row["mailing_contact_number"];
-			} // end else
-			$sent_mailing = (int) $mailing_row["sent_mailing"];
+			while ($mailing_row = fetch_row_db($res_mailing)) {
+				$name_mailing = $mailing_row["name_mailing"];
+				$name_mailing_2 = $mailing_row["name_mailing_2"];
+				if ($name_mailing_2 === NULL) { // it means that no contacts are associated with the mailing, I set $mailing_contact_number to 0 to avoid (1)
+					$mailing_contact_number = 0;
+				} // end if
+				else {
+					$mailing_contact_number = $mailing_row["mailing_contact_number"];
+				} // end else
+				$sent_mailing = (int) $mailing_row["sent_mailing"];
 
-			$mailing_select .= "<option value=\"" . $name_mailing . "\">" . $name_mailing . " (" . $mailing_contact_number . ")";
-			if ($sent_mailing === 1) {
-				$mailing_select .= ' (' . $normal_messages_ar['sent'] . ')';
-			} // end if
-			$mailing_select .= "</option>";
-		} // end while
+				$mailing_select .= "<option value=\"" . $name_mailing . "\">" . $name_mailing . " (" . $mailing_contact_number . ")";
+				if ($sent_mailing === 1) {
+					$mailing_select .= ' (' . $normal_messages_ar['sent'] . ')';
+				} // end if
+				$mailing_select .= "</option>";
+			} // end while
 
-		$mailing_select .= "</select>";
-	} // end if
-	else {
-		$mailing_select = false;
-	} // end else
+			$mailing_select .= "</select>";
+		} // end if
+		else {
+			$mailing_select = false;
+		} // end else
+	*/
 	return $mailing_select;
 } // end function build_mailing_select
 
@@ -1410,11 +1401,11 @@ function build_change_table_select($exclude_not_allowed = 1, $inlcude_users_tabl
 	if ($exclude_not_allowed == 1) {
 		if ($inlcude_users_table == 0) {
 			// get the array containing the names of the tables installed(excluding not allowed)
-			$tables_names_ar = build_tables_names_array(1, 1, 0);
+//			$tables_names_ar = build_tables_names_array(1, 1, 0);
 		} // end if
 		else {
 			// get the array containing the names of the tables installed(excluding not allowed)
-			$tables_names_ar = build_tables_names_array(1, 1, 1);
+//			$tables_names_ar = build_tables_names_array(1, 1, 1);
 		} // end else
 	} // end if
 	else {
@@ -1428,22 +1419,25 @@ function build_change_table_select($exclude_not_allowed = 1, $inlcude_users_tabl
 		} // end else
 	} // end else
 
-	$count_temp = count($tables_names_ar);
-	for ($i = 0; $i < $count_temp; $i++) {
-		$change_table_select .= "<option value=\"" . htmlspecialchars($tables_names_ar[$i]) . "\"";
-		if ($table_name == $tables_names_ar[$i]) {
-			$change_table_select .= " selected";
-		}
-		$change_table_select .= ">" . $tables_names_ar[$i] . "</option>";
-	} // end for
-	$change_table_select .= "</select>";
-	if ($count_temp == 1) {
-		return "";
-	} // end if
-	else {
-		return $change_table_select;
-	} // end else
+	/*	$count_temp = count($tables_names_ar);
+		for ($i = 0; $i < $count_temp; $i++) {
+			$change_table_select .= "<option value=\"" . htmlspecialchars($tables_names_ar[$i]) . "\"";
+			if ($table_name == $tables_names_ar[$i]) {
+				$change_table_select .= " selected";
+			}
+			$change_table_select .= ">" . $tables_names_ar[$i] . "</option>";
+		} // end for
+		$change_table_select .= "</select>";
+		if ($count_temp == 1) {
+			return "";
+		} // end if
+		else {
+			return $change_table_select;
+		} // end else
+
+	*/
 } // end function build_change_table_select
+
 /*
 function build_change_table_select_old($conn, $db_name, $exclude_not_allowed=1)
 // goal: build a select to choose the table
@@ -1502,10 +1496,10 @@ function table_contains($db_name_2, $table_name, $field_name, $value)
 {
 	global $conn, $quote, $db_name;
 	/*
-	   if ( $db_name_2 != "") {
-		   select_db($db_name_2, $conn);
-	   }
-	   */
+		  if ( $db_name_2 != "") {
+			  select_db($db_name_2, $conn);
+		  }
+		  */
 	$sql = "SELECT COUNT(" . $quote . $field_name . $quote . ") FROM " . $quote . $table_name . $quote . " WHERE " . $quote . $field_name . $quote . " = '" . $value . "'";
 	$res_count = execute_db($sql, $conn);
 	$count_row = fetch_row_db($res_count);
@@ -1513,11 +1507,11 @@ function table_contains($db_name_2, $table_name, $field_name, $value)
 		return true;
 	} // end if
 	/*
-	   // re-select the old db
-	   if ( $db_name_2 != "") {
-		   select_db($db_name, $conn);
-	   }
-	   */
+		  // re-select the old db
+		  if ( $db_name_2 != "") {
+			  select_db($db_name, $conn);
+		  }
+		  */
 	return false;
 } // end function table_contains
 
@@ -1529,12 +1523,12 @@ function insert_record($files, $post, $fields_labels_ar, $table_name, $table_int
 	global $conn, $db_name, $quote, $upload_directory, $current_user;
 
 	/*
-	   // get the post variables of the form
-	   reset ($_POST);
-	   while (list($key, $value) = each ($_POST)){
-		   $$key = $value;
-	   } // end while
-	   */
+		  // get the post variables of the form
+		  reset ($_POST);
+		  while (list($key, $value) = each ($_POST)){
+			  $$key = $value;
+		  } // end while
+		  */
 
 	$uploaded_file_names_count = 0;
 
@@ -1612,10 +1606,10 @@ function insert_record($files, $post, $fields_labels_ar, $table_name, $table_int
 
 							$primary_key_field_field = insert_other_field($fields_labels_ar[$i]["primary_key_db_field"], $fields_labels_ar[$i]["primary_key_table_field"], $linked_fields_ar[0], $_POST[$field_name_other_temp]);
 							/*
-												 if (substr($foreign_key_temp, 0, 4) != "SQL:"){ // with arbitrary sql statement the insert in the primary key table is not supported yet
-													 insert_other_field($foreign_key_temp, $_POST[$field_name_other_temp]);
-												 } // end if
-												 */
+																	  if (substr($foreign_key_temp, 0, 4) != "SQL:"){ // with arbitrary sql statement the insert in the primary key table is not supported yet
+																		  insert_other_field($foreign_key_temp, $_POST[$field_name_other_temp]);
+																	  } // end if
+																	  */
 							$sql .= "'" . $primary_key_field_field . "', "; // add the last ID inserted to the sql statement
 						} // end if ($foreign_key_temp != "")
 						else { // no foreign key field
@@ -1676,12 +1670,12 @@ function update_record($files, $post, $fields_labels_ar, $table_name, $table_int
 	$uploaded_file_names_count = 0;
 
 	/*
-	   // get the post variables of the form
-	   reset ($_POST);
-	   while (list($key, $value) = each ($_POST)){
-		   $$key = $value;
-	   } // end while
-	   */
+		  // get the post variables of the form
+		  reset ($_POST);
+		  while (list($key, $value) = each ($_POST)){
+			  $$key = $value;
+		  } // end while
+		  */
 
 	switch ($update_type) {
 		case "internal":
@@ -1768,12 +1762,12 @@ function update_record($files, $post, $fields_labels_ar, $table_name, $table_int
 
 							$primary_key_field_field = insert_other_field($fields_labels_ar[$i]["primary_key_db_field"], $fields_labels_ar[$i]["primary_key_table_field"], $linked_fields_ar[0], $_POST[$field_name_other_temp]);
 							/*
-												 if (substr($foreign_key_temp, 0, 4) != "SQL:"){ // with arbitrary sql statement the insert in the primary key table is not supported yet
+																	  if (substr($foreign_key_temp, 0, 4) != "SQL:"){ // with arbitrary sql statement the insert in the primary key table is not supported yet
 
-													 insert_other_field($foreign_key_temp, $_POST[$field_name_other_temp]);
+																		  insert_other_field($foreign_key_temp, $_POST[$field_name_other_temp]);
 
-												 } // end if
-												 */
+																	  } // end if
+																	  */
 							$sql .= $quote . $field_name_temp . $quote . " = "; // add the field name to the sql statement
 							$sql .= "'" . $primary_key_field_field . "', "; // add the field value to the sql statement
 						} // end if ($foreign_key_temp != "")
@@ -1934,12 +1928,12 @@ function build_where_clause($post, $fields_labels_ar, $table_name)
 	global $quote;
 
 	/*
-	   // get the post variables of the form
-	   reset ($_POST);
-	   while (list($key, $value) = each ($_POST)){
-		   $$key = $value;
-	   } // end while
-	   */
+		  // get the post variables of the form
+		  reset ($_POST);
+		  while (list($key, $value) = each ($_POST)){
+			  $$key = $value;
+		  } // end while
+		  */
 
 	$where_clause = "";
 
@@ -2241,10 +2235,10 @@ function build_results_table($fields_labels_ar, $table_name, $res_records, $resu
 		$results_table .= "<td class=\"" . $td_controls_class . "\">";
 
 		/*
-			  if ($results_type == "check_mailing"){
-				  $results_table .= "<table cellspacing=\"0\" cellpadding=\"0\"><tr><td><form method=post action=\"mail.php\"><input type=\"hidden\" name=\"function\" value=\"remove_contact\"><input type=\"hidden\" name=\"name_mailing\" value=\"".$name_mailing."\"><input type=\"hidden\" name=\"where_field\" value=\"".$where_field."\"><input type=\"hidden\" name=\"where_value\" value=\"".$where_value."\"><input type=\"hidden\" name=\"page\" value=\"".$page."\"><input type=\"submit\" value=\"".$submit_buttons_ar["remove_from_mailing"]."\"></form></td></tr></table>";
-			  } // end if
-			  */
+					if ($results_type == "check_mailing"){
+						$results_table .= "<table cellspacing=\"0\" cellpadding=\"0\"><tr><td><form method=post action=\"mail.php\"><input type=\"hidden\" name=\"function\" value=\"remove_contact\"><input type=\"hidden\" name=\"name_mailing\" value=\"".$name_mailing."\"><input type=\"hidden\" name=\"where_field\" value=\"".$where_field."\"><input type=\"hidden\" name=\"where_value\" value=\"".$where_value."\"><input type=\"hidden\" name=\"page\" value=\"".$page."\"><input type=\"submit\" value=\"".$submit_buttons_ar["remove_from_mailing"]."\"></form></td></tr></table>";
+					} // end if
+					*/
 
 
 		//elseif ($unique_field_name != "" and ($results_type == "search" or $results_type == "possible_duplication")){ // exists a unique number: edit, delete, details make sense
@@ -2374,15 +2368,15 @@ function build_csv($res_records, $fields_labels_ar)
 					} // end for
 
 					/*
-								   $linked_field_values_ar = build_linked_field_values_ar($row_records[$field_name_temp], $primary_key_field_field, $primary_key_table_field, $primary_key_db_field, $linked_fields_ar);
-								   */
+												  $linked_field_values_ar = build_linked_field_values_ar($row_records[$field_name_temp], $primary_key_field_field, $primary_key_table_field, $primary_key_db_field, $linked_fields_ar);
+												  */
 
 					/*
-								   if (substr($foreign_key_temp, 0, 4) == "SQL:"){
-									   $sql = substr($foreign_key_temp, 4, strlen($foreign_key_temp)-4);
-								   } // end if
-								   else{
-								   */
+												  if (substr($foreign_key_temp, 0, 4) == "SQL:"){
+													  $sql = substr($foreign_key_temp, 4, strlen($foreign_key_temp)-4);
+												  } // end if
+												  else{
+												  */
 
 					//$field_values_ar = $linked_field_values_ar;
 				} else {
@@ -2443,14 +2437,14 @@ function build_details_table($fields_labels_ar, $res_details)
 					} // end for
 
 					/*
-								   $linked_field_values_ar = build_linked_field_values_ar($details_row[$field_name_temp], $primary_key_field_field, $primary_key_table_field, $primary_key_db_field, $linked_fields_ar);
-								   */
+												  $linked_field_values_ar = build_linked_field_values_ar($details_row[$field_name_temp], $primary_key_field_field, $primary_key_table_field, $primary_key_db_field, $linked_fields_ar);
+												  */
 					/*
-								   if (substr($foreign_key_temp, 0, 4) == "SQL:"){
-									   $sql = substr($foreign_key_temp, 4, strlen($foreign_key_temp)-4);
-								   } // end if
-								   else{
-								   */
+												  if (substr($foreign_key_temp, 0, 4) == "SQL:"){
+													  $sql = substr($foreign_key_temp, 4, strlen($foreign_key_temp)-4);
+												  } // end if
+												  else{
+												  */
 					//$field_values_ar = $linked_field_values_ar;
 				} else {
 					$field_values_ar[0] = $details_row[$field_name_temp];
@@ -2934,20 +2928,20 @@ function insert_other_field($primary_key_db, $primary_key_table, $field_name, $f
 		display_sql($sql_insert_other);
 
 		/*
-			  if ($primary_key_db!="") {
-				  select_db($primary_key_db, $conn);
-			  }
-			  */
+					if ($primary_key_db!="") {
+						select_db($primary_key_db, $conn);
+					}
+					*/
 
 		// insert into the table of other
 		$res_insert = execute_db($sql_insert_other, $conn);
 
 		/*
-			  // reselect the old db
-			  if ($primary_key_db!="") {
-				  select_db($primary_key_db, $conn);
-			  }
-			  */
+					// reselect the old db
+					if ($primary_key_db!="") {
+						select_db($primary_key_db, $conn);
+					}
+					*/
 
 		return get_last_ID_db();
 	} // end if
@@ -3040,5 +3034,17 @@ function build_select_part($fields_labels_ar, $table_name)
 
 	return $sql;
 } // end function build_select_part()
+
+function build_fields_labels_array()
+{
+
+	$fields_labels_ar[0]["name_field"] = 'ID';
+	$fields_labels_ar[0]["label_field"] = 'ID';
+	
+
+
+
+	return $fields_labels_ar;
+}
 
 ?>

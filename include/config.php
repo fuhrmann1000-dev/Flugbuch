@@ -37,16 +37,16 @@ If you want to know more about it please visit: http://mine.pc.unicatt.it/
 // please specify at least the following parameters
 
 // MySQL server host
-$host = 'localhost'; // e.g. 'localhost' if DaDaBIK and MySQL run on the same computer
+$dbHost = 'localhost'; // e.g. 'localhost' if DaDaBIK and MySQL run on the same computer
 
 // database name
-$db_name = 'flugbuch';
+$dbName = 'flugbuch';
 
 // database user
-$user = 'flugbuch'; // this user must have select, insert, update, delete permissions, create and drop permissions are also needed for installation and administration area e.g. 'root'
+$dbUser = 'flugbuch'; // this user must have select, insert, update, delete permissions, create and drop permissions are also needed for installation and administration area e.g. 'root'
 
 // database password
-$pass = 'TYVKjodHNkFYNV7wjnsB';
+$dbPass = 'TYVKjodHNkFYNV7wjnsB';
 
 // DaDaBIK complete url (e.g. http://www.mysite.com/path_to_dadabik/)
 $site_url = 'http://www.dcb.org/intern/flugbuch/';
