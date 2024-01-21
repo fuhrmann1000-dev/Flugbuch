@@ -1,6 +1,7 @@
-<?php 
+<?php
 
-class Flug {
+class Flug
+{
     const ID = 'id';
     const DATUM = 'Datum';
     const STARTZEIT = 'Startzeit';
@@ -13,8 +14,9 @@ class Flug {
     const FLUGART = 'Flugart';
     const STARTPLATZ = 'Startplatz';
     const ZIELPLATZ = 'Zielplatz';
-    const FLUGLEITER  = 'Flugleiter';
+    const FLUGLEITER = 'Flugleiter';
     const GESCHLEPPTER = 'Geschleppter';
+    const ANZAHL = 'Anzahl';
     const SCHLEPPHOEHE = 'Schlepphoehe';
     const BETRAG = 'Betrag';
     const BEZAHLT = 'Bezahlt';
@@ -34,10 +36,35 @@ class Flug {
     public $zielplatz;
     public $flugleiter;
     public $geschleppter;
+    public $anzahl;
     public $schlepphoehe;
     public $betrag;
     public $bezahlt;
     public $bstart;
     public $bstop;
     public $bemerkung;
+
+    public function __construct()
+    {
+        $this->datum = '';
+        $this->startzeit = '';
+        $this->landezeit = '';
+        $this->muster = '';
+        $this->kennzeichen = '';
+        $this->pilot = '';
+        $this->besatzung = '';
+        $this->gaeste = '0';
+        $this->flugart = '';
+        $this->startplatz = '';
+        $this->zielplatz = '';
+        $this->flugleiter = '';
+        $this->geschleppter = '';
+        $this->anzahl = '0';
+        $this->schlepphoehe = '';
+        $this->betrag = '0.0';
+        $this->bezahlt = '0.0';
+        $this->bstart = '';
+        $this->bstop = '';
+        $this->bemerkung = '';
+    }
 }
