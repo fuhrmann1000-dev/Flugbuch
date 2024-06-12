@@ -9,7 +9,7 @@ class Flug
     const MUSTER = 'Muster';
     const KENNZEICHEN = 'Kennzeichen';
     const PILOT = 'Pilot';
-    const BESATZUNG = 'Besatzung';
+    const FLUGANZAHL = 'Fluganzahl';
     const GAESTE = 'Gaeste';
     const FLUGART = 'Flugart';
     const STARTPLATZ = 'Startplatz';
@@ -29,7 +29,7 @@ class Flug
     public $muster;
     public $kennzeichen;
     public $pilot;
-    public $besatzung;
+    public $fluganzahl;
     public $gaeste;
     public $flugart;
     public $startplatz;
@@ -52,7 +52,7 @@ class Flug
         $this->muster = '';
         $this->kennzeichen = '';
         $this->pilot = '';
-        $this->besatzung = '';
+        $this->fluganzahl = '';
         $this->gaeste = '0';
         $this->flugart = '';
         $this->startplatz = '';
