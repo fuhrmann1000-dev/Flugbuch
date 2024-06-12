@@ -57,7 +57,7 @@ class FlugDB extends DBC
             . Flug::KENNZEICHEN . ', '
             . Flug::PILOT . ', '
 
-            . Flug::BESATZUNG . ', '
+            . Flug::FLUGANZAHL . ', '
             . Flug::GAESTE . ', '
             . Flug::FLUGART . ', '
 
@@ -82,7 +82,7 @@ class FlugDB extends DBC
             . ':kennzeichen, '
             . ':pilot, '
 
-            . ':besatzung, '
+            . ':fluganzahl, '
             . ':gaeste, '
             . ':flugart, '
 
@@ -110,7 +110,7 @@ class FlugDB extends DBC
         $statement->bindValue(':kennzeichen', $flug->kennzeichen);
         $statement->bindValue(':pilot', $flug->pilot);
 
-        $statement->bindValue(':besatzung', $flug->besatzung);
+        $statement->bindValue(':fluganzahl', $flug->fluganzahl);
         $statement->bindValue(':gaeste', $flug->gaeste);
         $statement->bindValue(':flugart', $flug->flugart);
 
@@ -147,7 +147,7 @@ class FlugDB extends DBC
             . Flug::MUSTER . ' = :muster, '
             . Flug::KENNZEICHEN . ' = :kennzeichen, '
             . Flug::PILOT . ' = :pilot, '
-            . Flug::BESATZUNG . ' = :besatzung, '
+            . Flug::FLUGANZAHL . ' = :fluganzahl, '
             . Flug::GAESTE . ' = :gaeste, '
             . Flug::FLUGART . ' = :flugart, '
             . Flug::STARTPLATZ . ' = :startplatz, '
@@ -173,7 +173,7 @@ class FlugDB extends DBC
         $statement->bindValue(':kennzeichen', $flug->kennzeichen);
         $statement->bindValue(':pilot', $flug->pilot);
 
-        $statement->bindValue(':besatzung', $flug->besatzung);
+        $statement->bindValue(':fluganzahl', $flug->fluganzahl);
         $statement->bindValue(':gaeste', $flug->gaeste);
         $statement->bindValue(':flugart', $flug->flugart);
 
@@ -194,7 +194,7 @@ class FlugDB extends DBC
         try {
             $statement->execute();
         } catch (PDOException $ex) {
-            throw new DBException('Beim Speichern der Flugdaten ist ein Fehler aufgetreten.' . $ex->getMessage());
+            throw new DBException('Beim Speicher der Flugdaten ist ein Fehler aufgetreten.' . $ex->getMessage());
         }
 
         return $flug;
@@ -237,7 +237,7 @@ class FlugDB extends DBC
         $flug->muster = $row[Flug::MUSTER];
         $flug->kennzeichen = $row[Flug::KENNZEICHEN];
         $flug->pilot = $row[Flug::PILOT];
-        $flug->besatzung = $row[Flug::BESATZUNG];
+        $flug->fluganzahl = $row[Flug::FLUGANZAHL];
         $flug->gaeste = $row[Flug::GAESTE];
         $flug->flugart = $row[Flug::FLUGART];
         $flug->startplatz = $row[Flug::STARTPLATZ];
@@ -256,7 +256,7 @@ class FlugDB extends DBC
     protected function convertMySQLDateToGermanFormat($date)
     {
         $d = explode('-', $date);
-        return sprintf('%02d.%02d.%04d', $d[2], $d[1], $d[0]); 
+        return sprintf('%02d.%02d.%04d', $d[2], $d[1], $d[0]);
     }
 
     protected function convertMySQLDateTimeToGermanFormat($dateTime)
@@ -265,10 +265,11 @@ class FlugDB extends DBC
         return sprintf('%02d.%02d.%04d %02d:%02d:%02d', $dateTimeArray['day'], $dateTimeArray['month'], $dateTimeArray['year'], $dateTimeArray['hour'], $dateTimeArray['minute'], $dateTimeArray['second']);
     }
 
+    // 13.01.2024 2024-01-13
     protected function convertDateToMySQLFormat($date)
     {
         $d = explode('.', $date);
-        return sprintf('%04d-%02d-%02d', $d[2], $d[1], $d[0]); 
+        return sprintf('%04d-%02d-%02d', $d[2], $d[1], $d[0]);
     }
 
     protected function convertDateTimeToMySQLFormat($dateTime)
