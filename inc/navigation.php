@@ -6,11 +6,15 @@
             <div class="menu-title">Flugbuch</div>
         </a>
         <ul>
-            <li> <a href="index.php"><i class="bx bx-right-arrow-alt"></i>Flüge</a>
+            <li>
+                <a href="index.php"><i class="bx bx-right-arrow-alt"></i>Flüge</a>
             </li>
-            <li> <a href="flugbuch_bearbeiten.php"><i class="bx bx-right-arrow-alt"></i>Neuer Flugbucheintrag</a>
+            <li>
+                <a href="flugbuch_bearbeiten.php"><i class="bx bx-right-arrow-alt"></i>Neuer Flugbucheintrag</a>
             </li>
-            
+            <li>
+                <a href="daten_importieren.php"><i class="bx bx-right-arrow-alt"></i>Daten importieren</a>
+            </li>
         </ul>
     </li>
     

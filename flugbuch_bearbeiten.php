@@ -3,6 +3,7 @@
 error_reporting(E_ALL);
 
 require_once('./include/Flug.php');
+require_once('./include/FieldStatus.php');
 require_once('./include/FlugResult.php');
 require_once('./include/FlugService.php');
 
@@ -13,6 +14,8 @@ if (isset($_GET[Flug::ID])) {
 	$flugResult = $flugService->selectFlugById($_GET[Flug::ID]);
 } elseif (isset($_POST[Flug::ID])) {
 	$flugResult = $flugService->selectFlugById($_POST[Flug::ID]);
+} else {
+	$flugResult = new FlugResult();
 }
 
 if (isset($flugResult->flug)) {
@@ -36,7 +39,7 @@ if (isset($_POST['save'])) {
 	$flug->muster = $_POST[Flug::MUSTER];
 	$flug->kennzeichen = $_POST[Flug::KENNZEICHEN];
 	$flug->pilot = $_POST[Flug::PILOT];
-	$flug->besatzung = $_POST[Flug::BESATZUNG];
+	$flug->fluganzahl = $_POST[Flug::FLUGANZAHL];
 	$flug->gaeste = $_POST[Flug::GAESTE];
 	$flug->flugart = $_POST[Flug::FLUGART];
 	$flug->startplatz = $_POST[Flug::STARTPLATZ];
@@ -56,6 +59,8 @@ if (isset($_POST['save'])) {
 } else {
 	//echo 'not save';
 }
+
+//print_r($flugResult);
 
 ?>
 <!doctype html>
@@ -96,8 +101,7 @@ if (isset($_POST['save'])) {
 				<div>
 					<h4 class="logo-text">Hauptflugbuch</h4>
 				</div>
-				<div class="toggle-icon ms-auto"><i class='bx bx-arrow-to-left'></i>
-				</div>
+				
 			</div>
 			<!--navigation-->
 			<?php include('inc/navigation.php') ?>
@@ -155,87 +159,294 @@ if (isset($_POST['save'])) {
 									<input type="hidden" name="<?= Flug::ID ?>" value="<?= $flug->id ?>" />
 									<div class="col-md-4">
 										<label for="<?= Flug::DATUM ?>" class="form-label">Datum</label>
-										<input type="text" id="<?= Flug::DATUM ?>" name="<?= Flug::DATUM ?>"
-											class="form-control" value="<?= $flug->datum ?>"
-											title="Bitte gib das Datum im Format tt.mm.jjjj ein." />
+										<input type="text" id="<?= Flug::DATUM ?>" name="<?= Flug::DATUM ?>" class="form-control" value="<?= $flug->datum ?>" title="Bitte gib das Datum im Format tt.mm.jjjj ein." />
+										<?php
+										$fieldStatusDatum = $flugResult->fieldStatusList[Flug::DATUM];
+										if (isset($fieldStatusDatum)) {
+											if (FieldStatus::INFO == $fieldStatusDatum->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusDatum->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusDatum->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusDatum->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>
+
 									</div>
 									<div class="col-md-4">
 										<label for="<?= Flug::STARTZEIT ?>" class="form-label">Startzeit</label>
-										<input type="text" id="<?= Flug::STARTZEIT ?>" name="<?= Flug::STARTZEIT ?>"
-											class="form-control" value="<?= $flug->startzeit ?>"
-											title="Bitte gib die Zeit im Format ss:mm ein." />
+										<input type="text" id="<?= Flug::STARTZEIT ?>" name="<?= Flug::STARTZEIT ?>" class="form-control" value="<?= $flug->startzeit ?>" title="Bitte gib die Zeit im Format ss:mm ein." />
+										<?php
+										$fieldStatusStartzeit = $flugResult->fieldStatusList[Flug::STARTZEIT];
+										if (isset($fieldStatusStartzeit)) {
+											if (FieldStatus::INFO == $fieldStatusStartzeit->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusStartzeit->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusStartzeit->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusStartzeit->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>
 									</div>
 									<div class="col-md-4">
 										<label for="<?= Flug::LANDEZEIT ?>" class="form-label">Landezeit</label>
-										<input type="text" id="<?= Flug::LANDEZEIT ?>" name="<?= Flug::LANDEZEIT ?>"
-											class="form-control" value="<?= $flug->landezeit ?>"
-											title="Bitte gib die Zeit im Format ss:mm ein." />
+										<input type="text" id="<?= Flug::LANDEZEIT ?>" name="<?= Flug::LANDEZEIT ?>" class="form-control" value="<?= $flug->landezeit ?>" title="Bitte gib die Zeit im Format ss:mm ein." />
+										<?php
+										$fieldStatusLandezeit = $flugResult->fieldStatusList[Flug::LANDEZEIT];
+										if (isset($fieldStatusLandezeit)) {
+											if (FieldStatus::INFO == $fieldStatusLandezeit->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusLandezeit->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusLandezeit->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusLandezeit->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>
 									</div>
-
 									<div class="col-md-4">
 										<label for="<?= Flug::MUSTER ?>" class="form-label">Muster</label>
-										<input type="text" id="<?= Flug::MUSTER ?>" name="<?= Flug::MUSTER ?>"
-											class="form-control" value="<?= $flug->muster ?>" />
+										<input type="text" id="<?= Flug::MUSTER ?>" name="<?= Flug::MUSTER ?>" class="form-control" value="<?= $flug->muster ?>" />
+										<?php
+										$fieldStatusMuster = $flugResult->fieldStatusList[Flug::MUSTER];
+										if (isset($fieldStatusMuster)) {
+											if (FieldStatus::INFO == $fieldStatusMuster->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusMuster->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusMuster->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusMuster->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>
 									</div>
 									<div class="col-md-4">
 										<label for="<?= Flug::KENNZEICHEN ?>" class="form-label">Kennzeichen</label>
-										<input type="text" id="<?= Flug::KENNZEICHEN ?>" name="<?= Flug::KENNZEICHEN ?>"
-											class="form-control" value="<?= $flug->kennzeichen ?>" />
+										<input type="text" id="<?= Flug::KENNZEICHEN ?>" name="<?= Flug::KENNZEICHEN ?>" class="form-control" value="<?= $flug->kennzeichen ?>" />
+										<?php
+										$fieldStatusKennzeichen = $flugResult->fieldStatusList[Flug::KENNZEICHEN];
+										if (isset($fieldStatusKennzeichen)) {
+											if (FieldStatus::INFO == $fieldStatusKennzeichen->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusKennzeichen->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusKennzeichen->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusKennzeichen->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>									
 									</div>
 									<div class="col-md-4">
 										<label for="<?= Flug::PILOT ?>" class="form-label">Pilot</label>
-										<input type="text" id="<?= Flug::PILOT ?>" name="<?= Flug::PILOT ?>"
-											class="form-control" value="<?= $flug->pilot ?>" />
+										<input type="text" id="<?= Flug::PILOT ?>" name="<?= Flug::PILOT ?>" class="form-control" value="<?= $flug->pilot ?>" />
+										<?php
+										$fieldStatusPilot = $flugResult->fieldStatusList[Flug::PILOT];
+										if (isset($fieldStatusPilot)) {
+											if (FieldStatus::INFO == $fieldStatusPilot->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusPilot->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusPilot->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusPilot->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>		
 									</div>
-
 									<div class="col-md-4">
-										<label for="<?= Flug::BESATZUNG ?>" class="form-label">Besatzung</label>
-										<input type="text" id="<?= Flug::BESATZUNG ?>" name="<?= Flug::BESATZUNG ?>"
-											class="form-control" value="<?= $flug->besatzung ?>" />
+										<label for="<?= Flug::FLUGANZAHL ?>" class="form-label">Fluganzahl</label>
+										<input type="text" id="<?= Flug::FLUGANZAHL ?>" name="<?= Flug::FLUGANZAHL ?>" class="form-control" value="<?= $flug->fluganzahl ?>" />
+										<?php
+										$fieldStatusFluganzahl = $flugResult->fieldStatusList[Flug::FLUGANZAHL];
+										if (isset($fieldStatusFluganzahl)) {
+											if (FieldStatus::INFO == $fieldStatusFluganzahl->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusFluganzahl->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusFluganzahl->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusFluganzahl->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>
 									</div>
 									<div class="col-md-4">
 										<label for="<?= Flug::GAESTE ?>" class="form-label">Gäste</label>
-										<input type="text" id="<?= Flug::GAESTE ?>" name="<?= Flug::GAESTE ?>"
-											class="form-control" value="<?= $flug->gaeste ?>" />
+										<input type="text" id="<?= Flug::GAESTE ?>" name="<?= Flug::GAESTE ?>" class="form-control" value="<?= $flug->gaeste ?>" />
+										<?php
+										$fieldStatusGaeste = $flugResult->fieldStatusList[Flug::GAESTE];
+										if (isset($fieldStatusGaeste)) {
+											if (FieldStatus::INFO == $fieldStatusGaeste->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusGaeste->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusGaeste->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusGaeste->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>
 									</div>
 									<div class="col-md-4">
 										<label for="<?= Flug::FLUGART ?>" class="form-label">Flugart</label>
-										<input type="text" id="<?= Flug::FLUGART ?>" name="<?= Flug::FLUGART ?>"
-											class="form-control" value="<?= $flug->flugart ?>" />
+										<input type="text" id="<?= Flug::FLUGART ?>" name="<?= Flug::FLUGART ?>" class="form-control" value="<?= $flug->flugart ?>" />
+										<?php
+										$fieldStatusFlugart = $flugResult->fieldStatusList[Flug::FLUGART];
+										if (isset($fieldStatusFlugart)) {
+											if (FieldStatus::INFO == $fieldStatusFlugart->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusFlugart->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusFlugart->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusFlugart->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>
 									</div>
 
 									<div class="col-md-4">
 										<label for="<?= Flug::STARTPLATZ ?>" class="form-label">Startplatz</label>
-										<input type="text" id="<?= Flug::STARTPLATZ ?>" name="<?= Flug::STARTPLATZ ?>"
-											class="form-control" value="<?= $flug->startplatz ?>" />
+										<input type="text" id="<?= Flug::STARTPLATZ ?>" name="<?= Flug::STARTPLATZ ?>" class="form-control" value="<?= $flug->startplatz ?>" />
+										<?php
+										$fieldStatusStartplatz = $flugResult->fieldStatusList[Flug::STARTPLATZ];
+										if (isset($fieldStatusStartplatz)) {
+											if (FieldStatus::INFO == $fieldStatusStartplatz->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusStartplatz->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusStartplatz->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusStartplatz->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>
 									</div>
 									<div class="col-md-4">
 										<label for="<?= Flug::ZIELPLATZ ?>" class="form-label">Zielplatz</label>
-										<input type="text" id="<?= Flug::ZIELPLATZ ?>" name="<?= Flug::ZIELPLATZ ?>"
-											class="form-control" value="<?= $flug->zielplatz ?>" />
+										<input type="text" id="<?= Flug::ZIELPLATZ ?>" name="<?= Flug::ZIELPLATZ ?>" class="form-control" value="<?= $flug->zielplatz ?>" />
+										<?php
+										$fieldStatusZielplatz = $flugResult->fieldStatusList[Flug::ZIELPLATZ];
+										if (isset($fieldStatusZielplatz)) {
+											if (FieldStatus::INFO == $fieldStatusZielplatz->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusZielplatz->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusZielplatz->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusZielplatz->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>
 									</div>
 									<div class="col-md-4">
 										<label for="<?= Flug::FLUGLEITER ?>" class="form-label">Flugleiter</label>
-										<input type="text" id="<?= Flug::FLUGLEITER ?>" name="<?= Flug::FLUGLEITER ?>"
-											class="form-control" value="<?= $flug->flugleiter ?>" />
+										<input type="text" id="<?= Flug::FLUGLEITER ?>" name="<?= Flug::FLUGLEITER ?>" class="form-control" value="<?= $flug->flugleiter ?>" />
+										<?php
+										$fieldStatusFlugleiter = $flugResult->fieldStatusList[Flug::FLUGLEITER];
+										if (isset($fieldStatusFlugleiter)) {
+											if (FieldStatus::INFO == $fieldStatusFlugleiter->messageType) {
+										?>
+												<p style="color: green;">
+													<?= $fieldStatusFlugleiter->message ?>
+												</p>
+											<?php
+											}
+											if (FieldStatus::ERROR == $fieldStatusFlugleiter->messageType) {
+											?>
+												<p style="color: red;">
+													<?= $fieldStatusFlugleiter->message ?>
+												</p>
+										<?php
+											}
+										}
+										?>
 									</div>
 
 									<div class="col-md-4">
 										<label for="<?= Flug::GESCHLEPPTER ?>" class="form-label">Geschleppter</label>
-										<input type="text" id="<?= Flug::GESCHLEPPTER ?>"
-											name="<?= Flug::GESCHLEPPTER ?>" class="form-control"
-											value="<?= $flug->geschleppter ?>" />
+										<input type="text" id="<?= Flug::GESCHLEPPTER ?>" name="<?= Flug::GESCHLEPPTER ?>" class="form-control" value="<?= $flug->geschleppter ?>" />
 									</div>
 									<div class="col-md-4">
 										<label for="<?= Flug::SCHLEPPHOEHE ?>" class="form-label">Schlepphöhe</label>
-										<input type="text" id="<?= Flug::SCHLEPPHOEHE ?>"
-											name="<?= Flug::SCHLEPPHOEHE ?>" class="form-control"
-											value="<?= $flug->schlepphoehe ?>" />
+										<input type="text" id="<?= Flug::SCHLEPPHOEHE ?>" name="<?= Flug::SCHLEPPHOEHE ?>" class="form-control" value="<?= $flug->schlepphoehe ?>" />
 									</div>
 									<div class="col-md-4">
 										<label for="<?= Flug::BEMERKUNG ?>" class="form-label">Bemerkung</label>
-										<input type="text" id="<?= Flug::BEMERKUNG ?>" name="<?= Flug::BEMERKUNG ?>"
-											class="form-control" value="<?= $flug->bemerkung ?>" />
+										<input type="text" id="<?= Flug::BEMERKUNG ?>" name="<?= Flug::BEMERKUNG ?>" class="form-control" value="<?= $flug->bemerkung ?>" />
 									</div>
 
 									<div class="col-12">
@@ -255,53 +466,14 @@ if (isset($_POST['save'])) {
 		<!--start overlay-->
 		<div class="overlay toggle-icon"></div>
 		<!--end overlay-->
-		<!--Start Back To Top Button--> <a href="javaScript:;" class="back-to-top"><i
-				class='bx bxs-up-arrow-alt'></i></a>
+		<!--Start Back To Top Button--> <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
 		<!--End Back To Top Button-->
 		<footer class="page-footer">
 			<p class="mb-0"></p>
 		</footer>
 	</div>
 	<!--end wrapper-->
-	<!--start switcher-->
-	<div class="switcher-wrapper">
-		<div class="switcher-btn"> <i class='bx bx-cog bx-spin'></i>
-		</div>
-		<div class="switcher-body">
-			<div class="d-flex align-items-center">
-				<h5 class="mb-0 text-uppercase">Theme Customizer</h5>
-				<button type="button" class="btn-close ms-auto close-switcher" aria-label="Close"></button>
-			</div>
-			<hr />
-			<p class="mb-0">Gaussian Texture</p>
-			<hr>
-
-			<ul class="switcher">
-				<li id="theme1"></li>
-				<li id="theme2"></li>
-				<li id="theme3"></li>
-				<li id="theme4"></li>
-				<li id="theme5"></li>
-				<li id="theme6"></li>
-			</ul>
-			<hr>
-			<p class="mb-0">Gradient Background</p>
-			<hr>
-
-			<ul class="switcher">
-				<li id="theme7"></li>
-				<li id="theme8"></li>
-				<li id="theme9"></li>
-				<li id="theme10"></li>
-				<li id="theme11"></li>
-				<li id="theme12"></li>
-				<li id="theme13"></li>
-				<li id="theme14"></li>
-				<li id="theme15"></li>
-			</ul>
-		</div>
-	</div>
-	<!--end switcher-->
+	
 	<!-- Bootstrap JS -->
 	<script src="assets/js/bootstrap.bundle.min.js"></script>
 	<!--plugins-->
@@ -317,14 +489,14 @@ if (isset($_POST['save'])) {
 	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 	<script src="assets/i18n/datepicker-de.js"></script>
 	<script>
-		$(function () {
+		$(function() {
 			$("#<?= Flug::DATUM ?>").datepicker($.datepicker.regional["de"]);
 
 		});
 	</script>
 
 	<script>
-		$(function () {
+		$(function() {
 			$("#<?= Flug::DATUM ?>").tooltip({
 				show: {
 					effect: "slideDown",
@@ -338,11 +510,11 @@ if (isset($_POST['save'])) {
 	<script src="assets/plugins/notifications/js/lobibox.min.js"></script>
 	<script src="assets/plugins/notifications/js/notifications.min.js"></script>
 	<script>
-		$(document).ready(function () {
+		$(document).ready(function() {
 
 			<?php
 			if (FlugResult::INFO == $flugResult->resultMessageType) {
-				?>
+			?>
 				Lobibox.notify('success', {
 					pauseDelayOnHover: true,
 					continueDelayOnInactiveTab: false,
@@ -351,12 +523,12 @@ if (isset($_POST['save'])) {
 					title: 'Information',
 					msg: '<?= $flugResult->resultMessage ?>'
 				});
-				<?php
+			<?php
 			}
 			?>
 			<?php
 			if (FlugResult::WARNING == $flugResult->resultMessageType) {
-				?>
+			?>
 				Lobibox.notify('warning', {
 					pauseDelayOnHover: true,
 					continueDelayOnInactiveTab: false,
@@ -365,12 +537,12 @@ if (isset($_POST['save'])) {
 					title: 'Achtung',
 					msg: '<?= $flugResult->resultMessage ?>'
 				});
-				<?php
+			<?php
 			}
 			?>
 			<?php
 			if (FlugResult::ERROR == $flugResult->resultMessageType) {
-				?>
+			?>
 				Lobibox.notify('error', {
 					pauseDelayOnHover: true,
 					continueDelayOnInactiveTab: false,
@@ -379,7 +551,7 @@ if (isset($_POST['save'])) {
 					title: 'Es ist ein Fehler aufgetreten',
 					msg: '<?= $flugResult->resultMessage ?>'
 				});
-				<?php
+			<?php
 			}
 			?>
 
