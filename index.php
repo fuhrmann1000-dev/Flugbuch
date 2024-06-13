@@ -127,7 +127,7 @@ $fluege = $flugResult->fluege;
 										?>
 										<tr>
 											<td>
-												<div class="datagrid-cell datagrid-cell-c2-Datum">
+												<div style="" class="datagrid-cell datagrid-cell-c2-Datum">
 													<?= $flug->datum ?>
 												</div>
 											</td>
