@@ -166,7 +166,7 @@ class FlugService
         $kennzeichen = $flug->kennzeichen;
         $fieldStatus = new FieldStatus();
         $fieldStatus->fieldName = Flug::KENNZEICHEN;
-        if (isset($kennzeichen) && 6 == strlen($kennzeichen)) {
+        if (isset($kennzeichen) && 6 <= strlen($kennzeichen)) {
             $fieldStatus->messageType = FieldStatus::INFO;
             $fieldStatus->message = 'Das Kennzeichen wurde richtig eingegeben.';
         } else {
