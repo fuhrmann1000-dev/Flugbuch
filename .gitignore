@@ -1,1 +1,7 @@
-/nbproject/private/
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+*.log
+.idea/
+.vscode/
+*.iml
