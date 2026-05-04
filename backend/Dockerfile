@@ -1,9 +1,10 @@
 # Stage 1: Build
-FROM eclipse-temurin:21-jdk-jammy AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
-COPY . .
-# Maven Build (überspringt Tests für den schnellen Build)
-RUN ./mvnw clean package -DskipTests
+COPY pom.xml .
+RUN mvn -B dependency:go-offline
+COPY src ./src
+RUN mvn -B package -DskipTests
 
 # Stage 2: Runtime
 FROM eclipse-temurin:21-jre-jammy
