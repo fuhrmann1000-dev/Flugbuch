@@ -3,10 +3,10 @@ spring:
         name: flugbuch
 
     datasource:
-        url: jdbc:h2:mem:flugbuchdb
-        driver-class-name: org.h2.Driver
-        username: sa
-        password: password
+        url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:flugbuchdb}
+        username: ${SPRING_DATASOURCE_USERNAME:sa}
+        password: ${SPRING_DATASOURCE_PASSWORD:password}
+        driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
 
     h2:
         console:

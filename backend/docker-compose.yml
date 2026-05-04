@@ -1,0 +1,31 @@
+services:
+  flugbuch-db:
+    image: mysql:8.0
+    container_name: flugbuch_db
+    environment:
+      MYSQL_DATABASE: flugbuch
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: flugbuch_user
+      MYSQL_PASSWORD: flugbuch_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  flugbuch-app:
+    build: .
+    container_name: flugbuch_backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - flugbuch-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://flugbuch-db:3306/flugbuch?allowPublicKeyRetrieval=true&useSSL=false
+      - SPRING_DATASOURCE_USERNAME=flugbuch_user
+      - SPRING_DATASOURCE_PASSWORD=flugbuch_password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    volumes:
+      - ./import-daten:/app/import
+
+volumes:
+  db_data:
