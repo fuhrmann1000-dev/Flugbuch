@@ -1,0 +1,109 @@
+services:
+  # ─────────────────────────────────────────────
+  #  Datenbank
+  # ─────────────────────────────────────────────
+  db:
+    image: mysql:8.4
+    container_name: flugbuch-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-flugbuch}
+      MYSQL_USER: ${MYSQL_USER:-flugbuch}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-flugbuch}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "${MYSQL_USER:-flugbuch}",
+          "--password=${MYSQL_PASSWORD:-flugbuch}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ─────────────────────────────────────────────
+  #  phpMyAdmin
+  # ─────────────────────────────────────────────
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: flugbuch-phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: ${MYSQL_USER:-flugbuch}
+      PMA_PASSWORD: ${MYSQL_PASSWORD:-flugbuch}
+      UPLOAD_LIMIT: 64M
+    networks:
+      - backend
+    ports:
+      - "${PMA_PORT:-8081}:80"
+
+  # ─────────────────────────────────────────────
+  #  Backend (Spring Boot)
+  # ─────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flugbuch-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-dev}
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-flugbuch}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Berlin
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-flugbuch}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-flugbuch}
+      JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx512m}
+    networks:
+      - backend
+      - frontend
+    expose:
+      - "8080"
+
+  # ─────────────────────────────────────────────
+  #  Frontend (Angular) – Profil: frontend
+  #  Wird nur gestartet, wenn das Frontend existiert
+  # ─────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: flugbuch-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - frontend
+    expose:
+      - "80"
+    profiles:
+      - frontend
+
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
