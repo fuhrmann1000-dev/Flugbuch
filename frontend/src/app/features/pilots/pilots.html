@@ -1,0 +1,114 @@
+<div class="pl-page">
+
+    <div class="pl-header">
+        <div>
+            <nav class="pl-breadcrumb"><span>Dashboard</span><span class="sep">›</span><span
+                    class="active">Piloten</span></nav>
+            <h1 class="pl-title">PILOTENVERWALTUNG</h1>
+        </div>
+        <button class="btn btn-primary" (click)="openNew()">＋ Neuer Pilot</button>
+    </div>
+
+    <div class="pl-toolbar">
+        <div class="pl-search-wrap">
+            <span class="pl-search-icon">⌕</span>
+            <input type="text" class="pl-search" placeholder="Suchen…" [(ngModel)]="searchTerm" name="search" />
+        </div>
+        <span class="pl-count">{{ filtered().length }} Piloten</span>
+    </div>
+
+    <div class="pl-card">
+        <div class="pl-scroll">
+            <table class="pl-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>E-Mail</th>
+                        <th>Lizenz</th>
+                        <th class="center">Flüge</th>
+                        <th class="center">Stunden</th>
+                        <th class="center">Status</th>
+                        <th class="center">Aktion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (p of filtered(); track p.id) {
+                    <tr class="pl-row">
+                        <td>
+                            <div class="pl-avatar-row">
+                                <div class="pl-avatar">{{ p.firstName[0] }}{{ p.lastName[0] }}</div>
+                                <div>
+                                    <div class="pl-name">{{ p.lastName }}, {{ p.firstName }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="pl-email">{{ p.email }}</td>
+                        <td><span class="pl-license">{{ p.licenseType }}</span></td>
+                        <td class="center mono">{{ p.flightCount }}</td>
+                        <td class="center mono">{{ p.totalHours }}</td>
+                        <td class="center">
+                            <span class="pl-status" [class.active]="p.status === 'active'">
+                                {{ p.status === 'active' ? 'Aktiv' : 'Inaktiv' }}
+                            </span>
+                        </td>
+                        <td class="center">
+                            <div class="pl-actions">
+                                <button class="pl-btn" title="Bearbeiten" (click)="openEdit(p)">✎</button>
+                                <button class="pl-btn" title="Status wechseln" (click)="toggleStatus(p)">⟳</button>
+                                <button class="pl-btn pl-btn-del" title="Löschen">✕</button>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                    @empty {
+                    <tr>
+                        <td colspan="7" class="pl-empty">Keine Piloten gefunden.</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+        <div class="modal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span>{{ editingPilot() ? 'Pilot bearbeiten' : 'Neuer Pilot' }}</span>
+                <button class="modal-close" (click)="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="fe-row">
+                    <div class="fe-field">
+                        <label class="fe-label">Vorname</label>
+                        <input type="text" class="fe-input" [(ngModel)]="formFirstName" name="fn" placeholder="Max" />
+                    </div>
+                    <div class="fe-field">
+                        <label class="fe-label">Nachname</label>
+                        <input type="text" class="fe-input" [(ngModel)]="formLastName" name="ln"
+                            placeholder="Mustermann" />
+                    </div>
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label">E-Mail</label>
+                    <input type="email" class="fe-input" [(ngModel)]="formEmail" name="em"
+                        placeholder="pilot@example.com" />
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label">Lizenztyp</label>
+                    <select class="fe-input fe-select" [(ngModel)]="formLicense" name="lic">
+                        <option value="" disabled>Bitte wählen…</option>
+                        @for (l of licenseTypes; track l) { <option [value]="l">{{ l }}</option> }
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" (click)="closeModal()">Abbrechen</button>
+                <button class="btn btn-primary" (click)="saveModal()">Speichern</button>
+            </div>
+        </div>
+    </div>
+    }
+
+</div>

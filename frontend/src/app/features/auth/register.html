@@ -1,0 +1,72 @@
+<div class="auth-shell">
+    <div class="auth-bg">
+        <div class="auth-glow auth-glow-1"></div>
+        <div class="auth-glow auth-glow-2"></div>
+        <div class="auth-glow auth-glow-3"></div>
+    </div>
+
+    <div class="auth-card auth-card-wide">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L3 7l9 5 9-5-9-5z" opacity="0.9" />
+                    <path d="M3 12l9 5 9-5" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6" />
+                </svg>
+            </div>
+            <div>
+                <div class="auth-logo-top">AERO</div>
+                <div class="auth-logo-bottom">LOGBOOK</div>
+            </div>
+        </div>
+
+        <h2 class="auth-title">Konto erstellen</h2>
+        <p class="auth-sub">Starte dein digitales Flugbuch in wenigen Sekunden.</p>
+
+        @if (hasError()) {
+        <div class="auth-error"><span>⚠</span> {{ errorMsg }}</div>
+        }
+
+        <div class="auth-form">
+            <div class="auth-row">
+                <div class="auth-field">
+                    <label class="auth-label">Vorname</label>
+                    <input type="text" class="auth-input" placeholder="Max" [(ngModel)]="firstName" name="firstName" />
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label">Nachname</label>
+                    <input type="text" class="auth-input" placeholder="Mustermann" [(ngModel)]="lastName"
+                        name="lastName" />
+                </div>
+            </div>
+            <div class="auth-field">
+                <label class="auth-label">E-Mail</label>
+                <input type="email" class="auth-input" placeholder="pilot@example.com" [(ngModel)]="email"
+                    name="email" />
+            </div>
+            <div class="auth-row">
+                <div class="auth-field">
+                    <label class="auth-label">Passwort</label>
+                    <input type="password" class="auth-input" placeholder="••••••••" [(ngModel)]="password"
+                        name="password" />
+                </div>
+                <div class="auth-field">
+                    <label class="auth-label">Passwort wiederholen</label>
+                    <input type="password" class="auth-input" placeholder="••••••••" [(ngModel)]="passwordConfirm"
+                        name="passwordConfirm" />
+                </div>
+            </div>
+
+            <button class="auth-btn" (click)="register()" [disabled]="isLoading()">
+                @if (isLoading()) {
+                <span class="auth-spinner"></span> Registrieren…
+                } @else {
+                Konto erstellen
+                }
+            </button>
+        </div>
+
+        <p class="auth-footer">
+            Bereits registriert? <a routerLink="/login">Anmelden</a>
+        </p>
+    </div>
+</div>

@@ -1,0 +1,150 @@
+<div class="fe-page">
+
+    <!-- ── Header ────────────────────────────────────────────── -->
+    <div class="fe-header">
+        <nav class="fe-breadcrumb">
+            <span>Dashboard</span>
+            <span class="sep">›</span>
+            <span>Logbook</span>
+            <span class="sep">›</span>
+            <span class="active">{{ pageTitle }}</span>
+        </nav>
+        <h1 class="fe-title">{{ pageTitle }}</h1>
+    </div>
+
+    <!-- ── Form Card ─────────────────────────────────────────── -->
+    <div class="fe-card">
+
+        <div class="fe-card-header">
+            <span class="fe-card-icon">✈</span>
+            <span class="fe-card-title">{{ pageTitle }}</span>
+        </div>
+
+        <!-- Banners -->
+        @if (saveSuccess()) {
+        <div class="fe-banner fe-banner-success">
+            <span>✓</span> Flugdaten erfolgreich gespeichert.
+        </div>
+        }
+        @if (saveError()) {
+        <div class="fe-banner fe-banner-error">
+            <span>⚠</span> Speichern fehlgeschlagen. Bitte Backend prüfen.
+        </div>
+        }
+
+        <div class="fe-form">
+
+            <!-- Row 1: Datum / Startzeit / Landezeit -->
+            <div class="fe-row">
+                <div class="fe-field">
+                    <label class="fe-label" for="flightDate">Datum</label>
+                    <input id="flightDate" type="date" class="fe-input" [(ngModel)]="flightDate" name="flightDate" />
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label" for="startTime">Startzeit</label>
+                    <input id="startTime" type="time" class="fe-input" [(ngModel)]="startTimeUtc" name="startTimeUtc" />
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label" for="landingTime">Landezeit</label>
+                    <input id="landingTime" type="time" class="fe-input" [(ngModel)]="landingTimeUtc"
+                        name="landingTimeUtc" />
+                </div>
+            </div>
+
+            <!-- Row 2: Muster / Kennzeichen / Pilot -->
+            <div class="fe-row">
+                <div class="fe-field">
+                    <label class="fe-label" for="model">Muster</label>
+                    <input id="model" type="text" class="fe-input" placeholder="z.B. Merlin 1200"
+                        [(ngModel)]="aircraftModel" name="aircraftModel" />
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label" for="reg">Kennzeichen</label>
+                    <input id="reg" type="text" class="fe-input fe-mono" placeholder="z.B. D-MVBO"
+                        [(ngModel)]="aircraftRegistration" name="aircraftRegistration" />
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label" for="pilot">Pilot</label>
+                    <input id="pilot" type="text" class="fe-input" placeholder="Nachname, Vorname"
+                        [(ngModel)]="pilotInCommandName" name="pilotInCommandName" />
+                </div>
+            </div>
+
+            <!-- Row 3: Fluganzahl / Gäste / Flugart -->
+            <div class="fe-row">
+                <div class="fe-field">
+                    <label class="fe-label" for="landings">Fluganzahl</label>
+                    <input id="landings" type="number" class="fe-input" min="1" [(ngModel)]="numberOfLandings"
+                        name="numberOfLandings" />
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label" for="guests">Gäste</label>
+                    <input id="guests" type="number" class="fe-input" min="0" [(ngModel)]="guests" name="guests" />
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label" for="flightType">Flugart</label>
+                    <select id="flightType" class="fe-input fe-select" [(ngModel)]="flightType" name="flightType">
+                        <option value="" disabled>Bitte wählen…</option>
+                        @for (type of flightTypeOptions; track type) {
+                        <option [value]="type">{{ type }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Row 4: Startplatz / Zielplatz / Flugleiter -->
+            <div class="fe-row">
+                <div class="fe-field">
+                    <label class="fe-label" for="departure">Startplatz</label>
+                    <input id="departure" type="text" class="fe-input" placeholder="z.B. SLP Altes Lager"
+                        [(ngModel)]="departureLocation" name="departureLocation" />
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label" for="arrival">Zielplatz</label>
+                    <input id="arrival" type="text" class="fe-input" placeholder="z.B. SLP Altes Lager"
+                        [(ngModel)]="arrivalLocation" name="arrivalLocation" />
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label" for="controller">Flugleiter</label>
+                    <input id="controller" type="text" class="fe-input" placeholder="Nachname, Vorname"
+                        [(ngModel)]="flightController" name="flightController" />
+                </div>
+            </div>
+
+            <!-- Row 5: Geschleppter / Schlepphöhe / Bemerkung -->
+            <div class="fe-row">
+                <div class="fe-field">
+                    <label class="fe-label" for="towed">Geschleppter</label>
+                    <input id="towed" type="text" class="fe-input fe-mono" placeholder="Kennzeichen"
+                        [(ngModel)]="towedAircraft" name="towedAircraft" />
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label" for="towHeight">Schlepphöhe</label>
+                    <input id="towHeight" type="text" class="fe-input" placeholder="z.B. 400m" [(ngModel)]="towHeight"
+                        name="towHeight" />
+                </div>
+                <div class="fe-field">
+                    <label class="fe-label" for="remarks">Bemerkung</label>
+                    <input id="remarks" type="text" class="fe-input" placeholder="Optionale Notizen"
+                        [(ngModel)]="remarks" name="remarks" />
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="fe-actions">
+                <button class="btn btn-ghost" (click)="cancel()" [disabled]="isSaving()">
+                    Abbrechen
+                </button>
+                <button class="btn btn-primary" (click)="save()" [disabled]="isSaving()">
+                    @if (isSaving()) {
+                    <span class="fe-spinner"></span> Speichern…
+                    } @else {
+                    <span class="btn-icon">✓</span> Speichern
+                    }
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</div>

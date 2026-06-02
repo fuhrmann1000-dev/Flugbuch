@@ -1,0 +1,217 @@
+<div class="fl-page">
+
+    <!-- ── Header ─────────────────────────────────────────────── -->
+    <div class="fl-header">
+        <div>
+            <nav class="fl-breadcrumb">
+                <span>Dashboard</span>
+                <span class="sep">›</span>
+                <span class="active">Logbook</span>
+            </nav>
+            <h1 class="fl-title">Logbook: Altes Lager <span class="icao">(EDPU)</span></h1>
+        </div>
+
+        <div class="fl-actions">
+            <button class="btn btn-primary">
+                <span class="btn-icon">＋</span> Quick Add Flight
+            </button>
+            <button class="btn btn-ghost">
+                <span class="btn-icon">↓</span> Import
+            </button>
+            <button class="btn btn-ghost">
+                <span class="btn-icon">↑</span> Export (CSV/PDF)
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toolbar ─────────────────────────────────────────────── -->
+    <div class="fl-toolbar">
+        <label class="fl-show-entries">
+            <span>Show</span>
+            <select [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()" class="fl-select">
+                <option *ngFor="let opt of pageSizeOptions" [value]="opt">{{ opt }}</option>
+            </select>
+            <span>entries</span>
+        </label>
+
+        <div class="fl-toolbar-right">
+            <div class="fl-search-wrap">
+                <span class="fl-search-icon">⌕</span>
+                <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" class="fl-search"
+                    placeholder="Suchen…" />
+            </div>
+            <button class="btn btn-ghost btn-sm">
+                <span class="btn-icon">⇅</span> Sort
+            </button>
+            <button class="btn btn-ghost btn-sm">
+                <span class="btn-icon">▽</span> Filter
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Table ───────────────────────────────────────────────── -->
+    <div class="fl-table-wrap">
+        <div class="fl-scroll">
+            <table class="fl-table">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Reg / Muster</th>
+                        <th>Zeiten (Off / On Block)</th>
+                        <th>Route (Von → Nach)</th>
+                        <th>Pilot</th>
+                        <th>Flugart</th>
+                        <th class="center">Ldg</th>
+                        <th>Bemerkungen</th>
+                        <th class="center">Aktion</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <!-- Loading rows -->
+                    @if (isLoading()) {
+                    @for (i of [1,2,3,4,5]; track i) {
+                    <tr class="fl-row-skeleton">
+                        <td><span class="skeleton w-24"></span></td>
+                        <td>
+                            <span class="skeleton w-16 mb-1"></span>
+                            <span class="skeleton w-20"></span>
+                        </td>
+                        <td>
+                            <span class="skeleton w-28 mb-1"></span>
+                            <span class="skeleton w-16"></span>
+                        </td>
+                        <td><span class="skeleton w-36"></span></td>
+                        <td><span class="skeleton w-28"></span></td>
+                        <td><span class="skeleton w-20 h-5 rounded"></span></td>
+                        <td class="center"><span class="skeleton w-6 mx-auto"></span></td>
+                        <td><span class="skeleton w-32"></span></td>
+                        <td></td>
+                    </tr>
+                    }
+                    }
+
+                    <!-- Error state -->
+                    @if (hasError() && !isLoading()) {
+                    <tr>
+                        <td colspan="9">
+                            <div class="fl-inline-state fl-error-state">
+                                <span class="fl-state-icon">⚠</span>
+                                <div>
+                                    <p class="fl-state-msg">Verbindung zum Server fehlgeschlagen.</p>
+                                    <p class="fl-state-sub">
+                                        Bitte prüfe, ob das Backend auf
+                                        <code>localhost:8080</code>
+                                        erreichbar ist.
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+
+                    <!-- Data rows -->
+                    @if (!isLoading() && !hasError()) {
+                    @for (flight of pagedFlights(); track flight.id) {
+                    <tr class="fl-row">
+                        <td class="fl-date">{{ flight.flightDate }}</td>
+
+                        <td>
+                            <span class="fl-reg">{{ flight.aircraftRegistration }}</span>
+                            <span class="fl-model">{{ flight.aircraftModel }}</span>
+                        </td>
+
+                        <td>
+                            <span class="fl-times">{{ flight.startTimeUtc }} – {{ flight.landingTimeUtc }}</span>
+                            <span class="fl-dur">⏱ {{ flight.durationFormatted }}</span>
+                        </td>
+
+                        <td class="fl-route">
+                            {{ flight.departureLocation }} → {{ flight.arrivalLocation }}
+                        </td>
+
+                        <td class="fl-pilot">{{ flight.pilotInCommandName }}</td>
+
+                        <td>
+                            <span class="fl-badge" [ngClass]="getFlightTypeClass(flight.flightType)">
+                                {{ flight.flightType }}
+                            </span>
+                        </td>
+
+                        <td class="center fl-landings">{{ flight.numberOfLandings }}</td>
+
+                        <td class="fl-remarks" [title]="flight.remarks ?? ''">
+                            {{ flight.remarks }}
+                        </td>
+
+                        <td class="center">
+                            <div class="fl-action-group">
+                                <button class="fl-action-btn" title="Bearbeiten">✎</button>
+                                <button class="fl-action-btn" title="Kopieren">⧉</button>
+                                <button class="fl-action-btn fl-action-del" title="Löschen">✕</button>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+
+                    @empty {
+                    <tr>
+                        <td colspan="9">
+                            <div class="fl-inline-state">
+                                <span class="fl-state-icon">✈</span>
+                                <p class="fl-state-msg">Keine Einträge gefunden.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── Pagination ──────────────────────────────────────────── -->
+    <div class="fl-pagination">
+        <span class="fl-count">
+            Zeige {{ showingFrom }}–{{ showingTo }} von {{ filteredFlights().length }} Einträgen
+        </span>
+
+        <div class="fl-pages">
+            <button class="fl-page-btn" [disabled]="currentPage === 1" (click)="prevPage()">‹</button>
+
+            @for (p of pageNumbers(); track $index) {
+            @if (p === '…') {
+            <span class="fl-page-ellipsis">…</span>
+            } @else {
+            <button class="fl-page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+            }
+            }
+
+            <button class="fl-page-btn" [disabled]="currentPage === totalPages()" (click)="nextPage()">›</button>
+        </div>
+    </div>
+
+    <!-- ── Data Operations ─────────────────────────────────────── -->
+    <div class="fl-ops">
+        <div class="fl-ops-header">
+            <span class="fl-ops-title">DATA OPERATIONS</span>
+            <button class="fl-ops-toggle">∧</button>
+        </div>
+        <div class="fl-ops-body">
+            <button class="fl-ops-btn">
+                <span class="fl-ops-icon">📄</span>
+                <span>CSV Export</span>
+            </button>
+            <button class="fl-ops-btn">
+                <span class="fl-ops-icon">📋</span>
+                <span>PDF Logbook Print</span>
+            </button>
+            <button class="fl-ops-btn">
+                <span class="fl-ops-icon">💾</span>
+                <span>Backup Database</span>
+            </button>
+        </div>
+    </div>
+
+</div>
