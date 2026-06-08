@@ -19,7 +19,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StagingWinchkladdeEintrag {
+public class StagingSchleppbetriebEintrag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
