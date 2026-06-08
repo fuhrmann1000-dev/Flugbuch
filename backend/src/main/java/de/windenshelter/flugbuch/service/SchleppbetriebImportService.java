@@ -9,8 +9,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +43,8 @@ public class SchleppbetriebImportService {
 
     private static final char TRENNZEICHEN = ';';
     private static final String STATUS_PENDING = "PENDING";
+    /** Begrenzt die IN-Liste je Existenzabfrage und die saveAll-Bundles. */
+    private static final int CHUNK_GROESSE = 1000;
     private static final DateTimeFormatter ZEITPUNKT_FORMAT =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
@@ -92,19 +98,62 @@ public class SchleppbetriebImportService {
         return ergebnisListe;
     }
 
+    /**
+     * Persistiert die Eintraege idempotent ueber {@code external_id}.
+     *
+     * <p>Skaliert mit dem Datensatz, indem pro Chunk EINE Existenz-Abfrage
+     * (statt einer je Zeile) ausgefuehrt wird und Neueintraege gebuendelt
+     * gespeichert werden. Duplikate innerhalb derselben Eingabe werden vorab
+     * entfernt (sonst Unique-Verletzung, da der erste Insert in derselben
+     * Transaktion fuer den zweiten noch nicht sichtbar ist).</p>
+     *
+     * <p>Hinweis: Echtes JDBC-Insert-Batching greift erst, wenn die Id-Strategie
+     * nicht {@code IDENTITY} ist (siehe {@link StagingSchleppbetriebEintrag}).
+     * Der wesentliche Engpass beim Re-Import ist aber die Existenzpruefung,
+     * und die ist hier von O(n) Einzelabfragen auf O(n/chunk) reduziert.</p>
+     */
     @Transactional
     public void importiereIdempotent(List<StagingSchleppbetriebEintrag> eintraege) {
-        int gespeichert = 0;
-        int uebersprungen = 0;
+        // 1. Duplikate innerhalb der Eingabe entfernen (erste Vorkommnis gewinnt),
+        //    Eintraege ohne external_id sind nicht dedupbar -> separat behandeln.
+        Map<Integer, StagingSchleppbetriebEintrag> nachExternalId = new LinkedHashMap<>();
+        List<StagingSchleppbetriebEintrag> ohneExternalId = new ArrayList<>();
         for (StagingSchleppbetriebEintrag eintrag : eintraege) {
-            if (stagingRepository.existsByExternalId(eintrag.getExternalId())) {
-                uebersprungen++;
-                continue;
+            if (eintrag.getExternalId() == null) {
+                ohneExternalId.add(eintrag);
+            } else {
+                nachExternalId.putIfAbsent(eintrag.getExternalId(), eintrag);
             }
-            stagingRepository.save(eintrag);
-            gespeichert++;
         }
-        log.info("Schleppkladde-Import idempotent: {} gespeichert, {} bereits bekannt.",
+
+        int gespeichert = 0;
+        int uebersprungen = eintraege.size() - nachExternalId.size() - ohneExternalId.size();
+
+        // 2. In Chunks verarbeiten: pro Chunk eine IN-Abfrage + ein saveAll.
+        List<StagingSchleppbetriebEintrag> eindeutige = new ArrayList<>(nachExternalId.values());
+        for (int start = 0; start < eindeutige.size(); start += CHUNK_GROESSE) {
+            List<StagingSchleppbetriebEintrag> chunk =
+                    eindeutige.subList(start, Math.min(start + CHUNK_GROESSE, eindeutige.size()));
+
+            List<Integer> ids = chunk.stream()
+                    .map(StagingSchleppbetriebEintrag::getExternalId)
+                    .toList();
+            Set<Integer> bekannt = new HashSet<>(stagingRepository.findExistingExternalIds(ids));
+
+            List<StagingSchleppbetriebEintrag> neu = chunk.stream()
+                    .filter(e -> !bekannt.contains(e.getExternalId()))
+                    .toList();
+
+            stagingRepository.saveAll(neu);
+            gespeichert += neu.size();
+            uebersprungen += bekannt.size();
+        }
+
+        // Eintraege ohne external_id sind nicht dedupbar -> immer speichern.
+        stagingRepository.saveAll(ohneExternalId);
+        gespeichert += ohneExternalId.size();
+
+        log.info("Schleppkladde-Import idempotent: {} gespeichert, {} bereits bekannt/dupliziert.",
                 gespeichert, uebersprungen);
     }
 
