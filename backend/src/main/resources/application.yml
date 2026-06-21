@@ -20,3 +20,9 @@ spring:
         properties:
             hibernate:
                 format_sql: true
+                # JDBC-Batching fuer Massen-saveAll (Import). Greift voll erst,
+                # wenn die Id-Strategie nicht IDENTITY ist; schadet aber nie.
+                jdbc:
+                    batch_size: 500
+                order_inserts: true
+                order_updates: true
