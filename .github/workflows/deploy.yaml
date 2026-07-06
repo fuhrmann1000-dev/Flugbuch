@@ -22,7 +22,7 @@ jobs:
 
       - name: Dateien auf den vServer übertragen
         run: rsync -avz --delete ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/putput/
-#
+
 #      - name: Server-Skripte ausführen (optional, z.B. Neuladen des Webservers)
 #        run: |
 #          ssh ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'cd /var/www/mein-projekt/ && docker compose up -d'
