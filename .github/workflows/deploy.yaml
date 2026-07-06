@@ -1,0 +1,28 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Quellcode herunterladen
+        uses: actions/checkout@v4
+
+      - name: SSH-Schlüssel einrichten
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Bekannte Hosts akzeptieren
+        run: ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+      - name: Dateien auf den vServer übertragen
+        run: rsync -avz --delete ./ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/mein-projekt/
+
+      - name: Server-Skripte ausführen (optional, z.B. Neuladen des Webservers)
+        run: |
+          ssh ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'cd /var/www/mein-projekt/ && docker compose up -d'
