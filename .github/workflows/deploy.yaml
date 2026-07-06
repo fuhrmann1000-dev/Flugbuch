@@ -21,7 +21,7 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
       - name: Dateien auf den vServer übertragen
-        run: rsync -avz --delete ./ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/mein-projekt/
+        run: rsync -avz --delete ./ ${{ secrets.USER }}@${{ secrets.HOST }}:/var/www/mein-projekt/
 
       - name: Server-Skripte ausführen (optional, z.B. Neuladen des Webservers)
         run: |
