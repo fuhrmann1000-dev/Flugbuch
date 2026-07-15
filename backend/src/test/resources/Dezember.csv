@@ -1,0 +1,38 @@
+Datum;Startzeit;Landezeit;Muster;Kennzeichen;Pilot;Gäste;Flugart;Startplatz;Zielplatz;Flugleiter;Geschleppter;Schlepphöhe;Betrag;Bemerkung;Fluganzahl
+16.12.2025;09:30;09:58;"Minimum ";D-MIBY;"Martin Odening";0;VFR;"Altes Lager";"Altes Lager ";"Zur Hilfe befähigte Person";;;0.0;;1
+16.12.2025;12:21;12:35;"Merlin 1200";D-MVBO;"Odening, Martin";0;"Charter VFR";"SLP Altes Lager";"SLP Altes Lager";"Zur Hilfe bef. Person";;;0.0;;1
+12.12.2025;13:40;13:50;"Merlin 1200";D-MVBO;"Odening, Martin";0;"Schlepp DoSi";"SLP Altes Lager";"SLP Altes Lager";"Kienöl, Volkmar";"Jeniya (Raimbekova, Yevgeniya)";500;0.0;;1
+12.12.2025;13:03;13:17;"Merlin 1200";D-MVBO;"Odening, Martin";0;"Schlepp DoSi";"SLP Altes Lager";"SLP Altes Lager";"Kienöl, Volkmar";"Jeniya (Raimbekova, Yevgeniya)";600;0.0;;1
+12.12.2025;12:47;12:57;"Merlin 1200";D-MVBO;"Odening, Martin";0;"Schlepp DoSi";"SLP Altes Lager";"SLP Altes Lager";"Zur Hilfe bef. Person";"Jeniya (Raimbekova, Yevgeniya)";650;0.0;;1
+12.12.2025;12:20;12:35;"Merlin 1200";D-MVBO;"Odening, Martin";0;"Schlepp DoSi";"SLP Altes Lager";"SLP Altes Lager";"Zur Hilfe bef. Person";"Jeniya (Raimbekova, Yevgeniya)";450;0.0;;1
+12.12.2025;12:03;12:17;"Merlin 1200";D-MVBO;"Odening, Martin";0;"Schlepp DoSi";"SLP Altes Lager";"SLP Altes Lager";"Zur Hilfe bef. Person";"Jeniya (Raimbekova, Yevgeniya)";550;0.0;;1
+29.11.2025;09:10;09:35;"Minimum ";D-MIBY;"Martin Odening";0;VFR;"Altes Lager";"Altes Lager ";"Zur Hilfe befähigte Person";;;0.0;;1
+29.11.2025;12:18;12:31;"Merlin 1200";D-MVBO;"Odening, Martin";0;"Charter VFR";"SLP Altes Lager";"SLP Altes Lager";"Zur Hilfe bef. Person";;;0.0;;1
+22.11.2025;10:04;10:50;"Remos G3";D-MSGP;"Martin Odening";1;Überland;EDCS;"Altes Lager";"Markus Hanisch";;;0.0;;1
+22.11.2025;14:37;14:54;"Remos G3";D-MSGP;"Martin Odening";1;Überland;"Altes Lager";EDCS;"Markus Hanisch";;;0.0;;1
+22.11.2025;13:15;13:30;Solanus;D-MESI;V.Kienöl;0;check;"Altes Lager";"Altes Lager";"Martin Odening";;;0.0;;1
+09.11.2025;14:45;15:10;C42;D-MFUH;"Andreas Fuchs";0;privat;"Altes Lager";EDCS;"Martin Ackermann";;;0.0;;1
+09.11.2025;12:12;12:40;C42;D-MFUH;"	Andreas Fuchs";0;privat;EDCS;"Altes Lager";"Martin Ackermann";;;0.0;;1
+09.11.2025;13:55;14:25;C42;D-MFUH;"Andreas Fuchs";1;privat;"Altes Lager ";"Altes Lager";"Martin Ackermann";;;0.0;;1
+08.11.2025;08:05;08:30;Minimum;D-MIBY;"Martin Odening";0;Platzrunden;"Altes Lager";"Altes Lager";"zur Hilfe befähigte Person";;;0.0;;1
+08.11.2025;14:10;14:35;Minimum;D-MIBY;"Martin Odening";0;VFR;"Altes Lager";"Altes Lager";"Volkmar Kienöl";;;0.0;;1
+07.11.2025;14:11;14:22;"Merlin 1200";D-MVBO;"Odening, Martin";0;"Charter VFR";"SLP Altes Lager";"SLP Altes Lager";"Zur Hilfe bef. Person";;;0.0;;1
+02.11.2025;12:10;12:35;Minimum;D-MIBY;"Martin Odening";0;VFR;"Altes Lager";"Altes Lager";"zur Hilfe befähigte Person";;;0.0;;1
+31.10.2025;09:05;09:56;"Remos G3";D-MSGP;"Martin Odening";1;Überland;EDCS;"Altes Lager";"Martin Ackermann";;;0.0;;1
+31.10.2025;14:00;14:16;"Remos G3";D-MSGP;"Martin Odening";1;Überland;"Altes Lager";EDCS;"Martin Ackermann";;;0.0;;1
+19.10.2025;12:17;12:38;"Remos G3";D-MSGP;"Martin Odening";1;Überland;EDCS;"Altes Lager";"Volkmar Kienöl";;;0.0;;1
+19.10.2025;14:47;15:05;"Remos G3";D-MSGP;"Martin Odening";1;Überland;"Altes Lager";EDCS;"Volkmar Kienöl";;;0.0;;1
+18.10.2025;07:50;08:00;"Aeros 2";D-MUKR;"Martin Odening";0;UL-Schlepp;"Altes Lager";"Altes Lager";"Martin Ackermann";Matthias;500;0.0;;1
+18.10.2025;08:10;08:25;"Aeros 2";D-MUKR;"Martin Odening";0;UL-Schlepp;"Altes Lager";"Altes Lager";"zur Hilfe befähigte Person";"Martin Ackenmann";700;0.0;;1
+18.10.2025;08:55;09:07;"Aeros 2";D-MUKR;"Martin Odening";0;UL-Schlepp;"Altes Lager";"Altes Lager";"Martin Ackermann";Jan;500;0.0;;1
+18.10.2025;09:20;09:30;"Aeros 2";D-MUKR;"Martin Odening";0;UL-Schlepp;"Altes Lager";"Altes Lager";"Martin Ackermann";Matthias;500;0.0;;1
+18.10.2025;12:50;13:01;"Aeros 2";D-MUKR;"Martin Odening";0;UL-Schlepp;"Altes Lager";"Altes Lager";"Martin Ackermann";Matthias;500;0.0;;1
+18.10.2025;13:10;13:25;"Aeros 2";D-MUKR;"Martin Odening";0;UL-Schlepp;"Altes Lager";"Altes Lager";"zur Hilfe befähigte Person";"Martin Ackermann";700;0.0;;1
+18.10.2025;14:05;14:15;"Aeros 2";D-MUKR;"Martin Odening";0;UL-Schlepp;"Altes Lager";"Altes Lager";"Martin Ackermann";Matthias;500;0.0;;1
+18.10.2025;14:30;14:40;"Aeros 2";D-MUKR;"Martin Odening";0;UL-Schlepp;"Altes Lager";"Altes Lager";"Martin Ackermann";Jan;500;0.0;;1
+18.10.2025;14:45;15:02;"Merlin 1200";D-MVBO;"Kienöl, Volkmar";0;"Charter VFR";"SLP Altes Lager";"SLP Altes Lager";"Ackermann, Martin";;;0.0;;1
+18.10.2025;12:07;12:19;"Merlin 1200";D-MVBO;"Odening, Martin";0;Schlepp;"SLP Altes Lager";"SLP Altes Lager";"Ackermann, Martin";"Hanisch, Markus";900;0.0;;1
+18.10.2025;10:40;11:00;"Merlin 1200";D-MVBO;"Odening, Martin";0;"Schlepp FS";"SLP Altes Lager";"SLP Altes Lager";"Zur Hilfe bef. Person";"Ackermann, Martin";1000;0.0;;1
+18.10.2025;09:59;10:20;"Merlin 1200";D-MVBO;"Odening, Martin";0;"Schlepp FS";"SLP Altes Lager";"SLP Altes Lager";"Zur Hilfe bef. Person";"Ackermann, Martin";1000;0.0;;1
+18.10.2025;07:05;07:15;"Aeros 2";D-MUKR;"Martin Odening";0;UL-Schlepp;"Altes Lager";"Altes Lager";"Martin Ackermann";"Jenia Raimbekova";500;0.0;;1
+18.10.2025;07:25;07:40;"Aeros 2";D-MUKR;"Martin Odening";0;UL-Schlepp;"Altes Lager";"Altes Lager";"Martin Ackermann";"Jenia Raimbekova";700;0.0;;1
