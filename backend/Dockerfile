@@ -3,19 +3,22 @@
 # =============================================================
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
+RUN apk add --no-cache bash curl tar gzip
+
 WORKDIR /build
 
-# Maven-Wrapper und POM zuerst kopieren → Dependency-Layer wird gecached,
-# solange sich pom.xml nicht ändert
-COPY mvnw .
-COPY .mvn .mvn
+# Download Maven
+RUN curl -fsSL https://archive.apache.org/dist/maven/maven-3/3.9.7/binaries/apache-maven-3.9.7-bin.tar.gz | tar xz -C /opt && \
+    ln -s /opt/apache-maven-3.9.7/bin/mvn /usr/local/bin/mvn
+
+# POM zuerst kopieren → Dependency-Layer wird gecached
 COPY pom.xml .
 
-RUN ./mvnw dependency:go-offline -B
+RUN mvn dependency:go-offline -B
 
 # Quellcode kopieren und JAR bauen
 COPY src ./src
-RUN ./mvnw clean package -DskipTests -B
+RUN mvn clean package -DskipTests -B
 
 # Layered JAR extrahieren für optimiertes Layer-Caching im Runtime-Image
 RUN java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
