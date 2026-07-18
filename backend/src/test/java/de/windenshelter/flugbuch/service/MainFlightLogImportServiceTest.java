@@ -1,26 +1,26 @@
 package de.windenshelter.flugbuch.service;
 
 import de.windenshelter.flugbuch.model.StagingMainFlightLog;
-import de.windenshelter.flugbuch.model.StagingSchleppbetriebEintrag;
 import de.windenshelter.flugbuch.repository.MainFlightLogStagingRepository;
-import de.windenshelter.flugbuch.repository.SchleppbetriebStagingRepository;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class MainFlightLogImportServiceTest {
 
-    private final MainFlightLogStagingRepository repository = mock(SchleppbetriebStagingRepository.class);
-    private final MainFlightLogImportService service = new SchleppbetriebImportService(repository);
+    private final MainFlightLogStagingRepository repository = mock(MainFlightLogStagingRepository.class);
+    private final MainFlightLogImportService service = new MainFlightLogImportService(repository);
 
     private static final String HEADER =
             "Datum;Startzeit;Landezeit;Muster;Kennzeichen;Pilot;Gäste;Flugart;Startplatz;Zielplatz;Flugleiter;Geschleppter;Schlepphöhe;Betrag;Bemerkung;Fluganzahl";
@@ -31,149 +31,119 @@ class MainFlightLogImportServiceTest {
                 + "16.12.2025;09:30;09:58;\"Minimum \";D-MIBY;\"Martin Odening\";0;VFR;\"Altes Lager\";\"Altes Lager \";\"Zur Hilfe befähigte Person\";;;0.0;;1\n";
         InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
 
-        List<StagingMainFlightLog> result = service.importiereAusStream(stream);
+        List<StagingMainFlightLog> result = service.importFromStream(stream);
 
         assertThat(result).hasSize(1);
-        StagingSchleppbetriebEintrag eintrag = result.get(0);
-        assertThat(eintrag.getExternalId()).isEqualTo(198765);
-        assertThat(eintrag.getVereinId()).isEqualTo(12);
-        assertThat(eintrag.getZeitpunkt()).isEqualTo(LocalDateTime.of(2026, 5, 1, 10, 15));
-        assertThat(eintrag.getPilotNr()).isEqualTo(3421);
-        assertThat(eintrag.getPilot()).isEqualTo("Mustermann, Max");
-        assertThat(eintrag.getWindeName()).isEqualTo("Felix 1");
-        assertThat(eintrag.getStatus()).isEqualTo("PENDING");
+        StagingMainFlightLog eintrag = result.get(0);
+        assertThat(eintrag.getDatum()).isEqualTo(LocalDate.of(2025, 12, 16));
+        assertThat(eintrag.getStartzeit()).isEqualTo(LocalTime.of(9, 30));
+        assertThat(eintrag.getLandezeit()).isEqualTo(LocalTime.of(9, 58));
+        assertThat(eintrag.getMuster()).isEqualTo("Minimum");
+        assertThat(eintrag.getKennzeichen()).isEqualTo("D-MIBY");
+        assertThat(eintrag.getPilot()).isEqualTo("Martin Odening");
+        assertThat(eintrag.getFlugLeiter()).isEqualTo("Zur Hilfe befähigte Person");
+        assertThat(eintrag.getFlugAnzahl()).isEqualTo(1);
     }
 
     @Test
     void importFromStream_ueberspringtHeader() {
         String csv = HEADER + "\n"
-                + "198765;12;01.05.2026 10:15;3421;\"Mustermann, Max\";GS Solo;512;\"Schmidt, Anna\";207;\"Weber, Tom\";Felix 1;\n";
+                + "16.12.2025;09:30;09:58;Minimum;D-MIBY;Pilot;0;VFR;A;B;Leiter;;;0.0;;1\n";
         InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
 
-        List<StagingSchleppbetriebEintrag> result = service.importiereAusStream(stream);
+        List<StagingMainFlightLog> result = service.importFromStream(stream);
 
         assertThat(result).hasSize(1);
     }
 
     @Test
-    void importFromStream_parseDeutschesDatumsformat() {
+    void importFromStream_parseGeschlepptenUndSchlepphoehe() {
         String csv = HEADER + "\n"
-                + "198765;12;15.07.2025 18:42;3421;Pilot;Solo;512;Winde;207;Leiter;Felix 1;\n";
+                + "12.12.2025;13:40;13:50;\"Merlin 1200\";D-MVBO;\"Odening, Martin\";0;\"Schlepp DoSi\";\"SLP Altes Lager\";\"SLP Altes Lager\";\"Kienöl, Volkmar\";\"Jeniya (Raimbekova, Yevgeniya)\";500;0.0;;1\n";
         InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
 
-        List<StagingSchleppbetriebEintrag> result = service.importiereAusStream(stream);
+        List<StagingMainFlightLog> result = service.importFromStream(stream);
 
-        assertThat(result.get(0).getZeitpunkt()).isEqualTo(LocalDateTime.of(2025, 7, 15, 18, 42));
-    }
-
-    @Test
-    void importFromStream_parseQuotedZeitpunkt() {
-        // Echter schleppbetrieb.de-Export setzt das Zeitpunkt-Feld in Anfuehrungszeichen
-        String csv = HEADER + "\n"
-                + "17590;12;\"18.04.2026 14:46\";1057;\"Bernd Mueller\";\"GS Solo\";90;\"Ralf Stein\";498;\"Maja Goetz\";\"Felix 1\";\n";
-        InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
-
-        List<StagingSchleppbetriebEintrag> result = service.importiereAusStream(stream);
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getZeitpunkt()).isEqualTo(LocalDateTime.of(2026, 4, 18, 14, 46));
-        assertThat(result.get(0).getWindeName()).isEqualTo("Felix 1");
+        assertThat(result.get(0).getGeschleppter()).isEqualTo("Jeniya (Raimbekova, Yevgeniya)");
+        assertThat(result.get(0).getSchleppHoehe()).isEqualTo(500);
     }
 
     @Test
     void importFromStream_toleriertUtf8Bom() {
-        // Echter Export beginnt mit UTF-8-BOM (EF BB BF) vor der Kopfzeile
         String csv = "﻿" + HEADER + "\n"
-                + "17590;12;\"18.04.2026 14:46\";1057;\"Bernd Mueller\";\"GS Solo\";90;\"Ralf Stein\";498;\"Maja Goetz\";\"Felix 1\";\n";
+                + "16.12.2025;09:30;09:58;Minimum;D-MIBY;Pilot;0;VFR;A;B;Leiter;;;0.0;;1\n";
         InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
 
-        List<StagingSchleppbetriebEintrag> result = service.importiereAusStream(stream);
+        List<StagingMainFlightLog> result = service.importFromStream(stream);
 
-        // BOM sitzt auf der Kopfzeile, die uebersprungen wird -> Datenzeile bleibt sauber
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getExternalId()).isEqualTo(17590);
+        assertThat(result.get(0).getKennzeichen()).isEqualTo("D-MIBY");
     }
 
     @Test
     void importFromStream_erhaeltUmlauteInNamen() {
         String csv = HEADER + "\n"
-                + "17587;12;\"18.04.2026 14:37\";634;\"Gesa Schütze\";\"GS Solo\";107;\"Uwe Müller\";498;\"Maja Götz\";\"GSW 1\";\n";
+                + "22.11.2025;13:15;13:30;Solanus;D-MESI;V.Kienöl;0;check;\"Altes Lager\";\"Altes Lager\";\"Martin Odening\";;;0.0;;1\n";
         InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
 
-        List<StagingSchleppbetriebEintrag> result = service.importiereAusStream(stream);
+        List<StagingMainFlightLog> result = service.importFromStream(stream);
 
-        assertThat(result.get(0).getPilot()).isEqualTo("Gesa Schütze");
-        assertThat(result.get(0).getWindenfahrer()).isEqualTo("Uwe Müller");
-    }
-
-    @Test
-    void importFromStream_erhaeltInternationaleNamen() {
-        // UTF-8 muss end-to-end erhalten bleiben: arabisch, chinesisch, franzoesisch, kyrillisch
-        String csv = HEADER + "\n"
-                + "1;12;\"01.05.2026 10:00\";1;\"محمد علي\";Solo;2;\"李伟\";3;\"François Léveillé\";Felix 1;\n"
-                + "2;12;\"01.05.2026 10:05\";4;\"Иван Петров\";Solo;2;\"Müller-Œuvre\";3;\"Łukasz Brzęczyszczykiewicz\";Felix 1;\n";
-        InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
-
-        List<StagingSchleppbetriebEintrag> result = service.importiereAusStream(stream);
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getPilot()).isEqualTo("محمد علي");        // Arabisch
-        assertThat(result.get(0).getWindenfahrer()).isEqualTo("李伟");      // Chinesisch
-        assertThat(result.get(0).getStartleiter()).isEqualTo("François Léveillé"); // Franzoesisch
-        assertThat(result.get(1).getPilot()).isEqualTo("Иван Петров");     // Kyrillisch
-        assertThat(result.get(1).getStartleiter()).isEqualTo("Łukasz Brzęczyszczykiewicz");
-    }
-
-    @Test
-    void importiereIdempotent_entferntDuplikateInnerhalbDerEingabe() {
-        // Gleiche external_id zweimal in derselben Eingabe -> nur einmal speichern
-        StagingSchleppbetriebEintrag a = StagingSchleppbetriebEintrag.builder().externalId(42).build();
-        StagingSchleppbetriebEintrag b = StagingSchleppbetriebEintrag.builder().externalId(42).build();
-        when(repository.findExistingExternalIds(List.of(42))).thenReturn(List.of());
-
-        service.importiereIdempotent(List.of(a, b));
-
-        // saveAll wird mit genau einem Eintrag (external_id 42) aufgerufen
-        org.mockito.ArgumentCaptor<List<StagingSchleppbetriebEintrag>> captor =
-                org.mockito.ArgumentCaptor.forClass(List.class);
-        org.mockito.Mockito.verify(repository, org.mockito.Mockito.atLeastOnce()).saveAll(captor.capture());
-        long gesamtGespeichert = captor.getAllValues().stream().mapToLong(List::size).sum();
-        assertThat(gesamtGespeichert).isEqualTo(1);
+        assertThat(result.get(0).getPilot()).isEqualTo("V.Kienöl");
     }
 
     @Test
     void importFromStream_wirftBeiNullStream() {
-        assertThatThrownBy(() -> service.importiereAusStream(null))
+        assertThatThrownBy(() -> service.importFromStream(null))
                 .isInstanceOf(NullPointerException.class);
     }
 
     @Test
-    void importiereIdempotent_speichertNeueEintraege() {
-        StagingSchleppbetriebEintrag neu = StagingSchleppbetriebEintrag.builder()
-                .externalId(198765)
-                .build();
-        when(repository.findExistingExternalIds(List.of(198765))).thenReturn(List.of());
+    void importIdempotent_entferntDuplikateInnerhalbDerEingabe() {
+        // Gleiches Datum+Startzeit+Kennzeichen zweimal in derselben Eingabe -> nur einmal speichern
+        StagingMainFlightLog a = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
+        StagingMainFlightLog b = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
+        when(repository.findByKennzeichenInAndDatumIn(anyCollection(), anyCollection())).thenReturn(List.of());
 
-        service.importiereIdempotent(List.of(neu));
+        service.importIdempotent(List.of(a, b));
+
+        verifyGespeichertCount(1);
+    }
+
+    @Test
+    void importIdempotent_speichertNeuenFlug() {
+        StagingMainFlightLog neu = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
+        when(repository.findByKennzeichenInAndDatumIn(anyCollection(), anyCollection())).thenReturn(List.of());
+
+        service.importIdempotent(List.of(neu));
 
         org.mockito.Mockito.verify(repository).saveAll(List.of(neu));
     }
 
     @Test
-    void importiereIdempotent_ueberspringtBekannteExternalId() {
-        StagingSchleppbetriebEintrag bekannt = StagingSchleppbetriebEintrag.builder()
-                .externalId(198765)
+    void importIdempotent_ueberspringtBekanntenFlug() {
+        StagingMainFlightLog neuerVersuch = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
+        StagingMainFlightLog bereitsGespeichert = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
+        when(repository.findByKennzeichenInAndDatumIn(anyCollection(), anyCollection()))
+                .thenReturn(List.of(bereitsGespeichert));
+
+        service.importIdempotent(List.of(neuerVersuch));
+
+        verifyGespeichertCount(0);
+    }
+
+    private StagingMainFlightLog flug(LocalDate datum, LocalTime startzeit, String kennzeichen) {
+        return StagingMainFlightLog.builder()
+                .datum(datum)
+                .startzeit(startzeit)
+                .kennzeichen(kennzeichen)
                 .build();
-        when(repository.findExistingExternalIds(List.of(198765))).thenReturn(List.of(198765));
+    }
 
-        service.importiereIdempotent(List.of(bekannt));
-
-        // Bekannte external_id wird herausgefiltert -> nichts Neues wird gespeichert.
-        // saveAll darf nur mit leeren Listen aufgerufen worden sein.
-        org.mockito.ArgumentCaptor<List<StagingSchleppbetriebEintrag>> captor =
+    private void verifyGespeichertCount(int expected) {
+        org.mockito.ArgumentCaptor<List<StagingMainFlightLog>> captor =
                 org.mockito.ArgumentCaptor.forClass(List.class);
         org.mockito.Mockito.verify(repository, org.mockito.Mockito.atLeastOnce()).saveAll(captor.capture());
         long gesamtGespeichert = captor.getAllValues().stream().mapToLong(List::size).sum();
-        assertThat(gesamtGespeichert).isEqualTo(0);
+        assertThat(gesamtGespeichert).isEqualTo(expected);
     }
 }

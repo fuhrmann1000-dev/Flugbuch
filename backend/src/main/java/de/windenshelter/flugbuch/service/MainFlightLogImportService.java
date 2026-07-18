@@ -1,8 +1,8 @@
 package de.windenshelter.flugbuch.service;
 
 import de.windenshelter.flugbuch.model.StagingMainFlightLog;
-import de.windenshelter.flugbuch.model.StagingSchleppbetriebEintrag;
 import de.windenshelter.flugbuch.repository.MainFlightLogStagingRepository;
+import de.windenshelter.flugbuch.service.support.ChunkedDeduplicatingSaver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,36 +16,24 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-/**
- * Importiert Tagesprotokolle der digitalen Schleppkladde (schleppbetrieb.de).
- *
- * <p>Der CSV-Export ist {@code ;}-separiert, Felder koennen optional in
- * doppelte Anfuehrungszeichen gefasst sein (noetig wenn ein Feld – etwa der
- * Pilotenname "Nachname, Vorname" – selbst ein Komma enthaelt).</p>
- *
- * <p>{@link #importFromStream(InputStream)} parst nur (keine DB), so dass
- * die Extraktion isoliert testbar bleibt. {@link #importiereIdempotent(List)}
- * persistiert idempotent ueber {@code external_id} – ein erneuter Import
- * derselben Datei erzeugt keine Duplikate.</p>
- */
+import static de.windenshelter.flugbuch.service.support.CsvLineParser.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MainFlightLogImportService {
 
     private static final char DIVIDING_CHARACTER = ';';
-    /** Begrenzt die IN-Liste je Existenzabfrage und die saveAll-Bundles. */
     private static final int CHUNK_SIZE = 1000;
-    private static final DateTimeFormatter DATE_FORMAT =
-            DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private static final DateTimeFormatter  TIME_FORMAT =
-            DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
-    // Spaltenreihenfolge des schleppbetrieb.de-Exports:
-    // Datum;Startzeit;Landezeit;Muster;Kennzeichen;Pilot;Gäste;Flugart;Startplatz;Zielplatz;Flugleiter;Geschleppter;Schlepphöhe;Betrag;Bemerkung;Fluganzahl
     private static final int COLUMN_DATUM = 0;
     private static final int COLUMN_START_ZEIT = 1;
     private static final int COLUMN_LANDE_ZEIT = 2;
@@ -63,7 +51,6 @@ public class MainFlightLogImportService {
     private static final int COLUMN_BEMERKUNG = 14;
     private static final int COLUMN_FLUGANZAHL = 15;
     private static final int COLUMN_MINIMUM = 16;
-
 
     private final MainFlightLogStagingRepository stagingRepository;
 
@@ -91,65 +78,47 @@ public class MainFlightLogImportService {
             }
 
         } catch (IOException e) {
-            log.error("Fehler beim Lesen der Schleppkladde-CSV: {}", e.getMessage());
-            throw new SchleppbetriebImportException("Schleppkladde-CSV konnte nicht gelesen werden", e);
+            log.error("Fehler beim Lesen der Hauptflugbuch-CSV: {}", e.getMessage());
+            throw new SchleppbetriebImportException("Hauptflugbuch-CSV konnte nicht gelesen werden", e);
         }
 
-        log.info("Schleppkladde-Import: {} Datensaetze extrahiert.", resultList.size());
+        log.info("Hauptflugbuch-Import: {} Datensaetze extrahiert.", resultList.size());
         return resultList;
     }
 
-    /**
-     * Persistiert die Eintraege idempotent ueber {@code external_id}.
-     *
-     * <p>Skaliert mit dem Datensatz, indem pro Chunk EINE Existenz-Abfrage
-     * (statt einer je Zeile) ausgefuehrt wird und Neueintraege gebuendelt
-     * gespeichert werden. Duplikate innerhalb derselben Eingabe werden vorab
-     * entfernt (sonst Unique-Verletzung, da der erste Insert in derselben
-     * Transaktion fuer den zweiten noch nicht sichtbar ist).</p>
-     *
-     * <p>Hinweis: Echtes JDBC-Insert-Batching greift erst, wenn die Id-Strategie
-     * nicht {@code IDENTITY} ist (siehe {@link StagingSchleppbetriebEintrag}).
-     * Der wesentliche Engpass beim Re-Import ist aber die Existenzpruefung,
-     * und die ist hier von O(n) Einzelabfragen auf O(n/chunk) reduziert.</p>
-     */
     @Transactional
-    public void importiereIdempotent(List<StagingSchleppbetriebEintrag> eintraege) {
-        // 1. Duplikate innerhalb der Eingabe entfernen (erste Vorkommnis gewinnt),
-        //    Eintraege ohne external_id sind nicht dedupbar -> separat behandeln.
-        Map<Integer, StagingSchleppbetriebEintrag> nachExternalId = new LinkedHashMap<>();
-        List<StagingSchleppbetriebEintrag> ohneExternalId = new ArrayList<>();
-        for (StagingSchleppbetriebEintrag eintrag : eintraege) {
-            if (eintrag.getExternalId() == null) {
-                ohneExternalId.add(eintrag);
-            } else {
-                nachExternalId.putIfAbsent(eintrag.getExternalId(), eintrag);
-            }
+    public void importIdempotent(List<StagingMainFlightLog> eintraege) {
+        ChunkedDeduplicatingSaver<StagingMainFlightLog, NaturalKey> saver =
+                new ChunkedDeduplicatingSaver<>(CHUNK_SIZE, NaturalKey::of, this::sucheBekannteSchluessel);
+
+        var ergebnis = saver.speichereIdempotent(eintraege, stagingRepository::saveAll);
+
+        log.info("Hauptflugbuch-Import idempotent: {} gespeichert, {} bereits bekannt/dupliziert.",
+                ergebnis.gespeichert(), ergebnis.uebersprungen());
+    }
+
+    private Set<NaturalKey> sucheBekannteSchluessel(List<StagingMainFlightLog> chunk) {
+        Set<String> kennzeichenSet = chunk.stream()
+                .map(StagingMainFlightLog::getKennzeichen)
+                .collect(Collectors.toSet());
+        Set<LocalDate> datumSet = chunk.stream()
+                .map(StagingMainFlightLog::getDatum)
+                .collect(Collectors.toSet());
+
+        return stagingRepository.findByKennzeichenInAndDatumIn(kennzeichenSet, datumSet).stream()
+                .map(NaturalKey::of)
+                .collect(Collectors.toSet());
+    }
+
+    /** Natuerlicher Schluessel fuer Duplikaterkennung, da die CSV keine externalId liefert. */
+    private record NaturalKey(LocalDate datum, LocalTime startzeit, String kennzeichen) {
+        static NaturalKey of(StagingMainFlightLog eintrag) {
+            return new NaturalKey(eintrag.getDatum(), eintrag.getStartzeit(), eintrag.getKennzeichen());
         }
-
-        int gespeichert = 0;
-        int uebersprungen = eintraege.size() - nachExternalId.size() - ohneExternalId.size();
-
-        // 2. In Chunks verarbeiten: pro Chunk eine IN-Abfrage + ein saveAll.
-        List<StagingSchleppbetriebEintrag> eindeutige = new ArrayList<>(nachExternalId.values());
-        for (int start = 0; start < eindeutige.size(); start += CHUNK_SIZE) {
-            List<StagingSchleppbetriebEintrag> chunk =
-                    eindeutige.subList(start, Math.min(start + CHUNK_SIZE, eindeutige.size()));
-
-            List<Integer> ids = chunk.stream()
-                    .map(StagingSchleppbetriebEintrag::getExternalId)
-                    .toList();
-        }
-
-        // Eintraege ohne external_id sind nicht dedupbar -> immer speichern.
-        gespeichert += ohneExternalId.size();
-
-        log.info("Schleppkladde-Import idempotent: {} gespeichert, {} bereits bekannt/dupliziert.",
-                gespeichert, uebersprungen);
     }
 
     private StagingMainFlightLog processedRow(String zeile, int zeilennummer) {
-        List<String> felder = teileZeile(zeile);
+        List<String> felder = splitLine(zeile, DIVIDING_CHARACTER);
         if (felder.size() < COLUMN_MINIMUM) {
             throw new SchleppbetriebImportException(String.format(
                     "Zeile %d hat %d Spalten, erwartet werden mindestens %d.",
@@ -157,120 +126,22 @@ public class MainFlightLogImportService {
         }
 
         return StagingMainFlightLog.builder()
-                .datum(fieldToDate(feld(felder, COLUMN_DATUM),zeilennummer))
-                .startzeit(fieldToTime(feld(felder, COLUMN_START_ZEIT), zeilennummer))
-                .landezeit(fieldToTime(feld(felder, COLUMN_LANDE_ZEIT), zeilennummer))
-                .muster(feld(felder, COLUMN_MUSTER))
-                .kennzeichen(feld(felder, COLUMN_KENNZEICHEN))
-                .pilot(feld(felder, COLUMN_PILOT))
-                .gaeste(fieldToInteger(felder, COLUMN_GAESTE, zeilennummer))
-                .flugart(feld(felder, COLUMN_FLUGART))
-                .startPlatz(feld (felder, COLUMN_START_PLATZ))
-                .zielPlatz(feld(felder, COLUMN_ZIEL_PLATZ))
-                .flugLeiter(feld(felder, COLUMN_FLUG_LEITER))
-                .geschleppter(feld(felder, COLUMN_GESCHLEPPTER))
-                .schleppHoehe(fieldToInteger(felder, COLUMN_SCHLEPPHOEHE, zeilennummer))
-                .betrag(fieldToDouble(felder, COLUMN_BETRAG, zeilennummer))
-                .bemerkung(feld(felder, COLUMN_BEMERKUNG))
-                .flugAnzahl(fieldToInteger(felder, COLUMN_FLUGANZAHL, zeilennummer)).build();
-
-    }
-
-    /**
-     * Zerlegt eine CSV-Zeile entlang {@link #DIVIDING_CHARACTER}. Felder in doppelten
-     * Anfuehrungszeichen behalten enthaltene Trennzeichen; ein doppeltes
-     * {@code ""} innerhalb eines Feldes wird als literales {@code "} gelesen.
-     */
-    private List<String> teileZeile(String zeile) {
-        List<String> felder = new ArrayList<>();
-        StringBuilder aktuell = new StringBuilder();
-        boolean inAnfuehrung = false;
-
-        for (int i = 0; i < zeile.length(); i++) {
-            char c = zeile.charAt(i);
-            if (inAnfuehrung) {
-                if (c == '"') {
-                    if (i + 1 < zeile.length() && zeile.charAt(i + 1) == '"') {
-                        aktuell.append('"');
-                        i++;
-                    } else {
-                        inAnfuehrung = false;
-                    }
-                } else {
-                    aktuell.append(c);
-                }
-            } else if (c == '"') {
-                inAnfuehrung = true;
-            } else if (c == DIVIDING_CHARACTER) {
-                felder.add(aktuell.toString());
-                aktuell.setLength(0);
-            } else {
-                aktuell.append(c);
-            }
-        }
-        felder.add(aktuell.toString());
-        return felder;
-    }
-
-    private String feld(List<String> felder, int index) {
-        if (index >= felder.size()) {
-            return null;
-        }
-        String wert = felder.get(index).trim();
-        return wert.isEmpty() ? null : wert;
-    }
-
-    private Integer fieldToInteger(List<String> felder, int index, int zeilennummer) {
-        String wert = feld(felder, index);
-        if (wert == null) {
-            return null;
-        }
-        try {
-            return Integer.valueOf(wert);
-        } catch (NumberFormatException e) {
-            throw new SchleppbetriebImportException(String.format(
-                    "Zeile %d, Spalte %d: '%s' ist keine gueltige Ganzzahl.",
-                    zeilennummer, index, wert), e);
-        }
-    }
-
-    private Double fieldToDouble(List<String> felder, int index, int zeilennummer) {
-        String wert = feld(felder, index);
-        if (wert == null) {
-            return null;
-        }
-        try {
-            return Double.valueOf(wert);
-        } catch (NumberFormatException e) {
-            throw new SchleppbetriebImportException(String.format(
-                    "Zeile %d, Spalte %d: '%s' ist keine gueltige Ganzzahl.",
-                    zeilennummer, index, wert), e);
-        }
-    }
-
-    private LocalDate fieldToDate (String wert, int zeilennummer) {
-        if (wert == null) {
-            return null;
-        }
-        try {
-            return LocalDate.parse(wert, DATE_FORMAT);
-        } catch (DateTimeParseException e) {
-            throw new SchleppbetriebImportException(String.format(
-                    "Row %d: '%s' is not a valid a date (expected dd.MM.yyyy).",
-                    zeilennummer, wert), e);
-        }
-    }
-
-    private LocalTime fieldToTime (String wert, int zeilennummer) {
-        if (wert == null) {
-            return null;
-        }
-        try {
-            return LocalTime.parse(wert, TIME_FORMAT);
-        } catch (DateTimeParseException e) {
-            throw new SchleppbetriebImportException(String.format(
-                    "Row %d: '%s' is not a valid a date (expected HH:mm).",
-                    zeilennummer, wert), e);
-        }
+                .datum(parseDate(field(felder, COLUMN_DATUM), DATE_FORMAT, zeilennummer))
+                .startzeit(parseTime(field(felder, COLUMN_START_ZEIT), TIME_FORMAT, zeilennummer))
+                .landezeit(parseTime(field(felder, COLUMN_LANDE_ZEIT), TIME_FORMAT, zeilennummer))
+                .muster(field(felder, COLUMN_MUSTER))
+                .kennzeichen(field(felder, COLUMN_KENNZEICHEN))
+                .pilot(field(felder, COLUMN_PILOT))
+                .gaeste(parseInteger(felder, COLUMN_GAESTE, zeilennummer))
+                .flugart(field(felder, COLUMN_FLUGART))
+                .startPlatz(field(felder, COLUMN_START_PLATZ))
+                .zielPlatz(field(felder, COLUMN_ZIEL_PLATZ))
+                .flugLeiter(field(felder, COLUMN_FLUG_LEITER))
+                .geschleppter(field(felder, COLUMN_GESCHLEPPTER))
+                .schleppHoehe(parseInteger(felder, COLUMN_SCHLEPPHOEHE, zeilennummer))
+                .betrag(parseDouble(felder, COLUMN_BETRAG, zeilennummer))
+                .bemerkung(field(felder, COLUMN_BEMERKUNG))
+                .flugAnzahl(parseInteger(felder, COLUMN_FLUGANZAHL, zeilennummer))
+                .build();
     }
 }
