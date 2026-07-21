@@ -12,7 +12,7 @@ services:
       MYSQL_USER: flugbuch_user
       MYSQL_PASSWORD: flugbuch_password
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
     networks:
