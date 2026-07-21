@@ -11,6 +11,12 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uflugbuch_user", "-pflugbuch_password"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
 
   flugbuch-app:
     build: .
@@ -18,11 +24,13 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - flugbuch-db
+      flugbuch-db:
+        condition: service_healthy
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://flugbuch-db:3306/flugbuch?allowPublicKeyRetrieval=true&useSSL=false
       - SPRING_DATASOURCE_USERNAME=flugbuch_user
       - SPRING_DATASOURCE_PASSWORD=flugbuch_password
+      - SPRING_DATASOURCE_DRIVER=com.mysql.cj.jdbc.Driver
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     volumes:
       - ./import-daten:/app/import
