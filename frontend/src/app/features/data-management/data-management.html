@@ -1,0 +1,147 @@
+<div class="dm-page">
+
+    <div class="dm-header">
+        <div>
+            <nav class="dm-breadcrumb"><span>Dashboard</span><span class="sep">›</span><span
+                    class="active">Datenverwaltung</span></nav>
+            <h1 class="dm-title">DATENVERWALTUNG</h1>
+        </div>
+    </div>
+
+    <div class="dm-grid">
+
+        <!-- ── IMPORT ─────────────────────────────────────────── -->
+        <div class="dm-card">
+            <div class="dm-card-header">
+                <span class="dm-card-icon">↓</span>
+                <span class="dm-card-title">Daten importieren</span>
+            </div>
+            <div class="dm-card-body">
+
+                <!-- Mode Switch -->
+                <div class="dm-tabs">
+                    <button class="dm-tab" [class.active]="importMode === 'csv'"
+                        (click)="importMode = 'csv'">CSV-Datei</button>
+                    <button class="dm-tab" [class.active]="importMode === 'backup'"
+                        (click)="importMode = 'backup'">Backup (.json)</button>
+                </div>
+
+                <!-- Drop Zone -->
+                <div class="dm-dropzone">
+                    <span class="dm-drop-icon">📂</span>
+                    <p class="dm-drop-text">
+                        Datei hier ablegen oder
+                        <label class="dm-drop-link">
+                            durchsuchen
+                            <input type="file" [accept]="importMode === 'csv' ? '.csv' : '.json'"
+                                (change)="onFileSelect($event)" style="display:none" />
+                        </label>
+                    </p>
+                    <p class="dm-drop-sub">{{ importMode === 'csv' ? 'CSV-Dateien bis 10 MB' : 'JSON-Backup-Dateien' }}
+                    </p>
+                    @if (importFile) {
+                    <div class="dm-file-chip">📄 {{ importFile.name }}</div>
+                    }
+                </div>
+
+                <!-- Preview -->
+                @if (importPreview().length > 0) {
+                <div class="dm-preview">
+                    <p class="dm-preview-title">Vorschau (erste 3 Zeilen)</p>
+                    <div class="dm-preview-scroll">
+                        <table class="dm-preview-table">
+                            <thead>
+                                <tr>
+                                    <th>Datum</th>
+                                    <th>Start</th>
+                                    <th>Land.</th>
+                                    <th>Reg</th>
+                                    <th>Muster</th>
+                                    <th>Pilot</th>
+                                    <th>Flugart</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of importPreview(); track $index) {
+                                <tr>@for (cell of row; track $index) { <td>{{ cell }}</td> }</tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                }
+
+                @if (importSuccess()) {
+                <div class="dm-banner dm-success">✓ {{ importPreview().length }} Einträge erfolgreich importiert.</div>
+                }
+
+                <button class="btn btn-primary" [disabled]="!importFile || importLoading()" (click)="startImport()">
+                    @if (importLoading()) { <span class="dm-spinner"></span> Importieren… }
+                    @else { ↓ Import starten }
+                </button>
+            </div>
+        </div>
+
+        <!-- ── EXPORT ─────────────────────────────────────────── -->
+        <div class="dm-card">
+            <div class="dm-card-header">
+                <span class="dm-card-icon">↑</span>
+                <span class="dm-card-title">Daten exportieren</span>
+            </div>
+            <div class="dm-card-body">
+
+                <div class="fe-field">
+                    <label class="fe-label">Format</label>
+                    <select class="fe-input fe-select" [(ngModel)]="exportFormat" name="fmt">
+                        <option value="csv">CSV (Excel-kompatibel)</option>
+                        <option value="pdf">PDF Flugbuch</option>
+                    </select>
+                </div>
+
+                <div class="fe-field">
+                    <label class="fe-label">Zeitraum</label>
+                    <select class="fe-input fe-select" [(ngModel)]="exportRange" name="rng">
+                        <option value="all">Alle Einträge</option>
+                        <option value="year">Aktuelles Jahr</option>
+                        <option value="month">Aktueller Monat</option>
+                    </select>
+                </div>
+
+                <div class="dm-export-info">
+                    <div class="dm-info-row"><span>Gesamteinträge</span><span class="mono">174</span></div>
+                    <div class="dm-info-row"><span>Letzte Aktualisierung</span><span class="mono">01.05.2026</span>
+                    </div>
+                    <div class="dm-info-row"><span>Geschätzte Dateigröße</span><span class="mono">{{ exportFormat ===
+                            'pdf' ? '~2.4 MB' : '~48 KB' }}</span></div>
+                </div>
+
+                @if (exportSuccess()) {
+                <div class="dm-banner dm-success">✓ Export erfolgreich. Download startet…</div>
+                }
+
+                <button class="btn btn-primary" [disabled]="exportLoading()" (click)="startExport()">
+                    @if (exportLoading()) { <span class="dm-spinner"></span> Exportieren… }
+                    @else { ↑ {{ exportFormat.toUpperCase() }} exportieren }
+                </button>
+            </div>
+        </div>
+
+        <!-- ── BACKUP ─────────────────────────────────────────── -->
+        <div class="dm-card dm-card-full">
+            <div class="dm-card-header">
+                <span class="dm-card-icon">💾</span>
+                <span class="dm-card-title">Datenbank-Backup</span>
+            </div>
+            <div class="dm-card-body dm-backup-body">
+                <div class="dm-backup-info">
+                    <p class="dm-backup-text">Erstelle eine vollständige Sicherung aller Flugbuchdaten als JSON-Datei.
+                        Backups enthalten alle Flüge, Piloten und Einstellungen.</p>
+                    <div class="dm-info-row"><span>Letztes Backup</span><span class="mono">2026-05-01 — 12:34 Uhr</span>
+                    </div>
+                </div>
+                <button class="btn btn-ghost">💾 Backup jetzt erstellen</button>
+            </div>
+        </div>
+
+    </div>
+</div>

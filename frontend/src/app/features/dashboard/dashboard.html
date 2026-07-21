@@ -1,0 +1,108 @@
+<div class="dash-page">
+
+    <!-- Header -->
+    <div class="dash-header">
+        <div>
+            <p class="dash-greeting">Guten Morgen, Pilot ✈</p>
+            <h1 class="dash-title">Dashboard</h1>
+        </div>
+        <a routerLink="/flights/new" class="btn btn-primary">＋ Neuer Flugeintrag</a>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="dash-stats">
+        @for (stat of stats; track stat.label) {
+        <div class="stat-card">
+            <div class="stat-icon">{{ stat.icon }}</div>
+            <div class="stat-body">
+                <div class="stat-value">{{ stat.value }}</div>
+                <div class="stat-label">{{ stat.label }}</div>
+                <div class="stat-sub">{{ stat.sub }}</div>
+            </div>
+            @if (stat.trend) {
+            <div class="stat-trend" [class.up]="stat.trendUp">
+                {{ stat.trendUp ? '↑' : '↓' }} {{ stat.trend }}
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="dash-main">
+
+        <!-- Bar Chart -->
+        <div class="dash-card dash-chart-card">
+            <div class="dash-card-header">
+                <span class="dash-card-title">Flugstunden pro Monat</span>
+                <span class="dash-card-sub">2026</span>
+            </div>
+            <div class="dash-chart">
+                @for (h of monthlyHours; track $index) {
+                <div class="bar-col">
+                    <div class="bar-wrap">
+                        <div class="bar-fill" [style.height.%]="(h / maxHours) * 100" [class.bar-active]="$index === 4">
+                            <span class="bar-tooltip">{{ h }}h</span>
+                        </div>
+                    </div>
+                    <span class="bar-label">{{ months[$index] }}</span>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dash-card dash-quick-card">
+            <div class="dash-card-header">
+                <span class="dash-card-title">Schnellzugriff</span>
+            </div>
+            <div class="dash-quick-list">
+                <a routerLink="/flights/new" class="quick-item"><span class="qi-icon">✈</span><span>Neuer
+                        Flugeintrag</span><span class="qi-arrow">›</span></a>
+                <a routerLink="/flights" class="quick-item"><span class="qi-icon">📋</span><span>Flugbuch
+                        öffnen</span><span class="qi-arrow">›</span></a>
+                <a routerLink="/pilots" class="quick-item"><span class="qi-icon">👤</span><span>Piloten
+                        verwalten</span><span class="qi-arrow">›</span></a>
+                <a routerLink="/data/import" class="quick-item"><span class="qi-icon">↓</span><span>Daten
+                        importieren</span><span class="qi-arrow">›</span></a>
+                <a routerLink="/data/export" class="quick-item"><span class="qi-icon">↑</span><span>Daten
+                        exportieren</span><span class="qi-arrow">›</span></a>
+                <a routerLink="/profile" class="quick-item"><span class="qi-icon">⚙</span><span>Profil
+                        bearbeiten</span><span class="qi-arrow">›</span></a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Recent Flights -->
+    <div class="dash-card">
+        <div class="dash-card-header">
+            <span class="dash-card-title">Letzte Flüge</span>
+            <a routerLink="/flights" class="dash-card-link">Alle anzeigen →</a>
+        </div>
+        <div class="dash-table-scroll">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Kennzeichen</th>
+                        <th>Pilot</th>
+                        <th>Flugart</th>
+                        <th>Dauer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (f of recentFlights; track $index) {
+                    <tr>
+                        <td class="mono">{{ f.date }}</td>
+                        <td class="mono accent">{{ f.reg }}</td>
+                        <td>{{ f.pilot }}</td>
+                        <td><span class="fl-badge" [ngClass]="f.typeClass">{{ f.type }}</span></td>
+                        <td class="mono">{{ f.duration }}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

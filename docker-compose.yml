@@ -1,22 +1,22 @@
 services:
-  # ─────────────────────────────────────────────
+  # ────────────────────────────────────────────
   #  Datenbank
   # ─────────────────────────────────────────────
-  db:
-    image: mysql:8.4
-    container_name: flugbuch-db
+  flugbuch-db:
+    image: mysql:8.0
+    container_name: flugbuch_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-flugbuch}
-      MYSQL_USER: ${MYSQL_USER:-flugbuch}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-flugbuch}
+      MYSQL_DATABASE: flugbuch
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: flugbuch_user
+      MYSQL_PASSWORD: flugbuch_password
+    ports:
+      - "3307:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
     networks:
       - backend
-    ports:
-      - "${DB_PORT:-3306}:3306"
     healthcheck:
       test:
         [
@@ -24,14 +24,13 @@ services:
           "mysqladmin",
           "ping",
           "-h",
-          "localhost",
-          "-u",
-          "${MYSQL_USER:-flugbuch}",
-          "--password=${MYSQL_PASSWORD:-flugbuch}",
+          "127.0.0.1",
+          "-uflugbuch_user",
+          "-pflugbuch_password",
         ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      interval: 5s
+      timeout: 3s
+      retries: 30
       start_period: 30s
 
   # ─────────────────────────────────────────────
@@ -39,62 +38,63 @@ services:
   # ─────────────────────────────────────────────
   phpmyadmin:
     image: phpmyadmin:5
-    container_name: flugbuch-phpmyadmin
+    container_name: flugbuch_phpmyadmin
     restart: unless-stopped
     depends_on:
-      db:
+      flugbuch-db:
         condition: service_healthy
     environment:
-      PMA_HOST: db
+      PMA_HOST: flugbuch-db
       PMA_PORT: 3306
-      PMA_USER: ${MYSQL_USER:-flugbuch}
-      PMA_PASSWORD: ${MYSQL_PASSWORD:-flugbuch}
+      PMA_USER: flugbuch_user
+      PMA_PASSWORD: flugbuch_password
       UPLOAD_LIMIT: 64M
+    ports:
+      - "8081:80"
     networks:
       - backend
-    ports:
-      - "${PMA_PORT:-8081}:80"
 
   # ─────────────────────────────────────────────
   #  Backend (Spring Boot)
-  # ─────────────────────────────────────────────
-  backend:
+  # ────────────────────────────────────────────
+  flugbuch-backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: flugbuch-backend
+    container_name: flugbuch_backend
     restart: unless-stopped
     depends_on:
-      db:
+      flugbuch-db:
         condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-dev}
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-flugbuch}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Berlin
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-flugbuch}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-flugbuch}
-      JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx512m}
+      SPRING_DATASOURCE_URL: jdbc:mysql://flugbuch-db:3306/flugbuch?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: flugbuch_user
+      SPRING_DATASOURCE_PASSWORD: flugbuch_password
+      SPRING_DATASOURCE_DRIVER: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    volumes:
+      - ./backend/import-daten:/app/import
+    ports:
+      - "8080:8080"
     networks:
       - backend
       - frontend
-    expose:
-      - "8080"
 
   # ─────────────────────────────────────────────
-  #  Frontend (Angular) – Profil: frontend
-  #  Wird nur gestartet, wenn das Frontend existiert
+  #  Frontend (Angular) – erst aktiv mit Profil
   # ─────────────────────────────────────────────
-  frontend:
+  flugbuch-frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: flugbuch-frontend
+    container_name: flugbuch_frontend
     restart: unless-stopped
     depends_on:
-      - backend
+      - flugbuch-backend
+    ports:
+      - "4200:80"
     networks:
       - frontend
-    expose:
-      - "80"
     profiles:
       - frontend
 
@@ -105,5 +105,5 @@ networks:
     driver: bridge
 
 volumes:
-  mysql_data:
+  db_data:
     driver: local

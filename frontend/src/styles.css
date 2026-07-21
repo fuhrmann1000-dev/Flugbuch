@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+/* Erzwinge das Scannen der HTML- und TS-Dateien */
+@source "../src/app/**/*.html";
+@source "../src/app/**/*.ts";
+
+@theme {
+    --color-logbook-dark: #0a1118;
+}
+
+/* Basis-Styling für den Hintergrund */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at 50% 50%, #203c7a 0%, #08101f 100%);
+    color: #e2e8f0;
+}
