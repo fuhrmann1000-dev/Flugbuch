@@ -1,13 +1,5 @@
 package de.windenshelter.flugbuch.service;
 
-import de.windenshelter.flugbuch.model.StagingMainFlightLog;
-import de.windenshelter.flugbuch.repository.MainFlightLogStagingRepository;
-import de.windenshelter.flugbuch.service.support.ChunkedDeduplicatingSaver;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +14,20 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static de.windenshelter.flugbuch.service.support.CsvLineParser.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import de.windenshelter.flugbuch.model.StagingMainFlightLog;
+import de.windenshelter.flugbuch.repository.MainFlightLogStagingRepository;
+import de.windenshelter.flugbuch.service.support.ChunkedDeduplicatingSaver;
+import static de.windenshelter.flugbuch.service.support.CsvLineParser.field;
+import static de.windenshelter.flugbuch.service.support.CsvLineParser.parseDate;
+import static de.windenshelter.flugbuch.service.support.CsvLineParser.parseDouble;
+import static de.windenshelter.flugbuch.service.support.CsvLineParser.parseInteger;
+import static de.windenshelter.flugbuch.service.support.CsvLineParser.parseTime;
+import static de.windenshelter.flugbuch.service.support.CsvLineParser.splitLine;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
