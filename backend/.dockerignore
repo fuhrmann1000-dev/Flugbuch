@@ -2,5 +2,4 @@ target/
 .idea/
 .vscode/
 *.iml
-META-INF/
 *.log

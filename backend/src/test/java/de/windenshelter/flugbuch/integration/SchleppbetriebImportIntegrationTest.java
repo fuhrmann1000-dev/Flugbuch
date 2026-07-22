@@ -32,8 +32,8 @@ class SchleppbetriebImportIntegrationTest {
         InputStream csv = getClass().getClassLoader()
                 .getResourceAsStream("test-windenkladde.csv");
 
-        List<StagingSchleppbetriebEintrag> extrahiert = schleppbetriebImportService.importiereAusStream(csv);
-        schleppbetriebImportService.importiereIdempotent(extrahiert);
+        List<StagingSchleppbetriebEintrag> extrahiert = schleppbetriebImportService.importFromStream(csv);
+        schleppbetriebImportService.importIdempotent(extrahiert);
 
         long anzahl = stagingRepository.count();
         assertThat(anzahl).isEqualTo(3);
@@ -46,11 +46,11 @@ class SchleppbetriebImportIntegrationTest {
     void wiederholterImport_erzeugtKeineDuplikate() {
         InputStream csv1 = getClass().getClassLoader()
                 .getResourceAsStream("test-windenkladde.csv");
-        schleppbetriebImportService.importiereIdempotent(schleppbetriebImportService.importiereAusStream(csv1));
+        schleppbetriebImportService.importIdempotent(schleppbetriebImportService.importFromStream(csv1));
 
         InputStream csv2 = getClass().getClassLoader()
                 .getResourceAsStream("test-windenkladde.csv");
-        schleppbetriebImportService.importiereIdempotent(schleppbetriebImportService.importiereAusStream(csv2));
+        schleppbetriebImportService.importIdempotent(schleppbetriebImportService.importFromStream(csv2));
 
         assertThat(stagingRepository.count()).isEqualTo(3);
     }
@@ -63,7 +63,7 @@ class SchleppbetriebImportIntegrationTest {
      */
     @Test
     void importiertGrossenEchtExportUndIstIdempotent() {
-        List<StagingSchleppbetriebEintrag> extrahiert = schleppbetriebImportService.importiereAusStream(
+        List<StagingSchleppbetriebEintrag> extrahiert = schleppbetriebImportService.importFromStream(
                 getClass().getClassLoader().getResourceAsStream("anonymized-export-sample.csv"));
 
         assertThat(extrahiert).hasSize(3409);
@@ -73,11 +73,11 @@ class SchleppbetriebImportIntegrationTest {
             assertThat(e.getStatus()).isEqualTo("PENDING");
         });
 
-        schleppbetriebImportService.importiereIdempotent(extrahiert);
+        schleppbetriebImportService.importIdempotent(extrahiert);
         assertThat(stagingRepository.count()).isEqualTo(3409);
 
         // Zweiter Durchlauf darf keine Duplikate erzeugen (existsByExternalId)
-        schleppbetriebImportService.importiereIdempotent(schleppbetriebImportService.importiereAusStream(
+        schleppbetriebImportService.importIdempotent(schleppbetriebImportService.importFromStream(
                 getClass().getClassLoader().getResourceAsStream("anonymized-export-sample.csv")));
         assertThat(stagingRepository.count()).isEqualTo(3409);
     }
@@ -89,20 +89,20 @@ class SchleppbetriebImportIntegrationTest {
      */
     @Test
     void teilmengeUndPermutation_bleibtIdempotent() {
-        List<StagingSchleppbetriebEintrag> alle = schleppbetriebImportService.importiereAusStream(
+        List<StagingSchleppbetriebEintrag> alle = schleppbetriebImportService.importFromStream(
                 getClass().getClassLoader().getResourceAsStream("anonymized-export-sample.csv"));
         assertThat(alle).hasSize(3409);
 
         // 1. Nur die erste Haelfte importieren
         List<StagingSchleppbetriebEintrag> ersteHaelfte = new ArrayList<>(alle.subList(0, 1700));
-        schleppbetriebImportService.importiereIdempotent(ersteHaelfte);
+        schleppbetriebImportService.importIdempotent(ersteHaelfte);
         assertThat(stagingRepository.count()).isEqualTo(1700);
 
         // 2. Gesamten Datensatz in zufaelliger Reihenfolge nachimportieren
-        List<StagingSchleppbetriebEintrag> permutiert = schleppbetriebImportService.importiereAusStream(
+        List<StagingSchleppbetriebEintrag> permutiert = schleppbetriebImportService.importFromStream(
                 getClass().getClassLoader().getResourceAsStream("anonymized-export-sample.csv"));
         Collections.shuffle(permutiert, new Random(42));
-        schleppbetriebImportService.importiereIdempotent(permutiert);
+        schleppbetriebImportService.importIdempotent(permutiert);
 
         // Genau die volle Menge, keine Duplikate trotz Ueberlappung + Permutation
         assertThat(stagingRepository.count()).isEqualTo(3409);
