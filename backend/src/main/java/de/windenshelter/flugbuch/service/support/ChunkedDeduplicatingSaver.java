@@ -9,10 +9,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Kapselt das wiederkehrende Muster "dedupliziere gegen einen Schluessel,
- * verarbeite in Chunks, frage vorhandene Schluessel ab, speichere nur Neues".
- * K ist generisch, damit sowohl externalId (Integer) als auch ein
- * natuerlicher Schluessel (z.B. Datum+Startzeit+Kennzeichen) passen.
+ * Encapsulates the recurring pattern "deduplicate against a key,
+ * process in chunks, query existing keys, save only new items".
+ * K is generic so that both externalId (integer) and a natural key
+ * (e.g., date + start time + identifier) fit.
  */
 public final class ChunkedDeduplicatingSaver<T, K> {
 
@@ -27,32 +27,32 @@ public final class ChunkedDeduplicatingSaver<T, K> {
         this.existingKeysLookup = existingKeysLookup;
     }
 
-    public record Ergebnis(int gespeichert, int uebersprungen) {
+    public record Result(int stored, int skipped) {
     }
 
-    public Ergebnis speichereIdempotent(List<T> eintraege, Consumer<List<T>> saveAll) {
-        Map<K, T> eindeutigeNachSchluessel = new LinkedHashMap<>();
-        for (T eintrag : eintraege) {
-            eindeutigeNachSchluessel.putIfAbsent(keyExtractor.apply(eintrag), eintrag);
+    public Result saveIdempotent(List<T> entries, Consumer<List<T>> saveAll) {
+        Map<K, T> uniqueByKey = new LinkedHashMap<>();
+        for (T entry : entries) {
+            uniqueByKey.putIfAbsent(keyExtractor.apply(entry), entry);
         }
 
-        int gespeichert = 0;
-        int uebersprungen = eintraege.size() - eindeutigeNachSchluessel.size();
+        int saved = 0;
+        int skipped = entries.size() - uniqueByKey.size();
 
-        List<T> eindeutige = new ArrayList<>(eindeutigeNachSchluessel.values());
-        for (int start = 0; start < eindeutige.size(); start += chunkSize) {
-            List<T> chunk = eindeutige.subList(start, Math.min(start + chunkSize, eindeutige.size()));
+        List<T> unique = new ArrayList<>(uniqueByKey.values());
+        for (int start = 0; start < unique.size(); start += chunkSize) {
+            List<T> chunk = unique.subList(start, Math.min(start + chunkSize, unique.size()));
 
-            Set<K> bekannt = existingKeysLookup.apply(chunk);
-            List<T> neu = chunk.stream()
-                    .filter(e -> !bekannt.contains(keyExtractor.apply(e)))
+            Set<K> known = existingKeysLookup.apply(chunk);
+            List<T> newList = chunk.stream()
+                    .filter(e -> !known.contains(keyExtractor.apply(e)))
                     .toList();
 
-            saveAll.accept(neu);
-            gespeichert += neu.size();
-            uebersprungen += chunk.size() - neu.size();
+            saveAll.accept(newList);
+            saved += newList.size();
+            skipped += chunk.size() - newList.size();
         }
 
-        return new Ergebnis(gespeichert, uebersprungen);
+        return new Result(saved, skipped);
     }
 }

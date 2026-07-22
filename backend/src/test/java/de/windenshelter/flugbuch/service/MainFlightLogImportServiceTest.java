@@ -102,7 +102,7 @@ class MainFlightLogImportServiceTest {
         // Gleiches Datum+Startzeit+Kennzeichen zweimal in derselben Eingabe -> nur einmal speichern
         StagingMainFlightLog a = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
         StagingMainFlightLog b = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
-        when(repository.findByKennzeichenInAndDatumIn(anyCollection(), anyCollection())).thenReturn(List.of());
+        when(repository.findByLicensePlateInAndDateIn(anyCollection(), anyCollection())).thenReturn(List.of());
 
         service.importIdempotent(List.of(a, b));
 
@@ -112,7 +112,7 @@ class MainFlightLogImportServiceTest {
     @Test
     void importIdempotent_speichertNeuenFlug() {
         StagingMainFlightLog neu = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
-        when(repository.findByKennzeichenInAndDatumIn(anyCollection(), anyCollection())).thenReturn(List.of());
+        when(repository.findByLicensePlateInAndDateIn(anyCollection(), anyCollection())).thenReturn(List.of());
 
         service.importIdempotent(List.of(neu));
 
@@ -123,7 +123,7 @@ class MainFlightLogImportServiceTest {
     void importIdempotent_ueberspringtBekanntenFlug() {
         StagingMainFlightLog neuerVersuch = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
         StagingMainFlightLog bereitsGespeichert = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
-        when(repository.findByKennzeichenInAndDatumIn(anyCollection(), anyCollection()))
+        when(repository.findByLicensePlateInAndDateIn(anyCollection(), anyCollection()))
                 .thenReturn(List.of(bereitsGespeichert));
 
         service.importIdempotent(List.of(neuerVersuch));

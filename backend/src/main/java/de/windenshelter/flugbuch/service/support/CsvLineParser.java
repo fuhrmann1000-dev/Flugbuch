@@ -12,106 +12,106 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 /**
- * Gemeinsame Parsing-Logik fuer die schleppbetrieb.de-CSV-Exporte
- * (Schleppkladde und Hauptflugbuch). Beide Formate sind {@code ;}-separiert
- * mit optionalen doppelten Anfuehrungszeichen um Felder — nur die
- * Spaltenzuordnung unterscheidet sich pro aufrufendem Service.
+ * Common parsing logic for schleppbetrieb.de CSV exports
+ * (towing logbook and main flight log). Both formats
+ * are {@code ;}-separated with optional double quotes
+ * around fields — only the column mapping differs per calling service.
  */
 public final class CsvLineParser {
 
     private CsvLineParser() {
     }
 
-    public static List<String> splitLine(String zeile, char trennzeichen) {
-        List<String> felder = new ArrayList<>();
-        StringBuilder aktuell = new StringBuilder();
-        boolean inAnfuehrung = false;
+    public static List<String> splitLine(String line, char splitChar) {
+        List<String> fields = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
 
-        for (int i = 0; i < zeile.length(); i++) {
-            char c = zeile.charAt(i);
-            if (inAnfuehrung) {
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (inQuotes) {
                 if (c == '"') {
-                    if (i + 1 < zeile.length() && zeile.charAt(i + 1) == '"') {
-                        aktuell.append('"');
+                    if (i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                        current.append('"');
                         i++;
                     } else {
-                        inAnfuehrung = false;
+                        inQuotes = false;
                     }
                 } else {
-                    aktuell.append(c);
+                    current.append(c);
                 }
             } else if (c == '"') {
-                inAnfuehrung = true;
-            } else if (c == trennzeichen) {
-                felder.add(aktuell.toString());
-                aktuell.setLength(0);
+                inQuotes = true;
+            } else if (c == splitChar) {
+                fields.add(current.toString());
+                current.setLength(0);
             } else {
-                aktuell.append(c);
+                current.append(c);
             }
         }
-        felder.add(aktuell.toString());
-        return felder;
+        fields.add(current.toString());
+        return fields;
     }
 
-    public static String field(List<String> felder, int index) {
-        if (index >= felder.size()) {
+    public static String field(List<String> fields, int index) {
+        if (index >= fields.size()) {
             return null;
         }
-        String wert = felder.get(index).trim();
-        return wert.isEmpty() ? null : wert;
+        String value = fields.get(index).trim();
+        return value.isEmpty() ? null : value;
     }
 
-    public static Integer parseInteger(List<String> felder, int index, int zeilennummer) {
-        String wert = field(felder, index);
-        if (wert == null) {
-            return null;
-        }
-        try {
-            return Integer.valueOf(wert);
-        } catch (NumberFormatException e) {
-            throw new SchleppbetriebImportException(String.format(
-                    "Zeile %d, Spalte %d: '%s' ist keine gueltige Ganzzahl.",
-                    zeilennummer, index, wert), e);
-        }
-    }
-
-    public static Double parseDouble(List<String> felder, int index, int zeilennummer) {
-        String wert = field(felder, index);
-        if (wert == null) {
+    public static Integer parseInteger(List<String> fields, int index, int lineNumber) {
+        String value = field(fields, index);
+        if (value == null) {
             return null;
         }
         try {
-            return Double.valueOf(wert);
+            return Integer.valueOf(value);
         } catch (NumberFormatException e) {
             throw new SchleppbetriebImportException(String.format(
-                    "Zeile %d, Spalte %d: '%s' ist keine gueltige Zahl.",
-                    zeilennummer, index, wert), e);
+                    "Line %d, Column %d: '%s' is not a valid integer.",
+                    lineNumber, index, value), e);
         }
     }
 
-    public static LocalDate parseDate(String wert, DateTimeFormatter format, int zeilennummer) {
-        return parseTemporal(wert, format, zeilennummer, "Datum (erwartet dd.MM.yyyy)", LocalDate::parse);
+    public static Double parseDouble(List<String> fields, int index, int lineNumeber) {
+        String value = field(fields, index);
+        if (value == null) {
+            return null;
+        }
+        try {
+            return Double.valueOf(value);
+        } catch (NumberFormatException e) {
+            throw new SchleppbetriebImportException(String.format(
+                    "Line %d, Column %d: '%s' is not a valid number.",
+                    lineNumeber, index, value), e);
+        }
     }
 
-    public static LocalTime parseTime(String wert, DateTimeFormatter format, int zeilennummer) {
-        return parseTemporal(wert, format, zeilennummer, "Uhrzeit (erwartet HH:mm)", LocalTime::parse);
+    public static LocalDate parseDate(String value, DateTimeFormatter format, int lineNumber) {
+        return parseTemporal(value, format, lineNumber, "Date (expected dd.MM.yyyy)", LocalDate::parse);
     }
 
-    public static LocalDateTime parseDateTime(String wert, DateTimeFormatter format, int zeilennummer) {
-        return parseTemporal(wert, format, zeilennummer, "Datum (erwartet dd.MM.yyyy HH:mm)", LocalDateTime::parse);
+    public static LocalTime parseTime(String value, DateTimeFormatter format, int lineNumber) {
+        return parseTemporal(value, format, lineNumber, "Time (expected HH:mm)", LocalTime::parse);
     }
 
-    private static <T> T parseTemporal(String wert, DateTimeFormatter format, int zeilennummer,
-                                       String erwartungstext,
+    public static LocalDateTime parseDateTime(String value, DateTimeFormatter format, int lineNumber) {
+        return parseTemporal(value, format, lineNumber, "Date (expected dd.MM.yyyy HH:mm)", LocalDateTime::parse);
+    }
+
+    private static <T> T parseTemporal(String value, DateTimeFormatter format, int lineNumber,
+                                       String expectedText,
                                        BiFunction<String, DateTimeFormatter, T> parser) {
-        if (wert == null) {
+        if (value == null) {
             return null;
         }
         try {
-            return parser.apply(wert, format);
+            return parser.apply(value, format);
         } catch (DateTimeParseException e) {
             throw new SchleppbetriebImportException(String.format(
-                    "Zeile %d: '%s' ist kein gueltiges %s.", zeilennummer, wert, erwartungstext), e);
+                    "Line %d: '%s' is not a valid %s.", lineNumber, value, expectedText), e);
         }
     }
 }

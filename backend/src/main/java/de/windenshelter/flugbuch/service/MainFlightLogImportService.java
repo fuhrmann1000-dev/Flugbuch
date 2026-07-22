@@ -78,70 +78,70 @@ public class MainFlightLogImportService {
             }
 
         } catch (IOException e) {
-            log.error("Fehler beim Lesen der Hauptflugbuch-CSV: {}", e.getMessage());
-            throw new SchleppbetriebImportException("Hauptflugbuch-CSV konnte nicht gelesen werden", e);
+            log.error("Error reading main flight log CSV: {}", e.getMessage());
+            throw new SchleppbetriebImportException("Main flight log CSV could not be read", e);
         }
 
-        log.info("Hauptflugbuch-Import: {} Datensaetze extrahiert.", resultList.size());
+        log.info("Main flight log import: {} records extracted.", resultList.size());
         return resultList;
     }
 
     @Transactional
-    public void importIdempotent(List<StagingMainFlightLog> eintraege) {
+    public void importIdempotent(List<StagingMainFlightLog> entries) {
         ChunkedDeduplicatingSaver<StagingMainFlightLog, NaturalKey> saver =
-                new ChunkedDeduplicatingSaver<>(CHUNK_SIZE, NaturalKey::of, this::sucheBekannteSchluessel);
+                new ChunkedDeduplicatingSaver<>(CHUNK_SIZE, NaturalKey::of, this::findKnownKeys);
 
-        var ergebnis = saver.speichereIdempotent(eintraege, stagingRepository::saveAll);
+        var result = saver.saveIdempotent(entries, stagingRepository::saveAll);
 
-        log.info("Hauptflugbuch-Import idempotent: {} gespeichert, {} bereits bekannt/dupliziert.",
-                ergebnis.gespeichert(), ergebnis.uebersprungen());
+        log.info("Main flight log import idempotent: {} saved, {} already known/duplicated.",
+                result.stored(), result.skipped());
     }
 
-    private Set<NaturalKey> sucheBekannteSchluessel(List<StagingMainFlightLog> chunk) {
-        Set<String> kennzeichenSet = chunk.stream()
+    private Set<NaturalKey> findKnownKeys(List<StagingMainFlightLog> chunk) {
+        Set<String> licensePlateSet = chunk.stream()
                 .map(StagingMainFlightLog::getKennzeichen)
                 .collect(Collectors.toSet());
-        Set<LocalDate> datumSet = chunk.stream()
+        Set<LocalDate> dateSet = chunk.stream()
                 .map(StagingMainFlightLog::getDatum)
                 .collect(Collectors.toSet());
 
-        return stagingRepository.findByKennzeichenInAndDatumIn(kennzeichenSet, datumSet).stream()
+        return stagingRepository.findByLicensePlateInAndDateIn(licensePlateSet, dateSet).stream()
                 .map(NaturalKey::of)
                 .collect(Collectors.toSet());
     }
 
-    /** Natuerlicher Schluessel fuer Duplikaterkennung, da die CSV keine externalId liefert. */
-    private record NaturalKey(LocalDate datum, LocalTime startzeit, String kennzeichen) {
-        static NaturalKey of(StagingMainFlightLog eintrag) {
-            return new NaturalKey(eintrag.getDatum(), eintrag.getStartzeit(), eintrag.getKennzeichen());
+    /** Natural key for duplicate detection, since the CSV does not provide an externalId. */
+    private record NaturalKey(LocalDate date, LocalTime startTime, String licensePlate) {
+        static NaturalKey of(StagingMainFlightLog entry) {
+            return new NaturalKey(entry.getDatum(), entry.getStartzeit(), entry.getKennzeichen());
         }
     }
 
-    private StagingMainFlightLog processedRow(String zeile, int zeilennummer) {
-        List<String> felder = splitLine(zeile, DIVIDING_CHARACTER);
-        if (felder.size() < COLUMN_MINIMUM) {
+    private StagingMainFlightLog processedRow(String line, int lineNumber) {
+        List<String> fields = splitLine(line, DIVIDING_CHARACTER);
+        if (fields.size() < COLUMN_MINIMUM) {
             throw new SchleppbetriebImportException(String.format(
                     "Zeile %d hat %d Spalten, erwartet werden mindestens %d.",
-                    zeilennummer, felder.size(), COLUMN_MINIMUM));
+                    lineNumber, fields.size(), COLUMN_MINIMUM));
         }
 
         return StagingMainFlightLog.builder()
-                .datum(parseDate(field(felder, COLUMN_DATUM), DATE_FORMAT, zeilennummer))
-                .startzeit(parseTime(field(felder, COLUMN_START_ZEIT), TIME_FORMAT, zeilennummer))
-                .landezeit(parseTime(field(felder, COLUMN_LANDE_ZEIT), TIME_FORMAT, zeilennummer))
-                .muster(field(felder, COLUMN_MUSTER))
-                .kennzeichen(field(felder, COLUMN_KENNZEICHEN))
-                .pilot(field(felder, COLUMN_PILOT))
-                .gaeste(parseInteger(felder, COLUMN_GAESTE, zeilennummer))
-                .flugart(field(felder, COLUMN_FLUGART))
-                .startPlatz(field(felder, COLUMN_START_PLATZ))
-                .zielPlatz(field(felder, COLUMN_ZIEL_PLATZ))
-                .flugLeiter(field(felder, COLUMN_FLUG_LEITER))
-                .geschleppter(field(felder, COLUMN_GESCHLEPPTER))
-                .schleppHoehe(parseInteger(felder, COLUMN_SCHLEPPHOEHE, zeilennummer))
-                .betrag(parseDouble(felder, COLUMN_BETRAG, zeilennummer))
-                .bemerkung(field(felder, COLUMN_BEMERKUNG))
-                .flugAnzahl(parseInteger(felder, COLUMN_FLUGANZAHL, zeilennummer))
+                .datum(parseDate(field(fields, COLUMN_DATUM), DATE_FORMAT, lineNumber))
+                .startzeit(parseTime(field(fields, COLUMN_START_ZEIT), TIME_FORMAT, lineNumber))
+                .landezeit(parseTime(field(fields, COLUMN_LANDE_ZEIT), TIME_FORMAT, lineNumber))
+                .muster(field(fields, COLUMN_MUSTER))
+                .kennzeichen(field(fields, COLUMN_KENNZEICHEN))
+                .pilot(field(fields, COLUMN_PILOT))
+                .gaeste(parseInteger(fields, COLUMN_GAESTE, lineNumber))
+                .flugart(field(fields, COLUMN_FLUGART))
+                .startPlatz(field(fields, COLUMN_START_PLATZ))
+                .zielPlatz(field(fields, COLUMN_ZIEL_PLATZ))
+                .flugLeiter(field(fields, COLUMN_FLUG_LEITER))
+                .geschleppter(field(fields, COLUMN_GESCHLEPPTER))
+                .schleppHoehe(parseInteger(fields, COLUMN_SCHLEPPHOEHE, lineNumber))
+                .betrag(parseDouble(fields, COLUMN_BETRAG, lineNumber))
+                .bemerkung(field(fields, COLUMN_BEMERKUNG))
+                .flugAnzahl(parseInteger(fields, COLUMN_FLUGANZAHL, lineNumber))
                 .build();
     }
 }

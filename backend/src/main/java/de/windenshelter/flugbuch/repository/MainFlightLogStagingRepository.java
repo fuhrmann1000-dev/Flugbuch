@@ -20,7 +20,7 @@ public interface MainFlightLogStagingRepository extends JpaRepository<StagingMai
      * der Aufrufer die exakte Ubereinstimmung zusaetzlich in Java pruefen.
      */
     @Query("select f from StagingMainFlightLog f where f.kennzeichen in :kennzeichen and f.datum in :daten")
-    List<StagingMainFlightLog> findByKennzeichenInAndDatumIn(
+    List<StagingMainFlightLog> findByLicensePlateInAndDateIn(
             @Param("kennzeichen") Collection<String> kennzeichen,
             @Param("daten") Collection<LocalDate> daten);
 }
