@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 
 import de.windenshelter.flugbuch.dto.FlugbuchEintragDto;
 import de.windenshelter.flugbuch.mapper.FlugbuchMapper;
-import de.windenshelter.flugbuch.model.StagingSchleppkladdeEintrag;
-import de.windenshelter.flugbuch.repository.StagingRepository;
+import de.windenshelter.flugbuch.model.StagingMainFlightLog;
+import de.windenshelter.flugbuch.repository.MainFlightLogStagingRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -15,9 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FlightService {
 
-    private static final String DEFAULT_STATUS = "PENDING";
-
-    private final StagingRepository stagingRepository;
+    private final MainFlightLogStagingRepository stagingRepository;
     private final FlugbuchMapper flugbuchMapper;
 
     public List<FlugbuchEintragDto> findAll() {
@@ -28,32 +26,44 @@ public class FlightService {
     }
 
     public FlugbuchEintragDto findById(Long id) {
-        StagingSchleppkladdeEintrag entry = getEntityOrThrow(id);
+        StagingMainFlightLog entry = getEntityOrThrow(id);
         return flugbuchMapper.toDto(entry);
     }
 
     public FlugbuchEintragDto create(FlugbuchEintragDto dto) {
-        StagingSchleppkladdeEintrag entity = flugbuchMapper.toEntity(dto);
-        entity.setStatus(DEFAULT_STATUS);
-        StagingSchleppkladdeEintrag saved = stagingRepository.save(entity);
+        StagingMainFlightLog entity = flugbuchMapper.toEntity(dto);
+        StagingMainFlightLog saved = stagingRepository.save(entity);
         return flugbuchMapper.toDto(saved);
     }
 
     public FlugbuchEintragDto update(Long id, FlugbuchEintragDto dto) {
-        StagingSchleppkladdeEintrag existing = getEntityOrThrow(id);
-        existing.setFlugDatum(dto.getFlugDatum());
-        existing.setKundenNummer(dto.getKundenNummer());
-        existing.setNameDesPiloten(dto.getNameDesPiloten());
-        StagingSchleppkladdeEintrag saved = stagingRepository.save(existing);
+        StagingMainFlightLog existing = getEntityOrThrow(id);
+        existing.setDatum(dto.getDate());
+        existing.setStartzeit(dto.getStartTime());
+        existing.setLandezeit(dto.getLandingTime());
+        existing.setMuster(dto.getAircraftType());
+        existing.setKennzeichen(dto.getRegistration());
+        existing.setPilot(dto.getPilot());
+        existing.setGaeste(dto.getGuests());
+        existing.setFlugart(dto.getFlightType());
+        existing.setStartPlatz(dto.getDepartureAirfield());
+        existing.setZielPlatz(dto.getDestinationAirfield());
+        existing.setFlugLeiter(dto.getFlightDirector());
+        existing.setGeschleppter(dto.getTowedAircraft());
+        existing.setSchleppHoehe(dto.getTowHeight());
+        existing.setBetrag(dto.getAmount());
+        existing.setBemerkung(dto.getRemarks());
+        existing.setFlugAnzahl(dto.getFlightCount());
+        StagingMainFlightLog saved = stagingRepository.save(existing);
         return flugbuchMapper.toDto(saved);
     }
 
     public void delete(Long id) {
-        StagingSchleppkladdeEintrag existing = getEntityOrThrow(id);
+        StagingMainFlightLog existing = getEntityOrThrow(id);
         stagingRepository.delete(existing);
     }
 
-    private StagingSchleppkladdeEintrag getEntityOrThrow(Long id) {
+    private StagingMainFlightLog getEntityOrThrow(Long id) {
         return stagingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Flight entry not found with id " + id));
     }
