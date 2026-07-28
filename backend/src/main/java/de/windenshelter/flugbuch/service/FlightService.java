@@ -2,10 +2,10 @@ package de.windenshelter.flugbuch.service;
 
 import java.util.List;
 
+import de.windenshelter.flugbuch.dto.FlightLogEntryDto;
+import de.windenshelter.flugbuch.mapper.FlightLogMapper;
 import org.springframework.stereotype.Service;
 
-import de.windenshelter.flugbuch.dto.FlugbuchEintragDto;
-import de.windenshelter.flugbuch.mapper.FlugbuchMapper;
 import de.windenshelter.flugbuch.model.StagingMainFlightLog;
 import de.windenshelter.flugbuch.repository.MainFlightLogStagingRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,27 +16,27 @@ import lombok.RequiredArgsConstructor;
 public class FlightService {
 
     private final MainFlightLogStagingRepository stagingRepository;
-    private final FlugbuchMapper flugbuchMapper;
+    private final FlightLogMapper flightLogMapper;
 
-    public List<FlugbuchEintragDto> findAll() {
+    public List<FlightLogEntryDto> findAll() {
         return stagingRepository.findAll()
                 .stream()
-                .map(flugbuchMapper::toDto)
+                .map(flightLogMapper::toDto)
                 .toList();
     }
 
-    public FlugbuchEintragDto findById(Long id) {
+    public FlightLogEntryDto findById(Long id) {
         StagingMainFlightLog entry = getEntityOrThrow(id);
-        return flugbuchMapper.toDto(entry);
+        return flightLogMapper.toDto(entry);
     }
 
-    public FlugbuchEintragDto create(FlugbuchEintragDto dto) {
-        StagingMainFlightLog entity = flugbuchMapper.toEntity(dto);
+    public FlightLogEntryDto create(FlightLogEntryDto dto) {
+        StagingMainFlightLog entity = flightLogMapper.toEntity(dto);
         StagingMainFlightLog saved = stagingRepository.save(entity);
-        return flugbuchMapper.toDto(saved);
+        return flightLogMapper.toDto(saved);
     }
 
-    public FlugbuchEintragDto update(Long id, FlugbuchEintragDto dto) {
+    public FlightLogEntryDto update(Long id, FlightLogEntryDto dto) {
         StagingMainFlightLog existing = getEntityOrThrow(id);
         existing.setDatum(dto.getDate());
         existing.setStartzeit(dto.getStartTime());
@@ -55,7 +55,7 @@ public class FlightService {
         existing.setBemerkung(dto.getRemarks());
         existing.setFlugAnzahl(dto.getFlightCount());
         StagingMainFlightLog saved = stagingRepository.save(existing);
-        return flugbuchMapper.toDto(saved);
+        return flightLogMapper.toDto(saved);
     }
 
     public void delete(Long id) {

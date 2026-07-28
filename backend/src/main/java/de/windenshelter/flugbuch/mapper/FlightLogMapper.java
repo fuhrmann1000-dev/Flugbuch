@@ -3,11 +3,11 @@ package de.windenshelter.flugbuch.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import de.windenshelter.flugbuch.dto.FlugbuchEintragDto;
+import de.windenshelter.flugbuch.dto.FlightLogEntryDto;
 import de.windenshelter.flugbuch.model.StagingMainFlightLog;
 
 @Mapper(componentModel = "spring")
-public interface FlugbuchMapper {
+public interface FlightLogMapper {
 
     @Mapping(target = "date", source = "datum")
     @Mapping(target = "startTime", source = "startzeit")
@@ -24,7 +24,7 @@ public interface FlugbuchMapper {
     @Mapping(target = "amount", source = "betrag")
     @Mapping(target = "remarks", source = "bemerkung")
     @Mapping(target = "flightCount", source = "flugAnzahl")
-    FlugbuchEintragDto toDto(StagingMainFlightLog stagingEintrag);
+    FlightLogEntryDto toDto(StagingMainFlightLog stagingEintrag);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "externalId", ignore = true)
@@ -43,5 +43,5 @@ public interface FlugbuchMapper {
     @Mapping(target = "betrag", source = "amount")
     @Mapping(target = "bemerkung", source = "remarks")
     @Mapping(target = "flugAnzahl", source = "flightCount")
-    StagingMainFlightLog toEntity(FlugbuchEintragDto dto);
+    StagingMainFlightLog toEntity(FlightLogEntryDto dto);
 }

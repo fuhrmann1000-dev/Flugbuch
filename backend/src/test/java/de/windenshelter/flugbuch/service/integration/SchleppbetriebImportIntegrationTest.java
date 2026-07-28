@@ -1,4 +1,4 @@
-package de.windenshelter.flugbuch.integration;
+package de.windenshelter.flugbuch.service.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

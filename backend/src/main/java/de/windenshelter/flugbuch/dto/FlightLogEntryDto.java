@@ -11,7 +11,7 @@ import java.time.LocalTime;
 
 @Data
 @JsonPropertyOrder({"id"})
-public class FlugbuchEintragDto {
+public class FlightLogEntryDto {
     private Long id;
 
     @JsonFormat(pattern = "dd.MM.yyyy")
