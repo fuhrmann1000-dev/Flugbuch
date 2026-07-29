@@ -15,15 +15,15 @@ public class FlightLogEntryDto {
     private Long id;
 
     @JsonFormat(pattern = "dd.MM.yyyy")
-    @Schema(type = "string", pattern = "dd.MM.yyyy", example = "26.07.2026")
+    @Schema(type = "string", pattern = "^\\d{2}\\.\\d{2}\\.\\d{4}$", example = "26.07.2026")
     private LocalDate date;
 
     @JsonFormat(pattern = "HH:mm")
-    @Schema(type = "string", pattern = "HH:mm", example = "19:05")
+    @Schema(type = "string", pattern = "^\\d{2}:\\d{2}$", example = "19:05")
     private LocalTime startTime;
 
     @JsonFormat(pattern = "HH:mm")
-    @Schema(type = "string", pattern = "HH:mm", example = "19:35")
+    @Schema(type = "string", pattern = "^\\d{2}:\\d{2}$", example = "19:35")
     private LocalTime landingTime;
 
     private String aircraftType;
