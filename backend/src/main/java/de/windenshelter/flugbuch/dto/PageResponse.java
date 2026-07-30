@@ -19,6 +19,7 @@ public record PageResponse<T>(
         boolean first,
         boolean last) {
 
+    /** Builds a {@link PageResponse} from a Spring Data {@link Page}. */
     public static <T> PageResponse<T> of(Page<T> page) {
         return new PageResponse<>(
                 page.getContent(),

@@ -65,6 +65,7 @@ class FlightServiceFilterIntegrationTest {
                 .build();
     }
 
+    // No filter at all: every entry in the table comes back.
     @Test
     void findAll_noCriteria_returnsEverything() {
         Page<FlightLogEntryDto> result = flightService.findAll(new FlightSearchCriteria(), Pageable.unpaged());
@@ -73,6 +74,7 @@ class FlightServiceFilterIntegrationTest {
         assertThat(result.getTotalElements()).isEqualTo(4);
     }
 
+    // "max" (lowercase, partial) should still find "Max Mustermann".
     @Test
     void findAll_partialPilotMatch_isCaseInsensitiveContains() {
         FlightSearchCriteria criteria = new FlightSearchCriteria();
@@ -84,6 +86,7 @@ class FlightServiceFilterIntegrationTest {
         assertThat(result.getContent()).allMatch(dto -> dto.getPilot().equals("Max Mustermann"));
     }
 
+    // "discus" (partial) should find both "Duo Discus" entries.
     @Test
     void findAll_partialAircraftTypeMatch_findsAllVariants() {
         FlightSearchCriteria criteria = new FlightSearchCriteria();
@@ -95,6 +98,7 @@ class FlightServiceFilterIntegrationTest {
         assertThat(result.getContent()).allMatch(dto -> dto.getAircraftType().equals("Duo Discus"));
     }
 
+    // Filtering by an exact date returns only that day's entry.
     @Test
     void findAll_exactDate_returnsOnlyThatDay() {
         FlightSearchCriteria criteria = new FlightSearchCriteria();
@@ -106,6 +110,7 @@ class FlightServiceFilterIntegrationTest {
         assertThat(result.getContent().get(0).getPilot()).isEqualTo("Max Mustermann");
     }
 
+    // A dateFrom/dateTo range excludes the one entry that falls outside it.
     @Test
     void findAll_dateRange_excludesOutOfRangeEntries() {
         FlightSearchCriteria criteria = new FlightSearchCriteria();
@@ -118,6 +123,7 @@ class FlightServiceFilterIntegrationTest {
         assertThat(result.getContent()).hasSize(3);
     }
 
+    // Two filters together (AND): only the entry matching both remains.
     @Test
     void findAll_combinedPilotAndAircraftType_narrowsToSingleEntry() {
         FlightSearchCriteria criteria = new FlightSearchCriteria();
@@ -130,6 +136,7 @@ class FlightServiceFilterIntegrationTest {
         assertThat(result.getContent().get(0).getRegistration()).isEqualTo("D-1234");
     }
 
+    // A filter matching nobody returns an empty (not null/error) page.
     @Test
     void findAll_noMatches_returnsEmptyPage() {
         FlightSearchCriteria criteria = new FlightSearchCriteria();
@@ -156,6 +163,7 @@ class FlightServiceFilterIntegrationTest {
     // Pagination
     // -------------------------------------------------------------------
 
+    // Page 1 of 2 (size 2 of 4 total), sorted by date ascending: checks content + page metadata.
     @Test
     void findAll_pageSizeTwo_returnsFirstPageWithCorrectMetadata() {
         Pageable firstPage = PageRequest.of(0, 2, Sort.by("date").ascending());
@@ -173,6 +181,7 @@ class FlightServiceFilterIntegrationTest {
         assertThat(result.getContent().get(1).getDate()).isEqualTo(LocalDate.of(2026, 7, 10));
     }
 
+    // The second (last) page of the same 4-entry, size-2 pagination.
     @Test
     void findAll_pageSizeTwo_returnsSecondPage() {
         Pageable secondPage = PageRequest.of(1, 2, Sort.by("date").ascending());
@@ -186,6 +195,7 @@ class FlightServiceFilterIntegrationTest {
         assertThat(result.getContent().get(1).getDate()).isEqualTo(LocalDate.of(2026, 7, 26));
     }
 
+    // Filtering and pagination combined: page metadata reflects only the filtered subset.
     @Test
     void findAll_filterAndPaginateTogether_returnsFilteredPage() {
         FlightSearchCriteria criteria = new FlightSearchCriteria();
@@ -202,6 +212,7 @@ class FlightServiceFilterIntegrationTest {
     // Sorting (proves the DTO-field-name -> entity-field-name translation)
     // -------------------------------------------------------------------
 
+    // Sorting by "date" descending only works if the entity-field translation (date -> datum) is applied.
     @Test
     void findAll_sortByDateDescending_ordersNewestFirst() {
         Pageable sorted = PageRequest.of(0, 10, Sort.by("date").descending());
@@ -216,6 +227,7 @@ class FlightServiceFilterIntegrationTest {
                         LocalDate.of(2026, 6, 15));
     }
 
+    // Sorting by pilot name, ascending: alphabetical order.
     @Test
     void findAll_sortByPilotAscending_ordersAlphabetically() {
         // "pilot" happens to be named the same on both DTO and entity, but
@@ -229,6 +241,7 @@ class FlightServiceFilterIntegrationTest {
         assertThat(result.getContent().get(1).getPilot()).isEqualTo("Klaus Kleiner");
     }
 
+    // "aircraftType" (DTO) maps to "muster" (entity) - proves that translation specifically.
     @Test
     void findAll_sortByAircraftTypeAscending_translatesToEntityField() {
         // "aircraftType" on the DTO maps to "muster" on the entity.

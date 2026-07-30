@@ -28,6 +28,12 @@ public final class FlightSpecifications {
     private FlightSpecifications() {
     }
 
+    /**
+     * Combines every non-empty field on {@code criteria} into a single
+     * Specification with AND, e.g. pilot + date both set means "this pilot
+     * AND this date". A {@code null} criteria (or one with everything
+     * empty) results in a Specification that matches everything.
+     */
     public static Specification<StagingMainFlightLog> fromCriteria(FlightSearchCriteria criteria) {
         List<Specification<StagingMainFlightLog>> specs = new ArrayList<>();
 
@@ -58,21 +64,25 @@ public final class FlightSpecifications {
         return Specification.allOf(specs);
     }
 
+    /** Matches entries whose {@code pilot} (entity field) contains {@code pilot}, ignoring case. */
     public static Specification<StagingMainFlightLog> hasPilot(String pilot) {
         return (root, query, cb) ->
                 cb.like(cb.lower(root.get("pilot")), containsPattern(pilot), LIKE_ESCAPE_CHAR);
     }
 
+    /** Matches entries whose {@code muster} (aircraft type) contains {@code aircraftType}, ignoring case. */
     public static Specification<StagingMainFlightLog> hasAircraftType(String aircraftType) {
         return (root, query, cb) ->
                 cb.like(cb.lower(root.get("muster")), containsPattern(aircraftType), LIKE_ESCAPE_CHAR);
     }
 
+    /** Matches entries whose {@code kennzeichen} (registration) contains {@code registration}, ignoring case. */
     public static Specification<StagingMainFlightLog> hasRegistration(String registration) {
         return (root, query, cb) ->
                 cb.like(cb.lower(root.get("kennzeichen")), containsPattern(registration), LIKE_ESCAPE_CHAR);
     }
 
+    /** Matches entries whose {@code flugart} (flight type) contains {@code flightType}, ignoring case. */
     public static Specification<StagingMainFlightLog> hasFlightType(String flightType) {
         return (root, query, cb) ->
                 cb.like(cb.lower(root.get("flugart")), containsPattern(flightType), LIKE_ESCAPE_CHAR);
@@ -92,6 +102,7 @@ public final class FlightSpecifications {
         return "%" + escaped + "%";
     }
 
+    /** Matches entries whose {@code datum} (date) equals exactly {@code date}. */
     public static Specification<StagingMainFlightLog> onDate(LocalDate date) {
         return (root, query, cb) -> cb.equal(root.get("datum"), date);
     }

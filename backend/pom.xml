@@ -23,6 +23,7 @@
         <lombok.version>1.18.42</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <poi.version>5.4.0</poi.version>
+        <commons-net.version>3.13.0</commons-net.version>
     </properties>
 
     <dependencies>
@@ -45,6 +46,13 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>${poi.version}</version>
+        </dependency>
+
+        <!-- Apache Commons Net for the daily FTP download of the flight log CSV -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>${commons-net.version}</version>
         </dependency>
 
         <!-- Lombok & MapStruct -->

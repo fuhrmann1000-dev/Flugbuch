@@ -32,6 +32,13 @@ services:
       - SPRING_DATASOURCE_PASSWORD=flugbuch_password
       - SPRING_DATASOURCE_DRIVER=com.mysql.cj.jdbc.Driver
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # TODO: replace with the real FTP server details (ticket #29)
+      - FTP_HOST=ftp.example.org
+      - FTP_PORT=21
+      - FTP_USERNAME=changeme
+      - FTP_PASSWORD=changeme
+      - FTP_REMOTE_FILE_PATH=/flugbuch.csv
+      - FTP_LOCAL_DIRECTORY=/app/import
     volumes:
       - ./import-daten:/app/import
 

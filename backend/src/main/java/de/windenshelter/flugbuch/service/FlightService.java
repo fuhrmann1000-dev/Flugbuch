@@ -15,6 +15,7 @@ import de.windenshelter.flugbuch.repository.MainFlightLogStagingRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+/** Business logic for flight log entries: CRUD plus filtered/sorted/paginated listing. */
 @Service
 @RequiredArgsConstructor
 public class FlightService {

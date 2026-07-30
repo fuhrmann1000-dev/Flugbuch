@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.windenshelter.flugbuch.service.FlightService;
 import lombok.RequiredArgsConstructor;
 
+/** REST endpoints for flight log entries: list (filter/sort/paginate), get one, create, update, delete. */
 @RestController
 @RequestMapping("/api/v1/flights")
 @RequiredArgsConstructor
@@ -55,6 +56,7 @@ public class FlightController {
         return PageResponse.of(result);
     }
 
+    /** Builds a Pageable from the plain page/size/sortBy/sortDirection params (unsorted if sortBy is null). */
     private Pageable toPageable(int page, int size, SortableFlightField sortBy, Sort.Direction sortDirection) {
         if (sortBy == null) {
             return PageRequest.of(page, size);

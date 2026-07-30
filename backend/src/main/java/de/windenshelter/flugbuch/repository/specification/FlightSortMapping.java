@@ -44,6 +44,7 @@ public final class FlightSortMapping {
     private FlightSortMapping() {
     }
 
+    /** Returns {@code pageable} with every sort property rewritten to the matching entity field name. */
     public static Pageable toEntitySort(Pageable pageable) {
         if (pageable.isUnpaged() || pageable.getSort().isUnsorted()) {
             return pageable;
@@ -56,6 +57,7 @@ public final class FlightSortMapping {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(translatedOrders));
     }
 
+    /** Rewrites a single sort order's property name, keeping its direction/case-sensitivity. */
     private static Sort.Order translateOrder(Sort.Order order) {
         String entityProperty = DTO_TO_ENTITY_FIELD.getOrDefault(order.getProperty(), order.getProperty());
         Sort.Order translated = new Sort.Order(order.getDirection(), entityProperty, order.getNullHandling());
