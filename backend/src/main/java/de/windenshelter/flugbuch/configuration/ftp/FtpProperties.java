@@ -1,4 +1,4 @@
-package de.windenshelter.flugbuch.service.ftp;
+package de.windenshelter.flugbuch.configuration.ftp;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

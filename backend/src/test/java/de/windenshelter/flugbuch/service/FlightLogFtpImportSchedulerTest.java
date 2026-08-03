@@ -18,7 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import de.windenshelter.flugbuch.model.StagingMainFlightLog;
-import de.windenshelter.flugbuch.service.ftp.FtpFileFetcher;
+import de.windenshelter.flugbuch.configuration.ftp.FtpFileFetcher;
 
 /**
  * Proves that the FTP-download step doesn't need a real FTP server to be

@@ -1,4 +1,4 @@
-package de.windenshelter.flugbuch.service.ftp;
+package de.windenshelter.flugbuch.configuration.ftp;
 
 import java.io.IOException;
 import java.io.OutputStream;

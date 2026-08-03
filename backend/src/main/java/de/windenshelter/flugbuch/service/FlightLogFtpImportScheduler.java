@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import de.windenshelter.flugbuch.model.StagingMainFlightLog;
-import de.windenshelter.flugbuch.service.ftp.FtpFileFetcher;
+import de.windenshelter.flugbuch.configuration.ftp.FtpFileFetcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
