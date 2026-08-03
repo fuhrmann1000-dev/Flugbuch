@@ -26,3 +26,15 @@ spring:
                     batch_size: 500
                 order_inserts: true
                 order_updates: true
+
+# FTP access for the daily flight log CSV import (ticket #29).
+# The real values come from environment variables (see docker-compose.yml);
+# without those variables these stay empty placeholders, which is fine for
+# local development/tests since the scheduler never runs there.
+ftp:
+    host: ${FTP_HOST:}
+    port: ${FTP_PORT:21}
+    username: ${FTP_USERNAME:}
+    password: ${FTP_PASSWORD:}
+    remote-file-path: ${FTP_REMOTE_FILE_PATH:/flugbuch.csv}
+    local-directory: ${FTP_LOCAL_DIRECTORY:/app/import}

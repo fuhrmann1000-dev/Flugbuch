@@ -1,9 +1,13 @@
 package de.windenshelter.flugbuch.service;
 
-import java.util.List;
-
 import de.windenshelter.flugbuch.dto.FlightLogEntryDto;
+import de.windenshelter.flugbuch.dto.FlightSearchCriteria;
 import de.windenshelter.flugbuch.mapper.FlightLogMapper;
+import de.windenshelter.flugbuch.repository.specification.FlightSortMapping;
+import de.windenshelter.flugbuch.repository.specification.FlightSpecifications;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import de.windenshelter.flugbuch.model.StagingMainFlightLog;
@@ -11,6 +15,7 @@ import de.windenshelter.flugbuch.repository.MainFlightLogStagingRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+/** Business logic for flight log entries: CRUD plus filtered/sorted/paginated listing. */
 @Service
 @RequiredArgsConstructor
 public class FlightService {
@@ -18,11 +23,18 @@ public class FlightService {
     private final MainFlightLogStagingRepository stagingRepository;
     private final FlightLogMapper flightLogMapper;
 
-    public List<FlightLogEntryDto> findAll() {
-        return stagingRepository.findAll()
-                .stream()
-                .map(flightLogMapper::toDto)
-                .toList();
+    /**
+     * Returns flight log entries, paginated and sorted per {@code pageable},
+     * narrowed down by whichever fields are set on {@code criteria}. Sort
+     * properties are given using the public DTO's field names (e.g.
+     * {@code date}, {@code aircraftType}) and translated internally to the
+     * entity's field names; see {@link FlightSortMapping}.
+     */
+    public Page<FlightLogEntryDto> findAll(FlightSearchCriteria criteria, Pageable pageable) {
+        Specification<StagingMainFlightLog> spec = FlightSpecifications.fromCriteria(criteria);
+        Pageable entityPageable = FlightSortMapping.toEntitySort(pageable);
+        return stagingRepository.findAll(spec, entityPageable)
+                .map(flightLogMapper::toDto);
     }
 
     public FlightLogEntryDto findById(Long id) {
