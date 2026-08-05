@@ -28,10 +28,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -47,8 +50,15 @@ import de.windenshelter.flugbuch.service.FlightService;
  * while the service layer is mocked. Since {@code findAll} now returns a
  * Spring Data {@code Page}, the JSON body is wrapped ({@code content},
  * {@code totalElements}, ...) instead of a bare array.
+ *
+ * All flight endpoints now require authentication (see {@code SecurityConfig}),
+ * so every test here runs as a logged-in user via {@code @WithMockUser}. The
+ * "logged out" case is covered separately in
+ * {@code FlightControllerSecurityIntegrationTest}, to keep that concern out
+ * of these filter/pagination/sorting tests.
  */
 @SpringBootTest
+@WithMockUser
 class MainFlightLogControllerIntegrationTest {
 
     private static final String BASE_URL = "/api/v1/flights";
@@ -67,7 +77,7 @@ class MainFlightLogControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
 
         sampleDto = new FlightLogEntryDto();
         sampleDto.setId(1L);
