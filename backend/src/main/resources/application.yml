@@ -38,3 +38,10 @@ ftp:
     password: ${FTP_PASSWORD:}
     remote-file-path: ${FTP_REMOTE_FILE_PATH:/flugbuch.csv}
     local-directory: ${FTP_LOCAL_DIRECTORY:/app/import}
+
+# JWT signing secret for pilot login. The default below is fine for local
+# development/tests only; production must override it via the JWT_SECRET
+# environment variable with its own strong, random value (see docker-compose.yml).
+jwt:
+    secret: ${JWT_SECRET:local-dev-only-secret-do-not-use-in-production-9f3a7c1e}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}

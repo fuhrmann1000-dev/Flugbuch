@@ -39,6 +39,9 @@ services:
       - FTP_PASSWORD=changeme
       - FTP_REMOTE_FILE_PATH=/flugbuch.csv
       - FTP_LOCAL_DIRECTORY=/app/import
+      # TODO: generate a strong random secret for production and put it here (or better, in a secrets manager)
+      - JWT_SECRET=changeme-generate-a-strong-random-production-secret
+      - JWT_EXPIRATION_MINUTES=60
     volumes:
       - ./import-daten:/app/import
 

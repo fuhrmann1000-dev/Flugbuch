@@ -30,7 +30,7 @@ public class FlightSearchCriteria {
 
     private String registration;
 
-    private String flightType;
+    private FlightType flightType;
 
     @DateTimeFormat(pattern = "dd.MM.yyyy")
     @JsonFormat(pattern = "dd.MM.yyyy")
