@@ -114,23 +114,23 @@
                     @if (!isLoading() && !hasError()) {
                     @for (flight of pagedFlights(); track flight.id) {
                     <tr class="fl-row">
-                        <td class="fl-date">{{ flight.flightDate }}</td>
+                        <td class="fl-date">{{ flight.date }}</td>
 
                         <td>
-                            <span class="fl-reg">{{ flight.aircraftRegistration }}</span>
-                            <span class="fl-model">{{ flight.aircraftModel }}</span>
+                            <span class="fl-reg">{{ flight.registration }}</span>
+                            <span class="fl-model">{{ flight.aircraftType }}</span>
                         </td>
 
                         <td>
-                            <span class="fl-times">{{ flight.startTimeUtc }} – {{ flight.landingTimeUtc }}</span>
-                            <span class="fl-dur">⏱ {{ flight.durationFormatted }}</span>
+                            <span class="fl-times">{{ flight.startTime }} – {{ flight.landingTime }}</span>
+                            <span class="fl-dur">⏱ {{ getDuration(flight.startTime, flight.landingTime) }}</span>
                         </td>
 
                         <td class="fl-route">
-                            {{ flight.departureLocation }} → {{ flight.arrivalLocation }}
+                            {{ flight.departureAirfield }} → {{ flight.destinationAirfield }}
                         </td>
 
-                        <td class="fl-pilot">{{ flight.pilotInCommandName }}</td>
+                        <td class="fl-pilot">{{ flight.pilot }}</td>
 
                         <td>
                             <span class="fl-badge" [ngClass]="getFlightTypeClass(flight.flightType)">
@@ -138,7 +138,7 @@
                             </span>
                         </td>
 
-                        <td class="center fl-landings">{{ flight.numberOfLandings }}</td>
+                        <td class="center fl-landings">{{ flight.flightCount }}</td>
 
                         <td class="fl-remarks" [title]="flight.remarks ?? ''">
                             {{ flight.remarks }}

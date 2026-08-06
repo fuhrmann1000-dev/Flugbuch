@@ -30,13 +30,13 @@ export class FlightListComponent implements OnInit, OnDestroy {
     const term = this.searchTerm.toLowerCase().trim();
     if (!term) return this.allFlights();
     return this.allFlights().filter(f =>
-      f.flightDate.toLowerCase().includes(term) ||
-      f.pilotInCommandName.toLowerCase().includes(term) ||
-      f.aircraftRegistration.toLowerCase().includes(term) ||
-      f.aircraftModel.toLowerCase().includes(term) ||
+      f.date.toLowerCase().includes(term) ||
+      f.pilot.toLowerCase().includes(term) ||
+      f.registration.toLowerCase().includes(term) ||
+      f.aircraftType.toLowerCase().includes(term) ||
       f.flightType.toLowerCase().includes(term) ||
-      f.departureLocation.toLowerCase().includes(term) ||
-      f.arrivalLocation.toLowerCase().includes(term) ||
+      f.departureAirfield.toLowerCase().includes(term) ||
+      f.destinationAirfield.toLowerCase().includes(term) ||
       (f.remarks ?? '').toLowerCase().includes(term)
     );
   });
@@ -128,5 +128,19 @@ export class FlightListComponent implements OnInit, OnDestroy {
 
   public get showingTo(): number {
     return Math.min(this.currentPage * this.pageSize, this.filteredFlights().length);
+  }
+
+  /**
+   * The backend only sends startTime/landingTime ("HH:mm" each) - there's
+   * no precomputed duration field - so we work it out here for display.
+   */
+  public getDuration(startTime: string, landingTime: string): string {
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [landingHours, landingMinutes] = landingTime.split(':').map(Number);
+    let totalMinutes = (landingHours * 60 + landingMinutes) - (startHours * 60 + startMinutes);
+    if (totalMinutes < 0) {
+      totalMinutes += 24 * 60; // landed after midnight
+    }
+    return `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`;
   }
 }

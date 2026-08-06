@@ -1,6 +1,7 @@
-import { Component, signal, HostListener } from '@angular/core';
+import { Component, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, RouterLinkActive, RouterLink } from '@angular/router';
+import { Router, RouterModule, RouterLinkActive, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth';
 
 interface NavItem {
   label: string;
@@ -42,5 +43,14 @@ export class MainLayoutComponent {
   @HostListener('document:keydown.escape')
   public onEscape(): void {
     this.mobileOpen.set(false);
+  }
+
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
+  /** Clears the stored JWT and sends the pilot back to the login screen. */
+  public logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

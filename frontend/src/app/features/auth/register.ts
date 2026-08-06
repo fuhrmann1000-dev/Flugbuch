@@ -1,7 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth';
 
 @Component({
     selector: 'app-register',
@@ -13,6 +15,9 @@ import { Router, RouterLink } from '@angular/router';
 export class RegisterComponent {
     public firstName: string = '';
     public lastName: string = '';
+    // Bound to the "E-Mail" field; sent to the backend as the pilot's
+    // username. firstName/lastName aren't sent - the backend doesn't have
+    // fields for a display name yet, only username + password.
     public email: string = '';
     public password: string = '';
     public passwordConfirm: string = '';
@@ -20,15 +25,29 @@ export class RegisterComponent {
     public hasError = signal(false);
     public errorMsg: string = '';
 
-    constructor(private router: Router) { }
+    private readonly authService = inject(AuthService);
+    private readonly router = inject(Router);
 
+    /** Calls the real register endpoint. On success sends the pilot to /login - registering doesn't log them in automatically. */
     public register(): void {
         if (this.password !== this.passwordConfirm) {
             this.hasError.set(true);
             this.errorMsg = 'Passwörter stimmen nicht überein.';
             return;
         }
+
         this.isLoading.set(true);
-        setTimeout(() => this.router.navigate(['/flights']), 900);
+        this.hasError.set(false);
+
+        this.authService.register(this.email, this.password).subscribe({
+            next: () => this.router.navigate(['/login']),
+            error: (error: HttpErrorResponse) => {
+                this.isLoading.set(false);
+                this.hasError.set(true);
+                this.errorMsg = error.status === 409
+                    ? 'Dieser Benutzername ist bereits vergeben.'
+                    : 'Registrierung fehlgeschlagen. Bitte versuche es erneut.';
+            }
+        });
     }
 }

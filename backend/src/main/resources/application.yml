@@ -45,3 +45,17 @@ ftp:
 jwt:
     secret: ${JWT_SECRET:local-dev-only-secret-do-not-use-in-production-9f3a7c1e}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
+
+# The frontend origin allowed to call this API (CORS). Defaults to the
+# Angular dev server; override via CORS_ALLOWED_ORIGIN once the frontend
+# has a real production URL (see docker-compose.yml).
+cors:
+    allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:4200}
+
+# Always-present ADMIN account, created on startup if it doesn't exist yet
+# (see DefaultAdminSeeder). The password below is a local development/tests
+# default only; production must override it via ADMIN_PASSWORD with a real,
+# strong password (see docker-compose.yml).
+admin:
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:admin-local-dev-only-change-in-production}

@@ -1,5 +1,8 @@
 package de.windenshelter.flugbuch.security;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,6 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +34,14 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    /**
+     * The origin the Angular frontend is served from. Defaults to the local
+     * dev server; override with the {@code CORS_ALLOWED_ORIGIN} environment
+     * variable once the frontend has a real production URL.
+     */
+    @Value("${cors.allowed-origin:http://localhost:4200}")
+    private String allowedOrigin;
+
     /** BCrypt is the standard, salted, one-way hash for storing pilot passwords. */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,10 +54,29 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Tells the browser it's fine for {@link #allowedOrigin} (the Angular
+     * dev server) to call this API. Without this, the browser blocks every
+     * cross-origin request itself before it even reaches our code - a valid
+     * JWT wouldn't matter, the request never leaves the browser.
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of(allowedOrigin));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
     /** Defines which routes are public and installs the JWT filter ahead of Spring's default login filter. */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth

@@ -42,6 +42,11 @@ services:
       # TODO: generate a strong random secret for production and put it here (or better, in a secrets manager)
       - JWT_SECRET=changeme-generate-a-strong-random-production-secret
       - JWT_EXPIRATION_MINUTES=60
+      # TODO: point this at the real frontend URL once it's deployed
+      - CORS_ALLOWED_ORIGIN=http://localhost:4200
+      # TODO: set a real, strong password before deploying (this is a placeholder)
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=changeme-set-a-strong-production-password
     volumes:
       - ./import-daten:/app/import
 

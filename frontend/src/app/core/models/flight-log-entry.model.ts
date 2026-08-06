@@ -1,15 +1,24 @@
+/**
+ * Mirrors the backend's FlightLogEntryDto field-for-field. Date/time fields
+ * come over the wire as strings ("dd.MM.yyyy" / "HH:mm"), not Date objects -
+ * that's how the backend serializes LocalDate/LocalTime.
+ */
 export interface FlightLogEntry {
-    id: string;
-    flightDate: string;               // Format: "DD.MM.YYYY"
-    startTimeUtc: string;             // Format: "HH:MM"
-    landingTimeUtc: string;           // Format: "HH:MM"
-    durationFormatted: string;        // z.B. "1h 13m" (wird berechnet)
-    aircraftRegistration: string;     // z.B. "D-MVBO"
-    aircraftModel: string;            // z.B. "Merlin 1200"
-    pilotInCommandName: string;       // Name des verantwortlichen Piloten
-    departureLocation: string;        // "SLP Altes Lager"
-    arrivalLocation: string;          // "SLP Altes Lager"
-    flightType: string;               // "Schlepp", "Charter VFR", "Instruction"
-    numberOfLandings: number;         // Landungen
-    remarks?: string;                 // Bemerkungen / expanding Details
+    id: number;
+    date: string;                     // Format: "DD.MM.YYYY"
+    startTime: string;                // Format: "HH:MM"
+    landingTime: string;               // Format: "HH:MM"
+    aircraftType: string;
+    registration: string;
+    pilot: string;
+    guests: number | null;
+    flightType: string;
+    departureAirfield: string;
+    destinationAirfield: string;
+    flightDirector: string | null;
+    towedAircraft: string | null;
+    towHeight: number | null;
+    amount: number | null;
+    remarks: string | null;
+    flightCount: number | null;
 }
