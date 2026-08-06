@@ -41,6 +41,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import de.windenshelter.flugbuch.dto.FlightLogEntryDto;
 import de.windenshelter.flugbuch.dto.FlightSearchCriteria;
+import de.windenshelter.flugbuch.dto.FlightType;
 import de.windenshelter.flugbuch.service.FlightService;
 
 /**
@@ -249,13 +250,13 @@ class MainFlightLogControllerIntegrationTest {
         given(flightService.findAll(any(FlightSearchCriteria.class), any(Pageable.class)))
                 .willReturn(new PageImpl<>(List.of(sampleDto)));
 
-        mockMvc.perform(get(BASE_URL).param("flightType", "Schulung"))
+        mockMvc.perform(get(BASE_URL).param("flightType", "TYPE_1"))
                 .andExpect(status().isOk());
 
         ArgumentCaptor<FlightSearchCriteria> captor = ArgumentCaptor.forClass(FlightSearchCriteria.class);
         verify(flightService).findAll(captor.capture(), any(Pageable.class));
 
-        assertThat(captor.getValue().getFlightType()).isEqualTo("Schulung");
+        assertThat(captor.getValue().getFlightType()).isEqualTo(FlightType.TYPE_1);
     }
 
     @Test

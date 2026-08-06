@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
 import de.windenshelter.flugbuch.dto.FlightSearchCriteria;
+import de.windenshelter.flugbuch.dto.FlightType;
 import de.windenshelter.flugbuch.model.StagingMainFlightLog;
 
 /**
@@ -17,9 +18,11 @@ import de.windenshelter.flugbuch.model.StagingMainFlightLog;
  * are simply left out, so any subset of fields (or none at all) can be
  * queried through the same repository method.
  *
- * The text filters (pilot, aircraftType, registration, flightType) use a
+ * The free-text filters (pilot, aircraftType, registration) use a
  * case-insensitive partial match (SQL {@code LIKE %value%}), e.g.
- * {@code pilot=Max} matches "Max Mustermann".
+ * {@code pilot=Max} matches "Max Mustermann". {@code flightType} is a fixed
+ * dropdown (see {@link de.windenshelter.flugbuch.dto.FlightType}), so it's
+ * matched exactly instead.
  */
 public final class FlightSpecifications {
 
@@ -50,7 +53,7 @@ public final class FlightSpecifications {
         if (StringUtils.hasText(criteria.getRegistration())) {
             specs.add(hasRegistration(criteria.getRegistration()));
         }
-        if (StringUtils.hasText(criteria.getFlightType())) {
+        if (criteria.getFlightType() != null) {
             specs.add(hasFlightType(criteria.getFlightType()));
         }
 
@@ -82,10 +85,9 @@ public final class FlightSpecifications {
                 cb.like(cb.lower(root.get("kennzeichen")), containsPattern(registration), LIKE_ESCAPE_CHAR);
     }
 
-    /** Matches entries whose {@code flugart} (flight type) contains {@code flightType}, ignoring case. */
-    public static Specification<StagingMainFlightLog> hasFlightType(String flightType) {
-        return (root, query, cb) ->
-                cb.like(cb.lower(root.get("flugart")), containsPattern(flightType), LIKE_ESCAPE_CHAR);
+    /** Matches entries whose {@code flugart} (flight type) equals exactly the selected {@code flightType}. */
+    public static Specification<StagingMainFlightLog> hasFlightType(FlightType flightType) {
+        return (root, query, cb) -> cb.equal(root.get("flugart"), flightType.getFlugartValue());
     }
 
     /**
