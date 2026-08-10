@@ -7,14 +7,38 @@
         <h1 class="pf-title">{{ 'PROFILE.TITLE' | translate }}</h1>
     </div>
 
+    @if (isLoading()) {
+    <p class="pf-loading">{{ 'PROFILE.LOADING' | translate }}</p>
+    } @else if (loadError()) {
+    <div class="pf-banner pf-error">{{ 'PROFILE.LOAD_ERROR' | translate }}</div>
+    } @else {
+
     <div class="pf-grid">
 
         <!-- Left: Avatar + Stats -->
         <div class="pf-sidebar">
             <div class="pf-avatar-card">
-                <div class="pf-avatar">{{ firstName[0] }}{{ lastName[0] }}</div>
-                <div class="pf-name">{{ firstName }} {{ lastName }}</div>
-                <div class="pf-role">{{ licenseType }} · {{ homeAirfield }}</div>
+                <div class="pf-avatar-wrap" (click)="pictureInput.click()" [class.uploading]="pictureUploading()">
+                    @if (savedProfile().profilePicture) {
+                    <img class="pf-avatar pf-avatar-img" [src]="savedProfile().profilePicture" alt="" />
+                    } @else {
+                    <div class="pf-avatar">{{ savedProfile().firstName[0] }}{{ savedProfile().lastName[0] }}</div>
+                    }
+                    <div class="pf-avatar-edit" [title]="'PROFILE.CHANGE_PICTURE' | translate">
+                        @if (pictureUploading()) {
+                        <span class="pf-avatar-spinner"></span>
+                        } @else {
+                        <span>✎</span>
+                        }
+                    </div>
+                    <input #pictureInput type="file" accept="image/png,image/jpeg,image/gif,image/webp"
+                        (change)="onPictureSelected($event)" style="display:none" />
+                </div>
+                @if (pictureError()) {
+                <p class="pf-avatar-error">{{ pictureError() | translate }}</p>
+                }
+                <div class="pf-name">{{ savedProfile().firstName }} {{ savedProfile().lastName }}</div>
+                <div class="pf-role">{{ savedProfile().licenseType }} · {{ savedProfile().homeAirfield }}</div>
                 <div class="pf-stats">
                     @for (s of stats; track s.label) {
                     <div class="pf-stat">
@@ -37,6 +61,9 @@
                 <div class="pf-card-body">
                     @if (saveSuccess()) {
                     <div class="pf-banner pf-success">{{ 'PROFILE.SAVE_SUCCESS' | translate }}</div>
+                    }
+                    @if (saveError()) {
+                    <div class="pf-banner pf-error">{{ 'PROFILE.SAVE_ERROR' | translate }}</div>
                     }
                     <div class="fe-row">
                         <div class="fe-field">
@@ -75,8 +102,9 @@
                         </div>
                     </div>
                     <div class="pf-actions">
-                        <button class="btn btn-primary" (click)="save()">{{ 'PROFILE.SAVE_CHANGES' | translate
-                            }}</button>
+                        <button class="btn btn-primary" (click)="save()" [disabled]="isSaving()">
+                            {{ (isSaving() ? 'COMMON.SAVING' : 'PROFILE.SAVE_CHANGES') | translate }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -87,6 +115,12 @@
                     <span class="pf-card-title">{{ 'PROFILE.CARD_PASSWORD' | translate }}</span>
                 </div>
                 <div class="pf-card-body">
+                    @if (passwordSuccess()) {
+                    <div class="pf-banner pf-success">{{ 'PROFILE.PASSWORD_UPDATE_SUCCESS' | translate }}</div>
+                    }
+                    @if (passwordError()) {
+                    <div class="pf-banner pf-error">{{ passwordError() | translate }}</div>
+                    }
                     <div class="fe-field">
                         <label class="fe-label">{{ 'PROFILE.LABEL_CURRENT_PW' | translate }}</label>
                         <input type="password" class="fe-input" [(ngModel)]="currentPw" name="cpw"
@@ -105,7 +139,9 @@
                         </div>
                     </div>
                     <div class="pf-actions">
-                        <button class="btn btn-ghost">{{ 'PROFILE.UPDATE_PASSWORD' | translate }}</button>
+                        <button class="btn btn-ghost" (click)="changePassword()" [disabled]="passwordSaving()">
+                            {{ (passwordSaving() ? 'COMMON.SAVING' : 'PROFILE.UPDATE_PASSWORD') | translate }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -120,10 +156,42 @@
                         <p class="pf-danger-text">{{ 'PROFILE.DELETE_ACCOUNT_TEXT' | translate }}</p>
                         <p class="pf-danger-sub">{{ 'PROFILE.DELETE_ACCOUNT_SUB' | translate }}</p>
                     </div>
-                    <button class="btn btn-danger">{{ 'PROFILE.DELETE_ACCOUNT_BUTTON' | translate }}</button>
+                    <button class="btn btn-danger" (click)="openDeleteModal()">{{ 'PROFILE.DELETE_ACCOUNT_BUTTON' |
+                        translate }}</button>
                 </div>
             </div>
 
         </div>
     </div>
+    }
+
+    <!-- Delete account confirmation modal -->
+    @if (showDeleteModal()) {
+    <div class="modal-overlay" (click)="closeDeleteModal()">
+        <div class="modal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span>{{ 'PROFILE.DELETE_MODAL_TITLE' | translate }}</span>
+                <button class="modal-close" (click)="closeDeleteModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="pf-danger-sub">{{ 'PROFILE.DELETE_MODAL_TEXT' | translate }}</p>
+                @if (deleteError()) {
+                <div class="pf-banner pf-error">{{ deleteError() | translate }}</div>
+                }
+                <div class="fe-field">
+                    <label class="fe-label">{{ 'PROFILE.DELETE_MODAL_PASSWORD_LABEL' | translate }}</label>
+                    <input type="password" class="fe-input" [(ngModel)]="deletePassword" name="delpw"
+                        placeholder="••••••••" (keydown.enter)="confirmDeleteAccount()" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" (click)="closeDeleteModal()">{{ 'COMMON.CANCEL' | translate }}</button>
+                <button class="btn btn-danger" (click)="confirmDeleteAccount()" [disabled]="deleteLoading()">
+                    {{ (deleteLoading() ? 'COMMON.SAVING' : 'PROFILE.DELETE_ACCOUNT_BUTTON') | translate }}
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+
 </div>

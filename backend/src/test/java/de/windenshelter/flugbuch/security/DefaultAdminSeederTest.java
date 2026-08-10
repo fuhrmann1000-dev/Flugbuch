@@ -52,6 +52,16 @@ class DefaultAdminSeederTest {
         assertThat(savedAdmin.getUsername()).isEqualTo("admin");
         assertThat(savedAdmin.getPassword()).isEqualTo("hashed-password");
         assertThat(savedAdmin.getRoles()).containsExactly(adminRole);
+
+        // Placeholder profile data must be populated too, so GET /pilots/me
+        // has something real to return for this test account right away.
+        assertThat(savedAdmin.getFirstName()).isNotBlank();
+        assertThat(savedAdmin.getLastName()).isNotBlank();
+        assertThat(savedAdmin.getEmail()).isNotBlank();
+        assertThat(savedAdmin.getPhone()).isNotBlank();
+        assertThat(savedAdmin.getLicenseType()).isNotBlank();
+        assertThat(savedAdmin.getLicenseNumber()).isNotBlank();
+        assertThat(savedAdmin.getHomeAirfield()).isNotBlank();
     }
 
     // Every later startup: an admin already exists, so nothing should be created again.

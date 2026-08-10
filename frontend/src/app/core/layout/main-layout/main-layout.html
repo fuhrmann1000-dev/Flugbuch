@@ -97,7 +97,11 @@
 
         <!-- Profile: takes you to the profile page. -->
         <div class="ml-profile" routerLink="/profile" style="cursor: pointer;">
-            <div class="ml-profile-avatar">P</div>
+            @if (profilePicture()) {
+            <img class="ml-profile-avatar ml-profile-avatar-img" [src]="profilePicture()" alt="" />
+            } @else {
+            <div class="ml-profile-avatar">{{ profileInitials() }}</div>
+            }
             <div class="ml-profile-info">
                 <span class="ml-profile-name">{{ 'NAV.PROFILE' | translate }}</span>
                 <span class="ml-profile-role">{{ 'NAV.PILOT_ROLE' | translate }}</span>
