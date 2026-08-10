@@ -59,18 +59,24 @@ export class FlightEntryComponent implements OnInit {
     this.saveSuccess.set(false);
     this.saveError.set(false);
 
+    // Maps this form's local field names to the backend's FlightLogEntryDto
+    // field names (see core/models/flight-log-entry.model.ts).
     const entry: Partial<FlightLogEntry> = {
-      flightDate: this.flightDate,
-      startTimeUtc: this.startTimeUtc,
-      landingTimeUtc: this.landingTimeUtc,
-      aircraftModel: this.aircraftModel,
-      aircraftRegistration: this.aircraftRegistration,
-      pilotInCommandName: this.pilotInCommandName,
-      numberOfLandings: this.numberOfLandings,
-      departureLocation: this.departureLocation,
-      arrivalLocation: this.arrivalLocation,
+      date: this.toBackendDateFormat(this.flightDate),
+      startTime: this.startTimeUtc,
+      landingTime: this.landingTimeUtc,
+      aircraftType: this.aircraftModel,
+      registration: this.aircraftRegistration,
+      pilot: this.pilotInCommandName,
+      flightCount: this.numberOfLandings,
+      departureAirfield: this.departureLocation,
+      destinationAirfield: this.arrivalLocation,
       flightType: this.flightType,
       remarks: this.remarks,
+      guests: this.guests,
+      flightDirector: this.flightController,
+      towedAircraft: this.towedAircraft,
+      towHeight: this.towHeight ? Number(this.towHeight) : null,
     };
 
     this.flightDataService.createFlightLogEntry(entry).subscribe({
@@ -88,5 +94,15 @@ export class FlightEntryComponent implements OnInit {
 
   public cancel(): void {
     this.router.navigate(['/flights']);
+  }
+
+  /**
+   * The native <input type="date"> gives us "YYYY-MM-DD" (ISO), but the
+   * backend's FlightLogEntryDto expects "dd.MM.yyyy" - without this
+   * conversion, saving fails with a 400.
+   */
+  private toBackendDateFormat(isoDate: string): string {
+    const [year, month, day] = isoDate.split('-');
+    return `${day}.${month}.${year}`;
   }
 }
