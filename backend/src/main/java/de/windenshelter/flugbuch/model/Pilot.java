@@ -39,6 +39,29 @@ public class Pilot {
     @Column(nullable = false)
     private String password;
 
+    // Profile fields (ticket: functional profile page). All nullable - a pilot
+    // created via /auth/register only has username/password/roles until they
+    // fill these in on the Profile page themselves.
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phone;
+    private String licenseType;
+    private String licenseNumber;
+    private String homeAirfield;
+
+    /**
+     * The avatar image as a base64 data URI (e.g. {@code data:image/png;base64,...}),
+     * so the frontend can drop it straight into an {@code <img src>} with no
+     * separate file-serving endpoint needed. Plain {@code TEXT} instead of
+     * {@code @Lob} - simpler and more predictable across H2 (dev/tests) and
+     * Postgres (prod) than JDBC CLOB streaming, and this is read/written
+     * eagerly as a whole string anyway. Null means "no picture uploaded yet -
+     * show the initials avatar instead" (frontend concern, not enforced here).
+     */
+    @Column(columnDefinition = "TEXT")
+    private String profilePicture;
+
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "pilot_roles",

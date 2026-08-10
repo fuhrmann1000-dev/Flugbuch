@@ -1,8 +1,9 @@
-import { Component, inject, signal, HostListener } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, RouterLinkActive, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../services/auth';
+import { PilotService } from '../../services/pilot';
 import { LanguageSwitcherComponent } from '../language-switcher/language-switcher';
 
 interface NavItem {
@@ -19,9 +20,22 @@ interface NavItem {
   templateUrl: './main-layout.html',
   styleUrls: ['./main-layout.scss'],
 })
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit {
   public readonly collapsed = signal<boolean>(false);
   public readonly mobileOpen = signal<boolean>(false);
+
+  private readonly pilotService = inject(PilotService);
+
+  // Shown in the profile shortcut at the bottom of the sidebar. Derived from
+  // PilotService.currentProfile (a shared signal) rather than a local copy,
+  // so uploading a new picture on the Profile page updates the sidebar too -
+  // both just read/write the same singleton, no manual syncing needed.
+  public readonly profilePicture = computed(() => this.pilotService.currentProfile()?.profilePicture ?? null);
+  public readonly profileInitials = computed(() => {
+    const profile = this.pilotService.currentProfile();
+    const initials = `${profile?.firstName?.[0] ?? ''}${profile?.lastName?.[0] ?? ''}`;
+    return initials || 'P'; // 'P' placeholder until the real profile loads (or if it fails to)
+  });
 
   public readonly navItems: NavItem[] = [
     { label: 'NAV.DASHBOARD', icon: 'grid', route: '/dashboard' },
@@ -30,6 +44,12 @@ export class MainLayoutComponent {
     { label: 'NAV.DATA_MANAGEMENT', icon: 'database', route: '/data' },
     { label: 'NAV.SETTINGS', icon: 'settings', route: '/settings' },
   ];
+
+  public ngOnInit(): void {
+    // Triggers the initial load into PilotService.currentProfile (see there);
+    // best-effort - if this fails, the sidebar just keeps showing the placeholder.
+    this.pilotService.getMyProfile().subscribe({ error: () => { /* keep the placeholder */ } });
+  }
 
   public toggleSidebar(): void {
     this.collapsed.update(v => !v);

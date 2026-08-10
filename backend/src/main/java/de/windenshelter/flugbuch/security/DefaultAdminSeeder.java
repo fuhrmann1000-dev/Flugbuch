@@ -44,6 +44,20 @@ public class DefaultAdminSeeder implements CommandLineRunner {
         admin.setUsername(adminProperties.getUsername());
         admin.setPassword(passwordEncoder.encode(adminProperties.getPassword()));
         admin.setRoles(Set.of(adminRole));
+
+        // Placeholder profile data - not meant to be "real", just enough so
+        // that opening the Profile page with this test account immediately
+        // shows data that came back from GET /pilots/me, proving the whole
+        // profile flow works end-to-end without having to fill the form in
+        // by hand first.
+        admin.setFirstName("Admin");
+        admin.setLastName("Pilot");
+        admin.setEmail("admin@flugbuch.local");
+        admin.setPhone("+49 000 0000000");
+        admin.setLicenseType("ATPL");
+        admin.setLicenseNumber("D.ATPL.00001");
+        admin.setHomeAirfield("EDPU — Altes Lager");
+
         pilotRepository.save(admin);
     }
 }

@@ -295,6 +295,10 @@ $accent-bg: rgba(56, 139, 253, 0.12);
     font-family: 'IBM Plex Mono', monospace;
 }
 
+.ml-profile-avatar-img {
+    object-fit: cover;
+}
+
 .ml-profile-info {
     display: flex;
     flex-direction: column;
