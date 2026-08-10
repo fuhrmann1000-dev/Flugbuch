@@ -3,13 +3,13 @@
     <!-- ── Header ────────────────────────────────────────────── -->
     <div class="fe-header">
         <nav class="fe-breadcrumb">
-            <span>Dashboard</span>
+            <span>{{ 'COMMON.DASHBOARD_BREADCRUMB' | translate }}</span>
             <span class="sep">›</span>
-            <span>Logbook</span>
+            <span>{{ 'NAV.LOGBOOK' | translate }}</span>
             <span class="sep">›</span>
-            <span class="active">{{ pageTitle }}</span>
+            <span class="active">{{ pageTitle | translate }}</span>
         </nav>
-        <h1 class="fe-title">{{ pageTitle }}</h1>
+        <h1 class="fe-title">{{ pageTitle | translate }}</h1>
     </div>
 
     <!-- ── Form Card ─────────────────────────────────────────── -->
@@ -17,18 +17,18 @@
 
         <div class="fe-card-header">
             <span class="fe-card-icon">✈</span>
-            <span class="fe-card-title">{{ pageTitle }}</span>
+            <span class="fe-card-title">{{ pageTitle | translate }}</span>
         </div>
 
         <!-- Banners -->
         @if (saveSuccess()) {
         <div class="fe-banner fe-banner-success">
-            <span>✓</span> Flugdaten erfolgreich gespeichert.
+            <span>✓</span> {{ 'FLIGHT_ENTRY.SAVE_SUCCESS' | translate }}
         </div>
         }
         @if (saveError()) {
         <div class="fe-banner fe-banner-error">
-            <span>⚠</span> Speichern fehlgeschlagen. Bitte Backend prüfen.
+            <span>⚠</span> {{ 'FLIGHT_ENTRY.SAVE_ERROR' | translate }}
         </div>
         }
 
@@ -37,15 +37,16 @@
             <!-- Row 1: Datum / Startzeit / Landezeit -->
             <div class="fe-row">
                 <div class="fe-field">
-                    <label class="fe-label" for="flightDate">Datum</label>
+                    <label class="fe-label" for="flightDate">{{ 'DASHBOARD.TABLE_DATE' | translate }}</label>
                     <input id="flightDate" type="date" class="fe-input" [(ngModel)]="flightDate" name="flightDate" />
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label" for="startTime">Startzeit</label>
+                    <label class="fe-label" for="startTime">{{ 'FLIGHT_ENTRY.LABEL_START_TIME' | translate }}</label>
                     <input id="startTime" type="time" class="fe-input" [(ngModel)]="startTimeUtc" name="startTimeUtc" />
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label" for="landingTime">Landezeit</label>
+                    <label class="fe-label" for="landingTime">{{ 'FLIGHT_ENTRY.LABEL_LANDING_TIME' | translate
+                        }}</label>
                     <input id="landingTime" type="time" class="fe-input" [(ngModel)]="landingTimeUtc"
                         name="landingTimeUtc" />
                 </div>
@@ -54,17 +55,17 @@
             <!-- Row 2: Muster / Kennzeichen / Pilot -->
             <div class="fe-row">
                 <div class="fe-field">
-                    <label class="fe-label" for="model">Muster</label>
+                    <label class="fe-label" for="model">{{ 'DATA_MANAGEMENT.TABLE_MODEL' | translate }}</label>
                     <input id="model" type="text" class="fe-input" placeholder="z.B. Merlin 1200"
                         [(ngModel)]="aircraftModel" name="aircraftModel" />
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label" for="reg">Kennzeichen</label>
+                    <label class="fe-label" for="reg">{{ 'DASHBOARD.TABLE_REG' | translate }}</label>
                     <input id="reg" type="text" class="fe-input fe-mono" placeholder="z.B. D-MVBO"
                         [(ngModel)]="aircraftRegistration" name="aircraftRegistration" />
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label" for="pilot">Pilot</label>
+                    <label class="fe-label" for="pilot">{{ 'DASHBOARD.TABLE_PILOT' | translate }}</label>
                     <input id="pilot" type="text" class="fe-input" placeholder="Nachname, Vorname"
                         [(ngModel)]="pilotInCommandName" name="pilotInCommandName" />
                 </div>
@@ -73,18 +74,18 @@
             <!-- Row 3: Fluganzahl / Gäste / Flugart -->
             <div class="fe-row">
                 <div class="fe-field">
-                    <label class="fe-label" for="landings">Fluganzahl</label>
+                    <label class="fe-label" for="landings">{{ 'FLIGHT_ENTRY.LABEL_LANDINGS' | translate }}</label>
                     <input id="landings" type="number" class="fe-input" min="1" [(ngModel)]="numberOfLandings"
                         name="numberOfLandings" />
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label" for="guests">Gäste</label>
+                    <label class="fe-label" for="guests">{{ 'FLIGHT_ENTRY.LABEL_GUESTS' | translate }}</label>
                     <input id="guests" type="number" class="fe-input" min="0" [(ngModel)]="guests" name="guests" />
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label" for="flightType">Flugart</label>
+                    <label class="fe-label" for="flightType">{{ 'DASHBOARD.TABLE_TYPE' | translate }}</label>
                     <select id="flightType" class="fe-input fe-select" [(ngModel)]="flightType" name="flightType">
-                        <option value="" disabled>Bitte wählen…</option>
+                        <option value="" disabled>{{ 'COMMON.PLEASE_SELECT' | translate }}</option>
                         @for (type of flightTypeOptions; track type) {
                         <option [value]="type">{{ type }}</option>
                         }
@@ -95,17 +96,17 @@
             <!-- Row 4: Startplatz / Zielplatz / Flugleiter -->
             <div class="fe-row">
                 <div class="fe-field">
-                    <label class="fe-label" for="departure">Startplatz</label>
+                    <label class="fe-label" for="departure">{{ 'FLIGHT_ENTRY.LABEL_DEPARTURE' | translate }}</label>
                     <input id="departure" type="text" class="fe-input" placeholder="z.B. SLP Altes Lager"
                         [(ngModel)]="departureLocation" name="departureLocation" />
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label" for="arrival">Zielplatz</label>
+                    <label class="fe-label" for="arrival">{{ 'FLIGHT_ENTRY.LABEL_ARRIVAL' | translate }}</label>
                     <input id="arrival" type="text" class="fe-input" placeholder="z.B. SLP Altes Lager"
                         [(ngModel)]="arrivalLocation" name="arrivalLocation" />
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label" for="controller">Flugleiter</label>
+                    <label class="fe-label" for="controller">{{ 'FLIGHT_ENTRY.LABEL_CONTROLLER' | translate }}</label>
                     <input id="controller" type="text" class="fe-input" placeholder="Nachname, Vorname"
                         [(ngModel)]="flightController" name="flightController" />
                 </div>
@@ -114,17 +115,17 @@
             <!-- Row 5: Geschleppter / Schlepphöhe / Bemerkung -->
             <div class="fe-row">
                 <div class="fe-field">
-                    <label class="fe-label" for="towed">Geschleppter</label>
+                    <label class="fe-label" for="towed">{{ 'FLIGHT_ENTRY.LABEL_TOWED' | translate }}</label>
                     <input id="towed" type="text" class="fe-input fe-mono" placeholder="Kennzeichen"
                         [(ngModel)]="towedAircraft" name="towedAircraft" />
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label" for="towHeight">Schlepphöhe</label>
+                    <label class="fe-label" for="towHeight">{{ 'FLIGHT_ENTRY.LABEL_TOW_HEIGHT' | translate }}</label>
                     <input id="towHeight" type="text" class="fe-input" placeholder="z.B. 400m" [(ngModel)]="towHeight"
                         name="towHeight" />
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label" for="remarks">Bemerkung</label>
+                    <label class="fe-label" for="remarks">{{ 'FLIGHT_ENTRY.LABEL_REMARKS' | translate }}</label>
                     <input id="remarks" type="text" class="fe-input" placeholder="Optionale Notizen"
                         [(ngModel)]="remarks" name="remarks" />
                 </div>
@@ -133,13 +134,13 @@
             <!-- Actions -->
             <div class="fe-actions">
                 <button class="btn btn-ghost" (click)="cancel()" [disabled]="isSaving()">
-                    Abbrechen
+                    {{ 'COMMON.CANCEL' | translate }}
                 </button>
                 <button class="btn btn-primary" (click)="save()" [disabled]="isSaving()">
                     @if (isSaving()) {
-                    <span class="fe-spinner"></span> Speichern…
+                    <span class="fe-spinner"></span> {{ 'COMMON.SAVING' | translate }}
                     } @else {
-                    <span class="btn-icon">✓</span> Speichern
+                    <span class="btn-icon">✓</span> {{ 'COMMON.SAVE' | translate }}
                     }
                 </button>
             </div>

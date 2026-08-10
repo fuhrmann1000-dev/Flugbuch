@@ -1,9 +1,10 @@
 <div class="pf-page">
 
     <div class="pf-header">
-        <nav class="pf-breadcrumb"><span>Dashboard</span><span class="sep">›</span><span class="active">Profil</span>
+        <nav class="pf-breadcrumb"><span>{{ 'COMMON.DASHBOARD_BREADCRUMB' | translate }}</span><span
+                class="sep">›</span><span class="active">{{ 'NAV.PROFILE' | translate }}</span>
         </nav>
-        <h1 class="pf-title">MEIN PROFIL</h1>
+        <h1 class="pf-title">{{ 'PROFILE.TITLE' | translate }}</h1>
     </div>
 
     <div class="pf-grid">
@@ -18,7 +19,7 @@
                     @for (s of stats; track s.label) {
                     <div class="pf-stat">
                         <div class="pf-stat-value">{{ s.value }}</div>
-                        <div class="pf-stat-label">{{ s.label }}</div>
+                        <div class="pf-stat-label">{{ s.label | translate }}</div>
                     </div>
                     }
                 </div>
@@ -31,50 +32,51 @@
             <!-- Personal Info -->
             <div class="pf-card">
                 <div class="pf-card-header">
-                    <span class="pf-card-title">Persönliche Daten</span>
+                    <span class="pf-card-title">{{ 'PROFILE.CARD_PERSONAL' | translate }}</span>
                 </div>
                 <div class="pf-card-body">
                     @if (saveSuccess()) {
-                    <div class="pf-banner pf-success">✓ Profil erfolgreich gespeichert.</div>
+                    <div class="pf-banner pf-success">{{ 'PROFILE.SAVE_SUCCESS' | translate }}</div>
                     }
                     <div class="fe-row">
                         <div class="fe-field">
-                            <label class="fe-label">Vorname</label>
+                            <label class="fe-label">{{ 'COMMON.FIRST_NAME' | translate }}</label>
                             <input type="text" class="fe-input" [(ngModel)]="firstName" name="fn" />
                         </div>
                         <div class="fe-field">
-                            <label class="fe-label">Nachname</label>
+                            <label class="fe-label">{{ 'COMMON.LAST_NAME' | translate }}</label>
                             <input type="text" class="fe-input" [(ngModel)]="lastName" name="ln" />
                         </div>
                     </div>
                     <div class="fe-field">
-                        <label class="fe-label">E-Mail</label>
+                        <label class="fe-label">{{ 'COMMON.EMAIL' | translate }}</label>
                         <input type="email" class="fe-input" [(ngModel)]="email" name="em" />
                     </div>
                     <div class="fe-row">
                         <div class="fe-field">
-                            <label class="fe-label">Telefon</label>
+                            <label class="fe-label">{{ 'PROFILE.LABEL_PHONE' | translate }}</label>
                             <input type="tel" class="fe-input" [(ngModel)]="phone" name="ph" />
                         </div>
                         <div class="fe-field">
-                            <label class="fe-label">Heimatflugplatz</label>
+                            <label class="fe-label">{{ 'PROFILE.LABEL_HOME_AIRFIELD' | translate }}</label>
                             <input type="text" class="fe-input" [(ngModel)]="homeAirfield" name="haf" />
                         </div>
                     </div>
                     <div class="fe-row">
                         <div class="fe-field">
-                            <label class="fe-label">Lizenztyp</label>
+                            <label class="fe-label">{{ 'PROFILE.LABEL_LICENSE_TYPE' | translate }}</label>
                             <select class="fe-input fe-select" [(ngModel)]="licenseType" name="lic">
                                 @for (l of licenseTypes; track l) { <option [value]="l">{{ l }}</option> }
                             </select>
                         </div>
                         <div class="fe-field">
-                            <label class="fe-label">Lizenznummer</label>
+                            <label class="fe-label">{{ 'PROFILE.LABEL_LICENSE_NUMBER' | translate }}</label>
                             <input type="text" class="fe-input fe-mono" [(ngModel)]="licenseNumber" name="licn" />
                         </div>
                     </div>
                     <div class="pf-actions">
-                        <button class="btn btn-primary" (click)="save()">✓ Änderungen speichern</button>
+                        <button class="btn btn-primary" (click)="save()">{{ 'PROFILE.SAVE_CHANGES' | translate
+                            }}</button>
                     </div>
                 </div>
             </div>
@@ -82,28 +84,28 @@
             <!-- Password -->
             <div class="pf-card">
                 <div class="pf-card-header">
-                    <span class="pf-card-title">Passwort ändern</span>
+                    <span class="pf-card-title">{{ 'PROFILE.CARD_PASSWORD' | translate }}</span>
                 </div>
                 <div class="pf-card-body">
                     <div class="fe-field">
-                        <label class="fe-label">Aktuelles Passwort</label>
+                        <label class="fe-label">{{ 'PROFILE.LABEL_CURRENT_PW' | translate }}</label>
                         <input type="password" class="fe-input" [(ngModel)]="currentPw" name="cpw"
                             placeholder="••••••••" />
                     </div>
                     <div class="fe-row">
                         <div class="fe-field">
-                            <label class="fe-label">Neues Passwort</label>
+                            <label class="fe-label">{{ 'PROFILE.LABEL_NEW_PW' | translate }}</label>
                             <input type="password" class="fe-input" [(ngModel)]="newPw" name="npw"
                                 placeholder="••••••••" />
                         </div>
                         <div class="fe-field">
-                            <label class="fe-label">Passwort wiederholen</label>
+                            <label class="fe-label">{{ 'COMMON.PASSWORD_CONFIRM' | translate }}</label>
                             <input type="password" class="fe-input" [(ngModel)]="confirmPw" name="cpw2"
                                 placeholder="••••••••" />
                         </div>
                     </div>
                     <div class="pf-actions">
-                        <button class="btn btn-ghost">Passwort aktualisieren</button>
+                        <button class="btn btn-ghost">{{ 'PROFILE.UPDATE_PASSWORD' | translate }}</button>
                     </div>
                 </div>
             </div>
@@ -111,14 +113,14 @@
             <!-- Danger Zone -->
             <div class="pf-card pf-danger-card">
                 <div class="pf-card-header">
-                    <span class="pf-card-title pf-danger-title">Gefahrenzone</span>
+                    <span class="pf-card-title pf-danger-title">{{ 'PROFILE.DANGER_ZONE' | translate }}</span>
                 </div>
                 <div class="pf-card-body pf-danger-body">
                     <div>
-                        <p class="pf-danger-text">Konto dauerhaft löschen</p>
-                        <p class="pf-danger-sub">Alle Flugbuchdaten werden unwiderruflich gelöscht.</p>
+                        <p class="pf-danger-text">{{ 'PROFILE.DELETE_ACCOUNT_TEXT' | translate }}</p>
+                        <p class="pf-danger-sub">{{ 'PROFILE.DELETE_ACCOUNT_SUB' | translate }}</p>
                     </div>
-                    <button class="btn btn-danger">Konto löschen</button>
+                    <button class="btn btn-danger">{{ 'PROFILE.DELETE_ACCOUNT_BUTTON' | translate }}</button>
                 </div>
             </div>
 

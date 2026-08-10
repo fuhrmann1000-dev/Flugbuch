@@ -1,9 +1,12 @@
 import { Component, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, RouterLinkActive, RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../services/auth';
+import { LanguageSwitcherComponent } from '../language-switcher/language-switcher';
 
 interface NavItem {
+  /** Translation key (e.g. 'NAV.DASHBOARD'), not a display string - resolved via the translate pipe in the template. */
   label: string;
   icon: string;
   route: string;
@@ -12,7 +15,7 @@ interface NavItem {
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, RouterLinkActive, RouterLink],
+  imports: [CommonModule, RouterModule, RouterLinkActive, RouterLink, TranslatePipe, LanguageSwitcherComponent],
   templateUrl: './main-layout.html',
   styleUrls: ['./main-layout.scss'],
 })
@@ -21,11 +24,11 @@ export class MainLayoutComponent {
   public readonly mobileOpen = signal<boolean>(false);
 
   public readonly navItems: NavItem[] = [
-    { label: 'Dashboard', icon: 'grid', route: '/dashboard' },
-    { label: 'Logbook Entries', icon: 'book', route: '/logbook' },
-    { label: 'Add New Flight', icon: 'plus', route: '/flight/new' },
-    { label: 'Data Management', icon: 'database', route: '/data' },
-    { label: 'Settings', icon: 'settings', route: '/settings' },
+    { label: 'NAV.DASHBOARD', icon: 'grid', route: '/dashboard' },
+    { label: 'NAV.LOGBOOK', icon: 'book', route: '/flights' },
+    { label: 'NAV.ADD_FLIGHT', icon: 'plus', route: '/flights/new' },
+    { label: 'NAV.DATA_MANAGEMENT', icon: 'database', route: '/data' },
+    { label: 'NAV.SETTINGS', icon: 'settings', route: '/settings' },
   ];
 
   public toggleSidebar(): void {

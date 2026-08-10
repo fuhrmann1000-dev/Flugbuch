@@ -1,0 +1,7 @@
+<div class="ls-switch" role="group" aria-label="Sprache / Language">
+    @for (lang of languages; track lang) {
+    <button type="button" class="ls-btn" [class.active]="currentLang() === lang" (click)="setLanguage(lang)">
+        {{ lang.toUpperCase() }}
+    </button>
+    }
+</div>

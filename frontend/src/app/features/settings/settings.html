@@ -1,0 +1,59 @@
+<div class="pf-page">
+
+    <div class="pf-header">
+        <nav class="pf-breadcrumb"><span>{{ 'COMMON.DASHBOARD_BREADCRUMB' | translate }}</span><span
+                class="sep">›</span><span class="active">{{ 'NAV.SETTINGS' | translate }}</span></nav>
+        <h1 class="pf-title">{{ 'SETTINGS.TITLE' | translate }}</h1>
+    </div>
+
+    <div class="pf-forms st-forms">
+
+        <!-- Language -->
+        <div class="pf-card">
+            <div class="pf-card-header">
+                <span class="pf-card-title">{{ 'SETTINGS.CARD_LANGUAGE' | translate }}</span>
+            </div>
+            <div class="pf-card-body">
+                <p class="st-desc">{{ 'SETTINGS.CARD_LANGUAGE_DESC' | translate }}</p>
+                <app-language-switcher class="st-lang"></app-language-switcher>
+            </div>
+        </div>
+
+        <!-- Date format -->
+        <div class="pf-card">
+            <div class="pf-card-header">
+                <span class="pf-card-title">{{ 'SETTINGS.CARD_DATE_FORMAT' | translate }}</span>
+            </div>
+            <div class="pf-card-body">
+                <p class="st-desc">{{ 'SETTINGS.CARD_DATE_FORMAT_DESC' | translate }}</p>
+                <div class="fe-field">
+                    <select class="fe-input fe-select" [value]="settingsService.dateFormat()"
+                        (change)="setDateFormat($any($event.target).value)">
+                        <option value="dd.MM.yyyy">31.12.2026 (DE)</option>
+                        <option value="MM/dd/yyyy">12/31/2026 (US)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table defaults -->
+        <div class="pf-card">
+            <div class="pf-card-header">
+                <span class="pf-card-title">{{ 'SETTINGS.CARD_TABLE_DEFAULTS' | translate }}</span>
+            </div>
+            <div class="pf-card-body">
+                <p class="st-desc">{{ 'SETTINGS.CARD_TABLE_DEFAULTS_DESC' | translate }}</p>
+                <div class="fe-field">
+                    <label class="fe-label">{{ 'SETTINGS.LABEL_PAGE_SIZE' | translate }}</label>
+                    <select class="fe-input fe-select" [value]="settingsService.defaultPageSize()"
+                        (change)="setDefaultPageSize($any($event.target).value)">
+                        @for (opt of pageSizeOptions; track opt) {
+                        <option [value]="opt">{{ opt }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

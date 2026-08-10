@@ -1,23 +1,26 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
+import { AppDatePipe } from '../../core/pipes/app-date';
 
+// label/sub/trend hold translation keys, resolved via the translate pipe in the template.
 interface StatCard { label: string; value: string; sub: string; icon: string; trend?: string; trendUp?: boolean; }
 interface RecentFlight { date: string; reg: string; pilot: string; type: string; duration: string; typeClass: string; }
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule, RouterLink, TranslatePipe, AppDatePipe],
     templateUrl: './dashboard.html',
     styleUrls: ['./dashboard.scss'],
 })
 export class DashboardComponent {
     public readonly stats: StatCard[] = [
-        { label: 'Flüge gesamt', value: '174', sub: 'Alle Zeiträume', icon: '✈', trend: '+12 diesen Monat', trendUp: true },
-        { label: 'Flugstunden', value: '142h', sub: 'Kumuliert', icon: '⏱', trend: '+8h diesen Monat', trendUp: true },
-        { label: 'Aktive Piloten', value: '9', sub: 'Registriert', icon: '👤', },
-        { label: 'Schleppflüge', value: '98', sub: '56% aller Flüge', icon: '🪂', trend: '+5 diese Woche', trendUp: true },
+        { label: 'DASHBOARD.STAT_TOTAL_FLIGHTS', value: '174', sub: 'DASHBOARD.STAT_TOTAL_FLIGHTS_SUB', icon: '✈', trend: 'DASHBOARD.STAT_TOTAL_FLIGHTS_TREND', trendUp: true },
+        { label: 'DASHBOARD.STAT_HOURS', value: '142h', sub: 'DASHBOARD.STAT_HOURS_SUB', icon: '⏱', trend: 'DASHBOARD.STAT_HOURS_TREND', trendUp: true },
+        { label: 'DASHBOARD.STAT_ACTIVE_PILOTS', value: '9', sub: 'DASHBOARD.STAT_ACTIVE_PILOTS_SUB', icon: '👤', },
+        { label: 'DASHBOARD.STAT_TOWS', value: '98', sub: 'DASHBOARD.STAT_TOWS_SUB', icon: '🪂', trend: 'DASHBOARD.STAT_TOWS_TREND', trendUp: true },
     ];
 
     public readonly recentFlights: RecentFlight[] = [

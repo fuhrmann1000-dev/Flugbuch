@@ -2,19 +2,20 @@
 
     <div class="pl-header">
         <div>
-            <nav class="pl-breadcrumb"><span>Dashboard</span><span class="sep">›</span><span
-                    class="active">Piloten</span></nav>
-            <h1 class="pl-title">PILOTENVERWALTUNG</h1>
+            <nav class="pl-breadcrumb"><span>{{ 'COMMON.DASHBOARD_BREADCRUMB' | translate }}</span><span
+                    class="sep">›</span><span class="active">{{ 'NAV.PILOTS' | translate }}</span></nav>
+            <h1 class="pl-title">{{ 'PILOTS.TITLE' | translate }}</h1>
         </div>
-        <button class="btn btn-primary" (click)="openNew()">＋ Neuer Pilot</button>
+        <button class="btn btn-primary" (click)="openNew()">＋ {{ 'PILOTS.NEW_PILOT' | translate }}</button>
     </div>
 
     <div class="pl-toolbar">
         <div class="pl-search-wrap">
             <span class="pl-search-icon">⌕</span>
-            <input type="text" class="pl-search" placeholder="Suchen…" [(ngModel)]="searchTerm" name="search" />
+            <input type="text" class="pl-search" [placeholder]="'COMMON.SEARCH_PLACEHOLDER' | translate"
+                [(ngModel)]="searchTerm" name="search" />
         </div>
-        <span class="pl-count">{{ filtered().length }} Piloten</span>
+        <span class="pl-count">{{ 'PILOTS.COUNT' | translate:{ count: filtered().length } }}</span>
     </div>
 
     <div class="pl-card">
@@ -22,13 +23,13 @@
             <table class="pl-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>E-Mail</th>
-                        <th>Lizenz</th>
-                        <th class="center">Flüge</th>
-                        <th class="center">Stunden</th>
-                        <th class="center">Status</th>
-                        <th class="center">Aktion</th>
+                        <th>{{ 'PILOTS.TABLE_NAME' | translate }}</th>
+                        <th>{{ 'COMMON.EMAIL' | translate }}</th>
+                        <th>{{ 'PILOTS.TABLE_LICENSE' | translate }}</th>
+                        <th class="center">{{ 'PILOTS.TABLE_FLIGHTS' | translate }}</th>
+                        <th class="center">{{ 'PILOTS.TABLE_HOURS' | translate }}</th>
+                        <th class="center">{{ 'PILOTS.TABLE_STATUS' | translate }}</th>
+                        <th class="center">{{ 'COMMON.ACTION' | translate }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,21 +49,24 @@
                         <td class="center mono">{{ p.totalHours }}</td>
                         <td class="center">
                             <span class="pl-status" [class.active]="p.status === 'active'">
-                                {{ p.status === 'active' ? 'Aktiv' : 'Inaktiv' }}
+                                {{ (p.status === 'active' ? 'COMMON.STATUS_ACTIVE' : 'COMMON.STATUS_INACTIVE') |
+                                translate }}
                             </span>
                         </td>
                         <td class="center">
                             <div class="pl-actions">
-                                <button class="pl-btn" title="Bearbeiten" (click)="openEdit(p)">✎</button>
-                                <button class="pl-btn" title="Status wechseln" (click)="toggleStatus(p)">⟳</button>
-                                <button class="pl-btn pl-btn-del" title="Löschen">✕</button>
+                                <button class="pl-btn" [title]="'COMMON.EDIT' | translate"
+                                    (click)="openEdit(p)">✎</button>
+                                <button class="pl-btn" [title]="'PILOTS.ACTION_TOGGLE_STATUS' | translate"
+                                    (click)="toggleStatus(p)">⟳</button>
+                                <button class="pl-btn pl-btn-del" [title]="'COMMON.DELETE' | translate">✕</button>
                             </div>
                         </td>
                     </tr>
                     }
                     @empty {
                     <tr>
-                        <td colspan="7" class="pl-empty">Keine Piloten gefunden.</td>
+                        <td colspan="7" class="pl-empty">{{ 'PILOTS.EMPTY' | translate }}</td>
                     </tr>
                     }
                 </tbody>
@@ -75,37 +79,37 @@
     <div class="modal-overlay" (click)="closeModal()">
         <div class="modal-card" (click)="$event.stopPropagation()">
             <div class="modal-header">
-                <span>{{ editingPilot() ? 'Pilot bearbeiten' : 'Neuer Pilot' }}</span>
+                <span>{{ (editingPilot() ? 'PILOTS.MODAL_EDIT_TITLE' : 'PILOTS.NEW_PILOT') | translate }}</span>
                 <button class="modal-close" (click)="closeModal()">✕</button>
             </div>
             <div class="modal-body">
                 <div class="fe-row">
                     <div class="fe-field">
-                        <label class="fe-label">Vorname</label>
+                        <label class="fe-label">{{ 'COMMON.FIRST_NAME' | translate }}</label>
                         <input type="text" class="fe-input" [(ngModel)]="formFirstName" name="fn" placeholder="Max" />
                     </div>
                     <div class="fe-field">
-                        <label class="fe-label">Nachname</label>
+                        <label class="fe-label">{{ 'COMMON.LAST_NAME' | translate }}</label>
                         <input type="text" class="fe-input" [(ngModel)]="formLastName" name="ln"
                             placeholder="Mustermann" />
                     </div>
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label">E-Mail</label>
+                    <label class="fe-label">{{ 'COMMON.EMAIL' | translate }}</label>
                     <input type="email" class="fe-input" [(ngModel)]="formEmail" name="em"
                         placeholder="pilot@example.com" />
                 </div>
                 <div class="fe-field">
-                    <label class="fe-label">Lizenztyp</label>
+                    <label class="fe-label">{{ 'PILOTS.LICENSE_TYPE_LABEL' | translate }}</label>
                     <select class="fe-input fe-select" [(ngModel)]="formLicense" name="lic">
-                        <option value="" disabled>Bitte wählen…</option>
+                        <option value="" disabled>{{ 'COMMON.PLEASE_SELECT' | translate }}</option>
                         @for (l of licenseTypes; track l) { <option [value]="l">{{ l }}</option> }
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-ghost" (click)="closeModal()">Abbrechen</button>
-                <button class="btn btn-primary" (click)="saveModal()">Speichern</button>
+                <button class="btn btn-ghost" (click)="closeModal()">{{ 'COMMON.CANCEL' | translate }}</button>
+                <button class="btn btn-primary" (click)="saveModal()">{{ 'COMMON.SAVE' | translate }}</button>
             </div>
         </div>
     </div>

@@ -3,10 +3,10 @@
     <!-- Header -->
     <div class="dash-header">
         <div>
-            <p class="dash-greeting">Guten Morgen, Pilot ✈</p>
-            <h1 class="dash-title">Dashboard</h1>
+            <p class="dash-greeting">{{ 'DASHBOARD.GREETING' | translate }}</p>
+            <h1 class="dash-title">{{ 'NAV.DASHBOARD' | translate }}</h1>
         </div>
-        <a routerLink="/flights/new" class="btn btn-primary">＋ Neuer Flugeintrag</a>
+        <a routerLink="/flights/new" class="btn btn-primary">＋ {{ 'NAV.ADD_FLIGHT' | translate }}</a>
     </div>
 
     <!-- Stat Cards -->
@@ -16,12 +16,12 @@
             <div class="stat-icon">{{ stat.icon }}</div>
             <div class="stat-body">
                 <div class="stat-value">{{ stat.value }}</div>
-                <div class="stat-label">{{ stat.label }}</div>
-                <div class="stat-sub">{{ stat.sub }}</div>
+                <div class="stat-label">{{ stat.label | translate }}</div>
+                <div class="stat-sub">{{ stat.sub | translate }}</div>
             </div>
             @if (stat.trend) {
             <div class="stat-trend" [class.up]="stat.trendUp">
-                {{ stat.trendUp ? '↑' : '↓' }} {{ stat.trend }}
+                {{ stat.trendUp ? '↑' : '↓' }} {{ stat.trend | translate }}
             </div>
             }
         </div>
@@ -33,7 +33,7 @@
         <!-- Bar Chart -->
         <div class="dash-card dash-chart-card">
             <div class="dash-card-header">
-                <span class="dash-card-title">Flugstunden pro Monat</span>
+                <span class="dash-card-title">{{ 'DASHBOARD.CHART_TITLE' | translate }}</span>
                 <span class="dash-card-sub">2026</span>
             </div>
             <div class="dash-chart">
@@ -53,21 +53,21 @@
         <!-- Quick Actions -->
         <div class="dash-card dash-quick-card">
             <div class="dash-card-header">
-                <span class="dash-card-title">Schnellzugriff</span>
+                <span class="dash-card-title">{{ 'DASHBOARD.QUICK_ACTIONS' | translate }}</span>
             </div>
             <div class="dash-quick-list">
-                <a routerLink="/flights/new" class="quick-item"><span class="qi-icon">✈</span><span>Neuer
-                        Flugeintrag</span><span class="qi-arrow">›</span></a>
-                <a routerLink="/flights" class="quick-item"><span class="qi-icon">📋</span><span>Flugbuch
-                        öffnen</span><span class="qi-arrow">›</span></a>
-                <a routerLink="/pilots" class="quick-item"><span class="qi-icon">👤</span><span>Piloten
-                        verwalten</span><span class="qi-arrow">›</span></a>
-                <a routerLink="/data/import" class="quick-item"><span class="qi-icon">↓</span><span>Daten
-                        importieren</span><span class="qi-arrow">›</span></a>
-                <a routerLink="/data/export" class="quick-item"><span class="qi-icon">↑</span><span>Daten
-                        exportieren</span><span class="qi-arrow">›</span></a>
-                <a routerLink="/profile" class="quick-item"><span class="qi-icon">⚙</span><span>Profil
-                        bearbeiten</span><span class="qi-arrow">›</span></a>
+                <a routerLink="/flights/new" class="quick-item"><span class="qi-icon">✈</span><span>{{
+                        'DASHBOARD.QUICK_NEW_FLIGHT' | translate }}</span><span class="qi-arrow">›</span></a>
+                <a routerLink="/flights" class="quick-item"><span class="qi-icon">📋</span><span>{{
+                        'DASHBOARD.QUICK_OPEN_LOGBOOK' | translate }}</span><span class="qi-arrow">›</span></a>
+                <a routerLink="/pilots" class="quick-item"><span class="qi-icon">👤</span><span>{{
+                        'DASHBOARD.QUICK_MANAGE_PILOTS' | translate }}</span><span class="qi-arrow">›</span></a>
+                <a routerLink="/data/import" class="quick-item"><span class="qi-icon">↓</span><span>{{
+                        'DASHBOARD.QUICK_IMPORT' | translate }}</span><span class="qi-arrow">›</span></a>
+                <a routerLink="/data/export" class="quick-item"><span class="qi-icon">↑</span><span>{{
+                        'DASHBOARD.QUICK_EXPORT' | translate }}</span><span class="qi-arrow">›</span></a>
+                <a routerLink="/profile" class="quick-item"><span class="qi-icon">⚙</span><span>{{
+                        'DASHBOARD.QUICK_EDIT_PROFILE' | translate }}</span><span class="qi-arrow">›</span></a>
             </div>
         </div>
 
@@ -76,18 +76,18 @@
     <!-- Recent Flights -->
     <div class="dash-card">
         <div class="dash-card-header">
-            <span class="dash-card-title">Letzte Flüge</span>
-            <a routerLink="/flights" class="dash-card-link">Alle anzeigen →</a>
+            <span class="dash-card-title">{{ 'DASHBOARD.RECENT_FLIGHTS' | translate }}</span>
+            <a routerLink="/flights" class="dash-card-link">{{ 'DASHBOARD.VIEW_ALL' | translate }}</a>
         </div>
         <div class="dash-table-scroll">
             <table class="dash-table">
                 <thead>
                     <tr>
-                        <th>Datum</th>
-                        <th>Kennzeichen</th>
-                        <th>Pilot</th>
-                        <th>Flugart</th>
-                        <th>Dauer</th>
+                        <th>{{ 'DASHBOARD.TABLE_DATE' | translate }}</th>
+                        <th>{{ 'DASHBOARD.TABLE_REG' | translate }}</th>
+                        <th>{{ 'DASHBOARD.TABLE_PILOT' | translate }}</th>
+                        <th>{{ 'DASHBOARD.TABLE_TYPE' | translate }}</th>
+                        <th>{{ 'DASHBOARD.TABLE_DURATION' | translate }}</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -2,18 +2,22 @@ import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, catchError, of } from 'rxjs';
+import { TranslatePipe } from '@ngx-translate/core';
 import { FlightLogEntry } from '../../../core/models/flight-log-entry.model';
 import { FlightDataService } from '../../../core/services/flight-data';
+import { SettingsService } from '../../../core/services/settings';
+import { AppDatePipe } from '../../../core/pipes/app-date';
 
 @Component({
   selector: 'app-flight-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe],
   templateUrl: './flight-list.html',
   styleUrls: ['./flight-list.css'],
 })
 export class FlightListComponent implements OnInit, OnDestroy {
   private readonly flightDataService = inject(FlightDataService);
+  private readonly settingsService = inject(SettingsService);
   private readonly destroy$ = new Subject<void>();
 
   // State
@@ -21,7 +25,8 @@ export class FlightListComponent implements OnInit, OnDestroy {
   public readonly isLoading = signal<boolean>(true);
   public readonly hasError = signal<boolean>(false);
   public searchTerm = '';
-  public pageSize = 10;
+  // Starting page size follows the pilot's Settings preference (default 10).
+  public pageSize = this.settingsService.defaultPageSize();
   public currentPage = 1;
   public readonly pageSizeOptions = [10, 25, 50];
 

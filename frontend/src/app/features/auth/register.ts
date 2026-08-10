@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth';
 
 @Component({
     selector: 'app-register',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
+    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
     templateUrl: './register.html',
     styleUrls: ['./login.scss'],
 })
@@ -32,7 +33,7 @@ export class RegisterComponent {
     public register(): void {
         if (this.password !== this.passwordConfirm) {
             this.hasError.set(true);
-            this.errorMsg = 'Passwörter stimmen nicht überein.';
+            this.errorMsg = 'REGISTER.PASSWORD_MISMATCH';
             return;
         }
 
@@ -44,9 +45,11 @@ export class RegisterComponent {
             error: (error: HttpErrorResponse) => {
                 this.isLoading.set(false);
                 this.hasError.set(true);
+                // Holds a translation key, not display text - the template resolves it
+                // via the translate pipe so the message stays correct across language switches.
                 this.errorMsg = error.status === 409
-                    ? 'Dieser Benutzername ist bereits vergeben.'
-                    : 'Registrierung fehlgeschlagen. Bitte versuche es erneut.';
+                    ? 'REGISTER.USERNAME_TAKEN'
+                    : 'REGISTER.FAILED';
             }
         });
     }
