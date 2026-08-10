@@ -2,9 +2,10 @@
 
     <div class="dm-header">
         <div>
-            <nav class="dm-breadcrumb"><span>Dashboard</span><span class="sep">›</span><span
-                    class="active">Datenverwaltung</span></nav>
-            <h1 class="dm-title">DATENVERWALTUNG</h1>
+            <nav class="dm-breadcrumb"><span>{{ 'COMMON.DASHBOARD_BREADCRUMB' | translate }}</span><span
+                    class="sep">›</span><span class="active">{{ 'DATA_MANAGEMENT.BREADCRUMB' | translate }}</span>
+            </nav>
+            <h1 class="dm-title">{{ 'DATA_MANAGEMENT.TITLE' | translate }}</h1>
         </div>
     </div>
 
@@ -14,30 +15,31 @@
         <div class="dm-card">
             <div class="dm-card-header">
                 <span class="dm-card-icon">↓</span>
-                <span class="dm-card-title">Daten importieren</span>
+                <span class="dm-card-title">{{ 'DATA_MANAGEMENT.IMPORT_TITLE' | translate }}</span>
             </div>
             <div class="dm-card-body">
 
                 <!-- Mode Switch -->
                 <div class="dm-tabs">
                     <button class="dm-tab" [class.active]="importMode === 'csv'"
-                        (click)="importMode = 'csv'">CSV-Datei</button>
+                        (click)="importMode = 'csv'">{{ 'DATA_MANAGEMENT.IMPORT_CSV_TAB' | translate }}</button>
                     <button class="dm-tab" [class.active]="importMode === 'backup'"
-                        (click)="importMode = 'backup'">Backup (.json)</button>
+                        (click)="importMode = 'backup'">{{ 'DATA_MANAGEMENT.IMPORT_BACKUP_TAB' | translate }}</button>
                 </div>
 
                 <!-- Drop Zone -->
                 <div class="dm-dropzone">
                     <span class="dm-drop-icon">📂</span>
                     <p class="dm-drop-text">
-                        Datei hier ablegen oder
+                        {{ 'DATA_MANAGEMENT.DROP_TEXT' | translate }}
                         <label class="dm-drop-link">
-                            durchsuchen
+                            {{ 'DATA_MANAGEMENT.DROP_LINK' | translate }}
                             <input type="file" [accept]="importMode === 'csv' ? '.csv' : '.json'"
                                 (change)="onFileSelect($event)" style="display:none" />
                         </label>
                     </p>
-                    <p class="dm-drop-sub">{{ importMode === 'csv' ? 'CSV-Dateien bis 10 MB' : 'JSON-Backup-Dateien' }}
+                    <p class="dm-drop-sub">{{ (importMode === 'csv' ? 'DATA_MANAGEMENT.DROP_SUB_CSV' :
+                        'DATA_MANAGEMENT.DROP_SUB_BACKUP') | translate }}
                     </p>
                     @if (importFile) {
                     <div class="dm-file-chip">📄 {{ importFile.name }}</div>
@@ -47,18 +49,18 @@
                 <!-- Preview -->
                 @if (importPreview().length > 0) {
                 <div class="dm-preview">
-                    <p class="dm-preview-title">Vorschau (erste 3 Zeilen)</p>
+                    <p class="dm-preview-title">{{ 'DATA_MANAGEMENT.PREVIEW_TITLE' | translate }}</p>
                     <div class="dm-preview-scroll">
                         <table class="dm-preview-table">
                             <thead>
                                 <tr>
-                                    <th>Datum</th>
-                                    <th>Start</th>
-                                    <th>Land.</th>
-                                    <th>Reg</th>
-                                    <th>Muster</th>
-                                    <th>Pilot</th>
-                                    <th>Flugart</th>
+                                    <th>{{ 'DASHBOARD.TABLE_DATE' | translate }}</th>
+                                    <th>{{ 'DATA_MANAGEMENT.TABLE_START' | translate }}</th>
+                                    <th>{{ 'DATA_MANAGEMENT.TABLE_LANDING' | translate }}</th>
+                                    <th>{{ 'DATA_MANAGEMENT.TABLE_REG' | translate }}</th>
+                                    <th>{{ 'DATA_MANAGEMENT.TABLE_MODEL' | translate }}</th>
+                                    <th>{{ 'DASHBOARD.TABLE_PILOT' | translate }}</th>
+                                    <th>{{ 'DASHBOARD.TABLE_TYPE' | translate }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -72,12 +74,14 @@
                 }
 
                 @if (importSuccess()) {
-                <div class="dm-banner dm-success">✓ {{ importPreview().length }} Einträge erfolgreich importiert.</div>
+                <div class="dm-banner dm-success">✓ {{ 'DATA_MANAGEMENT.IMPORT_SUCCESS' | translate:{ count:
+                    importPreview().length } }}</div>
                 }
 
                 <button class="btn btn-primary" [disabled]="!importFile || importLoading()" (click)="startImport()">
-                    @if (importLoading()) { <span class="dm-spinner"></span> Importieren… }
-                    @else { ↓ Import starten }
+                    @if (importLoading()) { <span class="dm-spinner"></span> {{ 'DATA_MANAGEMENT.IMPORTING' |
+                    translate }} }
+                    @else { ↓ {{ 'DATA_MANAGEMENT.IMPORT_BUTTON' | translate }} }
                 </button>
             </div>
         </div>
@@ -86,42 +90,46 @@
         <div class="dm-card">
             <div class="dm-card-header">
                 <span class="dm-card-icon">↑</span>
-                <span class="dm-card-title">Daten exportieren</span>
+                <span class="dm-card-title">{{ 'DATA_MANAGEMENT.EXPORT_TITLE' | translate }}</span>
             </div>
             <div class="dm-card-body">
 
                 <div class="fe-field">
-                    <label class="fe-label">Format</label>
+                    <label class="fe-label">{{ 'DATA_MANAGEMENT.FORMAT_LABEL' | translate }}</label>
                     <select class="fe-input fe-select" [(ngModel)]="exportFormat" name="fmt">
-                        <option value="csv">CSV (Excel-kompatibel)</option>
-                        <option value="pdf">PDF Flugbuch</option>
+                        <option value="csv">{{ 'DATA_MANAGEMENT.FORMAT_CSV' | translate }}</option>
+                        <option value="pdf">{{ 'DATA_MANAGEMENT.FORMAT_PDF' | translate }}</option>
                     </select>
                 </div>
 
                 <div class="fe-field">
-                    <label class="fe-label">Zeitraum</label>
+                    <label class="fe-label">{{ 'DATA_MANAGEMENT.RANGE_LABEL' | translate }}</label>
                     <select class="fe-input fe-select" [(ngModel)]="exportRange" name="rng">
-                        <option value="all">Alle Einträge</option>
-                        <option value="year">Aktuelles Jahr</option>
-                        <option value="month">Aktueller Monat</option>
+                        <option value="all">{{ 'DATA_MANAGEMENT.RANGE_ALL' | translate }}</option>
+                        <option value="year">{{ 'DATA_MANAGEMENT.RANGE_YEAR' | translate }}</option>
+                        <option value="month">{{ 'DATA_MANAGEMENT.RANGE_MONTH' | translate }}</option>
                     </select>
                 </div>
 
                 <div class="dm-export-info">
-                    <div class="dm-info-row"><span>Gesamteinträge</span><span class="mono">174</span></div>
-                    <div class="dm-info-row"><span>Letzte Aktualisierung</span><span class="mono">01.05.2026</span>
+                    <div class="dm-info-row"><span>{{ 'DATA_MANAGEMENT.TOTAL_ENTRIES' | translate }}</span><span
+                            class="mono">174</span></div>
+                    <div class="dm-info-row"><span>{{ 'DATA_MANAGEMENT.LAST_UPDATE' | translate }}</span><span
+                            class="mono">01.05.2026</span>
                     </div>
-                    <div class="dm-info-row"><span>Geschätzte Dateigröße</span><span class="mono">{{ exportFormat ===
-                            'pdf' ? '~2.4 MB' : '~48 KB' }}</span></div>
+                    <div class="dm-info-row"><span>{{ 'DATA_MANAGEMENT.ESTIMATED_SIZE' | translate }}</span><span
+                            class="mono">{{ exportFormat === 'pdf' ? '~2.4 MB' : '~48 KB' }}</span></div>
                 </div>
 
                 @if (exportSuccess()) {
-                <div class="dm-banner dm-success">✓ Export erfolgreich. Download startet…</div>
+                <div class="dm-banner dm-success">✓ {{ 'DATA_MANAGEMENT.EXPORT_SUCCESS' | translate }}</div>
                 }
 
                 <button class="btn btn-primary" [disabled]="exportLoading()" (click)="startExport()">
-                    @if (exportLoading()) { <span class="dm-spinner"></span> Exportieren… }
-                    @else { ↑ {{ exportFormat.toUpperCase() }} exportieren }
+                    @if (exportLoading()) { <span class="dm-spinner"></span> {{ 'DATA_MANAGEMENT.EXPORTING' |
+                    translate }} }
+                    @else { ↑ {{ 'DATA_MANAGEMENT.EXPORT_BUTTON' | translate:{ format: exportFormat.toUpperCase() } }}
+                    }
                 </button>
             </div>
         </div>
@@ -130,16 +138,16 @@
         <div class="dm-card dm-card-full">
             <div class="dm-card-header">
                 <span class="dm-card-icon">💾</span>
-                <span class="dm-card-title">Datenbank-Backup</span>
+                <span class="dm-card-title">{{ 'DATA_MANAGEMENT.BACKUP_TITLE' | translate }}</span>
             </div>
             <div class="dm-card-body dm-backup-body">
                 <div class="dm-backup-info">
-                    <p class="dm-backup-text">Erstelle eine vollständige Sicherung aller Flugbuchdaten als JSON-Datei.
-                        Backups enthalten alle Flüge, Piloten und Einstellungen.</p>
-                    <div class="dm-info-row"><span>Letztes Backup</span><span class="mono">2026-05-01 — 12:34 Uhr</span>
+                    <p class="dm-backup-text">{{ 'DATA_MANAGEMENT.BACKUP_DESC' | translate }}</p>
+                    <div class="dm-info-row"><span>{{ 'DATA_MANAGEMENT.LAST_BACKUP' | translate }}</span><span
+                            class="mono">2026-05-01 — 12:34 Uhr</span>
                     </div>
                 </div>
-                <button class="btn btn-ghost">💾 Backup jetzt erstellen</button>
+                <button class="btn btn-ghost">💾 {{ 'DATA_MANAGEMENT.BACKUP_BUTTON' | translate }}</button>
             </div>
         </div>
 

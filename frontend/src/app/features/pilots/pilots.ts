@@ -1,6 +1,7 @@
 import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface Pilot {
     id: string; firstName: string; lastName: string;
@@ -11,7 +12,7 @@ interface Pilot {
 @Component({
     selector: 'app-pilots',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, TranslatePipe],
     templateUrl: './pilots.html',
     styleUrls: ['./pilots.scss'],
 })

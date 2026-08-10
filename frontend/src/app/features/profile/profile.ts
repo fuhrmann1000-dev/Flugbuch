@@ -1,11 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, TranslatePipe],
     templateUrl: './profile.html',
     styleUrls: ['./profile.scss'],
 })
@@ -17,11 +18,12 @@ export class ProfileComponent {
     public saveSuccess = signal(false);
 
     public readonly licenseTypes = ['PPL(A)', 'PPL(B)', 'CPL(A)', 'ATPL', 'SPL', 'Schüler'];
+    // label holds a translation key, resolved via the translate pipe in the template.
     public readonly stats = [
-        { label: 'Flüge gesamt', value: '42' },
-        { label: 'Gesamtstunden', value: '36h 20m' },
-        { label: 'Schleppflüge', value: '28' },
-        { label: 'Mitglied seit', value: '2023' },
+        { label: 'DASHBOARD.STAT_TOTAL_FLIGHTS', value: '42' },
+        { label: 'PROFILE.STAT_TOTAL_HOURS', value: '36h 20m' },
+        { label: 'DASHBOARD.STAT_TOWS', value: '28' },
+        { label: 'PROFILE.STAT_MEMBER_SINCE', value: '2023' },
     ];
 
     // Password change

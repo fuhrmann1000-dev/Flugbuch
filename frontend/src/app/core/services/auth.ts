@@ -42,8 +42,34 @@ export class AuthService {
     return localStorage.getItem(TOKEN_STORAGE_KEY);
   }
 
+  /**
+   * True only if there's a token AND it hasn't expired yet. A merely
+   * *present* token isn't enough - JWTs carry their own expiration (1h by
+   * default here) and the browser has no way to know it expired other than
+   * checking that timestamp itself, since the token is never invalidated
+   * server-side. An expired token found here is discarded on the spot.
+   */
   public isLoggedIn(): boolean {
-    return this.getToken() !== null;
+    const token = this.getToken();
+    if (!token) {
+      return false;
+    }
+    if (this.isTokenExpired(token)) {
+      this.logout();
+      return false;
+    }
+    return true;
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payloadSegment = token.split('.')[1];
+      const base64 = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      return true; // malformed token - treat it as invalid/expired
+    }
   }
 
   private storeToken(token: string): void {

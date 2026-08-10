@@ -251,6 +251,17 @@ $accent-bg: rgba(56, 139, 253, 0.12);
     margin-left: auto;
 }
 
+// ── Language switcher ────────────────────────────────────────
+.ml-lang-switcher {
+    display: block;
+    padding: 0 0.85rem 0.6rem;
+    flex-shrink: 0;
+}
+
+.ml-shell.ml-collapsed .ml-lang-switcher {
+    display: none;
+}
+
 // ── Profile ───────────────────────────────────────────────────
 .ml-profile {
     display: flex;

@@ -1,11 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
+import { AppDatePipe } from '../../core/pipes/app-date';
 
 @Component({
     selector: 'app-data-management',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, TranslatePipe, AppDatePipe],
     templateUrl: './data-management.html',
     styleUrls: ['./data-management.scss'],
 })

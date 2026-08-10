@@ -2,13 +2,14 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { FlightDataService } from '../../core/services/flight-data';
 import { FlightLogEntry } from '../../core/models/flight-log-entry.model';
 
 @Component({
   selector: 'app-flight-entry',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './flight-entry.html',
   styleUrls: ['./flight-entry.scss'],
 })
@@ -50,8 +51,9 @@ export class FlightEntryComponent implements OnInit {
     }
   }
 
+  /** Translation key for the page/card title - resolved via the translate pipe in the template. */
   public get pageTitle(): string {
-    return this.isEditMode() ? 'Flugdaten bearbeiten' : 'Neuer Flugeintrag';
+    return this.isEditMode() ? 'FLIGHT_ENTRY.EDIT_TITLE' : 'FLIGHT_ENTRY.NEW_TITLE';
   }
 
   public save(): void {
