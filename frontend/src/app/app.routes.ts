@@ -19,7 +19,15 @@ export const routes: Routes = [
     {
         path: '',
         component: MainLayoutComponent,
+        // canActivate only guards *entering* this parent route (e.g. a fresh
+        // navigation straight to /flights). Once MainLayoutComponent is
+        // already active, clicking between sidebar links (dashboard -> flights)
+        // only re-activates the *child* route, so canActivate alone never
+        // runs again - a pilot whose token expired mid-session could still
+        // click through to the flight log. canActivateChild re-checks on
+        // every child activation, which covers that case too.
         canActivate: [authGuard],
+        canActivateChild: [authGuard],
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             {
