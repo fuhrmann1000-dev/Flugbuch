@@ -52,12 +52,34 @@ public class PilotService {
      * {@code /auth/**} makes the frontend's auth interceptor log the pilot
      * out and redirect to /login, which would be wrong here: the pilot *is*
      * validly authenticated, they just mistyped their current password.
+     * Complexity of the new password itself is enforced declaratively by
+     * {@link ChangePasswordRequest}'s {@code @Pattern}, so it never reaches here.
      */
     public void changePassword(String username, ChangePasswordRequest request) {
         Pilot pilot = findByUsername(username);
         verifyPassword(request.getCurrentPassword(), pilot, "Current password is incorrect");
 
+        // 422, not 400: this is a different failure mode than "you typed your
+        // current password wrong" (that's the verifyPassword call above) - a
+        // distinct status lets the frontend show a distinct, accurate message
+        // instead of lumping every rejection under "current password wrong".
+        if (passwordEncoder.matches(request.getNewPassword(), pilot.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "New password must be different from the current password");
+        }
+
         pilot.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        // Bumping tokenVersion invalidates every JWT issued before this
+        // point (see JwtAuthenticationFilter) the instant the password
+        // changes, rather than waiting up to jwt.expiration-minutes for
+        // already-issued tokens to expire naturally. That gap matters most
+        // right when it's most dangerous: a pilot changing their password
+        // because they suspect it (and any token derived from it) leaked -
+        // e.g. a shared/borrowed device at a competition - wants old sessions
+        // dead immediately, not "eventually".
+        pilot.setTokenVersion(pilot.getTokenVersion() + 1);
+
         pilotRepository.save(pilot);
     }
 

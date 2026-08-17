@@ -68,4 +68,19 @@ public class Pilot {
             joinColumns = @JoinColumn(name = "pilot_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
+
+    /**
+     * Bumped every time this pilot's password changes (see
+     * {@code PilotService#changePassword}) and embedded as a claim in every
+     * JWT issued at login (see {@code JwtService#generateToken}). A request
+     * carrying a token whose "tokenVersion" claim doesn't match this column
+     * is rejected even though the token is otherwise validly signed and not
+     * yet expired - see {@code JwtAuthenticationFilter} for why this is the
+     * mechanism chosen to invalidate old sessions on a password change.
+     * Defaults to 0 so existing pilots (and tokens issued before this field
+     * existed) keep working without a forced re-login.
+     */
+    @Builder.Default
+    @Column(nullable = false)
+    private int tokenVersion = 0;
 }

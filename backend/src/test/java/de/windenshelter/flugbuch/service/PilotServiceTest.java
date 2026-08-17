@@ -146,6 +146,25 @@ class PilotServiceTest {
         verify(pilotRepository).save(existing);
     }
 
+    // A successful password change must invalidate any token issued before
+    // it, so an old, possibly-leaked session can't keep being used.
+    @Test
+    void changePassword_correctCurrentPassword_incrementsTokenVersion() {
+        Pilot existing = samplePilot();
+        existing.setTokenVersion(2);
+        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(existing));
+        when(passwordEncoder.matches("oldPassword", "hashed-current-password")).thenReturn(true);
+        when(passwordEncoder.encode("newPassword1")).thenReturn("hashed-new-password");
+
+        ChangePasswordRequest request = new ChangePasswordRequest();
+        request.setCurrentPassword("oldPassword");
+        request.setNewPassword("newPassword1");
+
+        pilotService.changePassword("max.mustermann", request);
+
+        assertThat(existing.getTokenVersion()).isEqualTo(3);
+    }
+
     // Wrong current password must be a 400, not a 401 - a 401 here would make the
     // frontend's auth interceptor treat it as an expired session and force a logout.
     @Test
@@ -161,6 +180,26 @@ class PilotServiceTest {
         assertThatThrownBy(() -> pilotService.changePassword("max.mustermann", request))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("400");
+
+        verify(pilotRepository, never()).save(any());
+    }
+
+    // A new password identical to the current one is a distinct failure mode
+    // from "wrong current password" - it must surface as 422, not 400, so the
+    // frontend can show a message that actually matches what went wrong.
+    @Test
+    void changePassword_newPasswordSameAsCurrentPassword_throwsUnprocessableEntityAndDoesNotSave() {
+        Pilot existing = samplePilot();
+        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(existing));
+        when(passwordEncoder.matches("samePassword1", "hashed-current-password")).thenReturn(true);
+
+        ChangePasswordRequest request = new ChangePasswordRequest();
+        request.setCurrentPassword("samePassword1");
+        request.setNewPassword("samePassword1");
+
+        assertThatThrownBy(() -> pilotService.changePassword("max.mustermann", request))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("422");
 
         verify(pilotRepository, never()).save(any());
     }

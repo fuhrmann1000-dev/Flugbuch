@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,7 +17,6 @@ import de.windenshelter.flugbuch.model.Pilot;
 import de.windenshelter.flugbuch.model.Role;
 import de.windenshelter.flugbuch.repository.PilotRepository;
 import de.windenshelter.flugbuch.repository.RoleRepository;
-import de.windenshelter.flugbuch.security.CustomUserDetailsService;
 import de.windenshelter.flugbuch.security.JwtService;
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +31,6 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final CustomUserDetailsService userDetailsService;
     private final JwtService jwtService;
 
     /** Creates a new pilot account with the default USER role and a hashed password. Rejects duplicate usernames. */
@@ -62,8 +59,13 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
         }
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-        String token = jwtService.generateToken(userDetails);
+        // authenticationManager.authenticate already proved these credentials
+        // are correct, so this lookup can't reasonably fail - it's here to
+        // hand JwtService the real Pilot entity (for tokenVersion), not to
+        // re-check identity.
+        Pilot pilot = pilotRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new IllegalStateException("Authenticated pilot vanished mid-request"));
+        String token = jwtService.generateToken(pilot);
         return new AuthResponse(token);
     }
 }

@@ -14,8 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,7 +24,6 @@ import de.windenshelter.flugbuch.model.Pilot;
 import de.windenshelter.flugbuch.model.Role;
 import de.windenshelter.flugbuch.repository.PilotRepository;
 import de.windenshelter.flugbuch.repository.RoleRepository;
-import de.windenshelter.flugbuch.security.CustomUserDetailsService;
 import de.windenshelter.flugbuch.security.JwtService;
 
 /**
@@ -41,11 +38,10 @@ class AuthServiceTest {
     private final RoleRepository roleRepository = mock(RoleRepository.class);
     private final PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
     private final AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
-    private final CustomUserDetailsService userDetailsService = mock(CustomUserDetailsService.class);
     private final JwtService jwtService = mock(JwtService.class);
 
     private final AuthService authService = new AuthService(pilotRepository, roleRepository, passwordEncoder,
-            authenticationManager, userDetailsService, jwtService);
+            authenticationManager, jwtService);
 
     // Happy path: new username, password gets hashed, default USER role gets assigned.
     @Test
@@ -93,9 +89,11 @@ class AuthServiceTest {
         request.setUsername("max.mustermann");
         request.setPassword("correctPassword");
 
-        UserDetails userDetails = User.withUsername("max.mustermann").password("hash").authorities("ROLE_USER").build();
-        when(userDetailsService.loadUserByUsername("max.mustermann")).thenReturn(userDetails);
-        when(jwtService.generateToken(userDetails)).thenReturn("signed-jwt-token");
+        Pilot pilot = new Pilot();
+        pilot.setUsername("max.mustermann");
+        pilot.setPassword("hash");
+        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(pilot));
+        when(jwtService.generateToken(pilot)).thenReturn("signed-jwt-token");
 
         AuthResponse response = authService.login(request);
 

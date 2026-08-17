@@ -7,10 +7,9 @@ import java.util.List;
 
 import javax.crypto.SecretKey;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import de.windenshelter.flugbuch.model.Pilot;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -24,16 +23,22 @@ public class JwtService {
 
     private final JwtProperties jwtProperties;
 
-    /** Builds a signed token for {@code userDetails}, embedding their username and roles. */
-    public String generateToken(UserDetails userDetails) {
+    /**
+     * Builds a signed token for {@code pilot}, embedding their username,
+     * roles and current tokenVersion. Takes the {@link Pilot} entity
+     * directly (rather than a Spring Security {@code UserDetails}) because
+     * tokenVersion is a Pilot-only concept - see {@link Pilot#getTokenVersion()}.
+     */
+    public String generateToken(Pilot pilot) {
         Instant now = Instant.now();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
+        List<String> roles = pilot.getRoles().stream()
+                .map(role -> "ROLE_" + role.getName())
                 .toList();
 
         return Jwts.builder()
-                .subject(userDetails.getUsername())
+                .subject(pilot.getUsername())
                 .claim("roles", roles)
+                .claim("tokenVersion", pilot.getTokenVersion())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(jwtProperties.getExpirationMinutes() * 60)))
                 .signWith(signingKey())
@@ -43,6 +48,19 @@ public class JwtService {
     /** Returns the username (subject) encoded in a JWT. Only call this after {@link #isTokenValid}. */
     public String extractUsername(String token) {
         return parseClaims(token).getSubject();
+    }
+
+    /**
+     * Returns the tokenVersion embedded in a JWT at login time. Tokens
+     * issued before this field existed carry no such claim - those are
+     * treated as version 0, which matches the default value newly-migrated
+     * Pilot rows get (see {@link Pilot#getTokenVersion()}), so already-issued
+     * tokens keep working across the deploy that introduces this feature.
+     * Only call this after {@link #isTokenValid}.
+     */
+    public int extractTokenVersion(String token) {
+        Object claim = parseClaims(token).get("tokenVersion");
+        return claim == null ? 0 : ((Number) claim).intValue();
     }
 
     /** Returns whether {@code token} is well-formed, correctly signed, and not expired. */

@@ -22,7 +22,8 @@
     "PLEASE_SELECT": "Please select…",
     "STATUS_ACTIVE": "Active",
     "STATUS_INACTIVE": "Inactive",
-    "ACTION": "Action"
+    "ACTION": "Action",
+    "RATE_LIMITED": "Too many attempts. Please wait a moment and try again."
   },
   "NAV": {
     "DASHBOARD": "Dashboard",
@@ -193,6 +194,8 @@
     "PASSWORD_UPDATE_FAILED": "Could not change password. Please try again.",
     "PASSWORD_REQUIRED": "Please fill in all password fields.",
     "CURRENT_PASSWORD_WRONG": "Current password is incorrect.",
+    "PASSWORD_SAME_AS_CURRENT": "The new password must be different from the current one.",
+    "PASSWORD_TOO_SIMPLE": "Password must contain at least one uppercase letter, one lowercase letter and one digit.",
     "DANGER_ZONE": "Danger Zone",
     "DELETE_ACCOUNT_TEXT": "Permanently Delete Account",
     "DELETE_ACCOUNT_SUB": "All logbook data will be permanently deleted.",

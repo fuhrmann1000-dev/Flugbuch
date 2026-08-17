@@ -47,9 +47,14 @@ export class RegisterComponent {
                 this.hasError.set(true);
                 // Holds a translation key, not display text - the template resolves it
                 // via the translate pipe so the message stays correct across language switches.
-                this.errorMsg = error.status === 409
-                    ? 'REGISTER.USERNAME_TAKEN'
-                    : 'REGISTER.FAILED';
+                // 429 = too many registration attempts from this client (see RateLimitingFilter).
+                if (error.status === 409) {
+                    this.errorMsg = 'REGISTER.USERNAME_TAKEN';
+                } else if (error.status === 429) {
+                    this.errorMsg = 'COMMON.RATE_LIMITED';
+                } else {
+                    this.errorMsg = 'REGISTER.FAILED';
+                }
             }
         });
     }

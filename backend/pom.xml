@@ -25,6 +25,7 @@
         <poi.version>5.4.0</poi.version>
         <commons-net.version>3.13.0</commons-net.version>
         <jjwt.version>0.13.0</jjwt.version>
+        <bucket4j.version>8.19.0</bucket4j.version>
     </properties>
 
     <dependencies>
@@ -63,6 +64,13 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>${jjwt.version}</version>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- Bucket4j: in-memory token-bucket rate limiting for login/register/change-password (brute-force protection) -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>${bucket4j.version}</version>
         </dependency>
 
         <!-- Apache POI für Excel-Import -->

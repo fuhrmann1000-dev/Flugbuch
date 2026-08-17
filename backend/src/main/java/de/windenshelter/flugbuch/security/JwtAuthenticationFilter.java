@@ -47,10 +47,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String username = jwtService.extractUsername(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+            // Design note (why tokenVersion, not a denylist table or a switch
+            // to refresh tokens): CustomUserDetailsService already has to load
+            // this Pilot row from the database on every single authenticated
+            // request just to build `userDetails` above, so reading the
+            // pilot's *current* tokenVersion here is free - no extra query,
+            // no extra table to grow/prune, no new infrastructure (e.g. Redis)
+            // needed. A mismatch means the token was issued before the
+            // pilot's most recent password change (see
+            // PilotService#changePassword, which increments tokenVersion),
+            // so we treat it exactly like an invalid/expired token: leave the
+            // SecurityContext unauthenticated and let the request fall
+            // through to SecurityConfig's normal 401 handling for protected
+            // endpoints. That 401 is intentional here (unlike the 400s used
+            // for a mistyped password elsewhere) - the session backing this
+            // token is genuinely dead, so the frontend's auth interceptor
+            // logging the pilot out and sending them to /login is correct.
+            boolean tokenVersionMatches = !(userDetails instanceof PilotUserDetails pilotUserDetails)
+                    || jwtService.extractTokenVersion(token) == pilotUserDetails.getTokenVersion();
+
+            if (tokenVersionMatches) {
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
         }
 
         filterChain.doFilter(request, response);
