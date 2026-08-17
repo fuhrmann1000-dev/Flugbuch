@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -142,6 +143,32 @@ class PilotControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"currentPassword\":\"wrongPassword\",\"newPassword\":\"newPassword1\"}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "max.mustermann")
+    @DisplayName("PUT /api/v1/pilots/me/password with a new password missing complexity is rejected with 400 before reaching the service")
+    void changePassword_newPasswordMissingComplexity_returnsBadRequest() throws Exception {
+        mockMvc.perform(put(BASE_URL + "/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"currentPassword\":\"oldPassword\",\"newPassword\":\"alllowercase1\"}"))
+                .andExpect(status().isBadRequest());
+
+        verify(pilotService, never()).changePassword(any(), any());
+    }
+
+    @Test
+    @WithMockUser(username = "max.mustermann")
+    @DisplayName("PUT /api/v1/pilots/me/password with a new password equal to the current one surfaces as 422")
+    void changePassword_newPasswordSameAsCurrent_returnsUnprocessableEntity() throws Exception {
+        willThrow(new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                "New password must be different from the current password"))
+                .given(pilotService).changePassword(eq("max.mustermann"), any());
+
+        mockMvc.perform(put(BASE_URL + "/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"currentPassword\":\"samePassword1\",\"newPassword\":\"samePassword1\"}"))
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test

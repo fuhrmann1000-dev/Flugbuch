@@ -40,6 +40,23 @@ class CustomUserDetailsServiceTest {
                 .containsExactly("ROLE_USER");
     }
 
+    // The returned object must carry tokenVersion too - JwtAuthenticationFilter
+    // relies on this to check a token's validity without a second database query.
+    @Test
+    void loadUserByUsername_existingPilot_returnsPilotUserDetailsWithTokenVersion() {
+        Pilot pilot = new Pilot();
+        pilot.setUsername("max.mustermann");
+        pilot.setPassword("hashed-password");
+        pilot.setRoles(Set.of(Role.builder().name("USER").build()));
+        pilot.setTokenVersion(4);
+        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(pilot));
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername("max.mustermann");
+
+        assertThat(userDetails).isInstanceOf(PilotUserDetails.class);
+        assertThat(((PilotUserDetails) userDetails).getTokenVersion()).isEqualTo(4);
+    }
+
     // An unknown username must fail loudly instead of silently returning null.
     @Test
     void loadUserByUsername_unknownUsername_throwsUsernameNotFoundException() {

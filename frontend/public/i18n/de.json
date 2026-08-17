@@ -22,7 +22,8 @@
     "PLEASE_SELECT": "Bitte wählen…",
     "STATUS_ACTIVE": "Aktiv",
     "STATUS_INACTIVE": "Inaktiv",
-    "ACTION": "Aktion"
+    "ACTION": "Aktion",
+    "RATE_LIMITED": "Zu viele Versuche. Bitte warte einen Moment und versuche es erneut."
   },
   "NAV": {
     "DASHBOARD": "Dashboard",
@@ -193,6 +194,8 @@
     "PASSWORD_UPDATE_FAILED": "Passwort konnte nicht geändert werden. Bitte versuche es erneut.",
     "PASSWORD_REQUIRED": "Bitte fülle alle Passwortfelder aus.",
     "CURRENT_PASSWORD_WRONG": "Das aktuelle Passwort ist falsch.",
+    "PASSWORD_SAME_AS_CURRENT": "Das neue Passwort muss sich vom aktuellen unterscheiden.",
+    "PASSWORD_TOO_SIMPLE": "Das Passwort muss mindestens einen Großbuchstaben, einen Kleinbuchstaben und eine Ziffer enthalten.",
     "DANGER_ZONE": "Gefahrenzone",
     "DELETE_ACCOUNT_TEXT": "Konto dauerhaft löschen",
     "DELETE_ACCOUNT_SUB": "Alle Flugbuchdaten werden unwiderruflich gelöscht.",

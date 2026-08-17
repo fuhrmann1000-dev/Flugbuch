@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitingFilter rateLimitingFilter;
 
     /**
      * The origin the Angular frontend is served from. Defaults to the local
@@ -90,7 +91,19 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(
                         (request, response, authException) ->
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                // jwtAuthenticationFilter must be registered first: addFilterBefore
+                // needs its "before" argument to already have a known position in
+                // the chain, and JwtAuthenticationFilter only gets one once this
+                // line runs (UsernamePasswordAuthenticationFilter's position is
+                // already known to Spring Security out of the box). Registering
+                // rateLimitingFilter relative to it before that happens fails at
+                // startup with "does not have a registered order".
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // Rate limiting runs before JWT auth so a client hammering
+                // /auth/login or /auth/register - endpoints that never carry
+                // a token in the first place - gets rejected before doing
+                // any real work at all.
+                .addFilterBefore(rateLimitingFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

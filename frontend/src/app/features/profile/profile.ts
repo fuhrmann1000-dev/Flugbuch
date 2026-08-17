@@ -70,6 +70,10 @@ export class ProfileComponent implements OnInit {
 
     // Password change
     public currentPw = ''; public newPw = ''; public confirmPw = '';
+    // Mirrors the backend's @Pattern on ChangePasswordRequest.newPassword (see
+    // there) - checked client-side too so a pilot finds out immediately
+    // instead of after a round trip to the server.
+    private static readonly PASSWORD_COMPLEXITY = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
     public readonly passwordSaving = signal(false);
     public readonly passwordSuccess = signal(false);
     /** Holds a translation key (or null) - resolved via the translate pipe in the template. */
@@ -190,6 +194,19 @@ export class ProfileComponent implements OnInit {
             this.passwordError.set('REGISTER.PASSWORD_MISMATCH');
             return;
         }
+        // Checked client-side first (cheap, instant) even though the backend
+        // enforces both rules too (see ChangePasswordRequest / PilotService) -
+        // that server-side check is what actually matters for security, this
+        // one is purely so a pilot isn't stuck waiting on a round trip to find
+        // out they made an obvious mistake.
+        if (this.newPw === this.currentPw) {
+            this.passwordError.set('PROFILE.PASSWORD_SAME_AS_CURRENT');
+            return;
+        }
+        if (!ProfileComponent.PASSWORD_COMPLEXITY.test(this.newPw)) {
+            this.passwordError.set('PROFILE.PASSWORD_TOO_SIMPLE');
+            return;
+        }
 
         this.passwordSaving.set(true);
 
@@ -203,14 +220,22 @@ export class ProfileComponent implements OnInit {
                 this.currentPw = ''; this.newPw = ''; this.confirmPw = '';
                 setTimeout(() => this.passwordSuccess.set(false), 3000);
             },
-            // A wrong current password comes back as 400 (see PilotController) -
-            // never 401, so the auth interceptor won't treat this as an expired
-            // session and force a logout; we just show the inline error below.
+            // Distinct statuses for distinct failure reasons (see PilotService):
+            // 400 = wrong current password, 422 = new password same as current,
+            // 429 = too many attempts (see RateLimitingFilter). None of these are
+            // 401, so the auth interceptor never treats this as an expired
+            // session - we just show the matching inline error below instead.
             error: (error: HttpErrorResponse) => {
                 this.passwordSaving.set(false);
-                this.passwordError.set(error.status === 400
-                    ? 'PROFILE.CURRENT_PASSWORD_WRONG'
-                    : 'PROFILE.PASSWORD_UPDATE_FAILED');
+                if (error.status === 400) {
+                    this.passwordError.set('PROFILE.CURRENT_PASSWORD_WRONG');
+                } else if (error.status === 422) {
+                    this.passwordError.set('PROFILE.PASSWORD_SAME_AS_CURRENT');
+                } else if (error.status === 429) {
+                    this.passwordError.set('COMMON.RATE_LIMITED');
+                } else {
+                    this.passwordError.set('PROFILE.PASSWORD_UPDATE_FAILED');
+                }
             },
         });
     }
