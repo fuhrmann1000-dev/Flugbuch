@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<!--
+  Print layout for the daily flight log PDF (ticket: daily flight log printout).
+  Rendered server-side by Thymeleaf, then converted to PDF by OpenHTMLtoPDF -
+  no browser or JavaScript involved, so only plain CSS understood by an
+  HTML-to-PDF renderer (no flexbox/grid) is used here.
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Flugbuch</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 15mm 10mm;
+        }
+
+        body {
+            font-family: "DejaVu Sans", Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            color: #222;
+        }
+
+        h1 {
+            font-size: 16pt;
+            margin: 0 0 2mm 0;
+        }
+
+        .subtitle {
+            font-size: 10pt;
+            color: #555;
+            margin: 0 0 6mm 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 0.5pt solid #999;
+            padding: 2mm 2mm;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #eee;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            margin-top: 8mm;
+            font-style: italic;
+            color: #555;
+        }
+
+        .footer {
+            margin-top: 6mm;
+            font-size: 8pt;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <h1>Flugbuch - Tagesauszug</h1>
+    <p class="subtitle" th:text="${date}">01.01.2026</p>
+
+    <table th:if="${not #lists.isEmpty(rows)}">
+        <thead>
+            <tr>
+                <th>Zeit</th>
+                <th>Muster</th>
+                <th>Kennzeichen</th>
+                <th>Pilot</th>
+                <th>Gäste</th>
+                <th>Flugart</th>
+                <th>Strecke</th>
+                <th>Flugleiter</th>
+                <th>Geschleppter</th>
+                <th>Schlepphöhe</th>
+                <th>Betrag</th>
+                <th>Bemerkung</th>
+                <th>Anzahl</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="row : ${rows}">
+                <td th:text="${row.timeRange}"></td>
+                <td th:text="${row.aircraftType}"></td>
+                <td th:text="${row.registration}"></td>
+                <td th:text="${row.pilot}"></td>
+                <td th:text="${row.guests}"></td>
+                <td th:text="${row.flightType}"></td>
+                <td th:text="${row.route}"></td>
+                <td th:text="${row.flightDirector}"></td>
+                <td th:text="${row.towedAircraft}"></td>
+                <td th:text="${row.towHeight}"></td>
+                <td th:text="${row.amount}"></td>
+                <td th:text="${row.remarks}"></td>
+                <td th:text="${row.flightCount}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p class="empty-state" th:if="${#lists.isEmpty(rows)}">
+        Keine Flüge an diesem Tag.
+    </p>
+
+    <p class="footer" th:text="${generatedAt}">Erstellt am 01.01.2026 um 23:00</p>
+</body>
+</html>

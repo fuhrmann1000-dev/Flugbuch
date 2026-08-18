@@ -39,6 +39,13 @@ ftp:
     remote-file-path: ${FTP_REMOTE_FILE_PATH:/flugbuch.csv}
     local-directory: ${FTP_LOCAL_DIRECTORY:/app/import}
 
+# Where the daily flight log PDF printout is written (see
+# DailyFlightLogPrintScheduler, runs at 23:00). The default matches the
+# local-development volume; production overrides it via PRINT_OUTPUT_DIRECTORY
+# (see docker-compose.yml).
+print:
+    output-directory: ${PRINT_OUTPUT_DIRECTORY:/app/print}
+
 # JWT signing secret for pilot login. The default below is fine for local
 # development/tests only; production must override it via the JWT_SECRET
 # environment variable with its own strong, random value (see docker-compose.yml).
