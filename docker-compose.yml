@@ -74,6 +74,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     volumes:
       - ./backend/import-daten:/app/import
+      - ./backend/print-daten:/app/print
     ports:
       - "8080:8080"
     networks:
