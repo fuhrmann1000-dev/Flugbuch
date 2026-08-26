@@ -123,19 +123,28 @@
                     }
                     <div class="fe-field">
                         <label class="fe-label">{{ 'PROFILE.LABEL_CURRENT_PW' | translate }}</label>
-                        <input type="password" class="fe-input" [(ngModel)]="currentPw" name="cpw"
-                            placeholder="••••••••" />
+                        <div class="pw-wrap">
+                            <input [type]="currentPwVisible() ? 'text' : 'password'" class="fe-input"
+                                [(ngModel)]="currentPw" name="cpw" placeholder="••••••••" />
+                            <app-password-toggle [(visible)]="currentPwVisible" />
+                        </div>
                     </div>
                     <div class="fe-row">
                         <div class="fe-field">
                             <label class="fe-label">{{ 'PROFILE.LABEL_NEW_PW' | translate }}</label>
-                            <input type="password" class="fe-input" [(ngModel)]="newPw" name="npw"
-                                placeholder="••••••••" />
+                            <div class="pw-wrap">
+                                <input [type]="newPwVisible() ? 'text' : 'password'" class="fe-input"
+                                    [(ngModel)]="newPw" name="npw" placeholder="••••••••" />
+                                <app-password-toggle [(visible)]="newPwVisible" />
+                            </div>
                         </div>
                         <div class="fe-field">
                             <label class="fe-label">{{ 'COMMON.PASSWORD_CONFIRM' | translate }}</label>
-                            <input type="password" class="fe-input" [(ngModel)]="confirmPw" name="cpw2"
-                                placeholder="••••••••" />
+                            <div class="pw-wrap">
+                                <input [type]="confirmPwVisible() ? 'text' : 'password'" class="fe-input"
+                                    [(ngModel)]="confirmPw" name="cpw2" placeholder="••••••••" />
+                                <app-password-toggle [(visible)]="confirmPwVisible" />
+                            </div>
                         </div>
                     </div>
                     <div class="pf-actions">
@@ -180,8 +189,12 @@
                 }
                 <div class="fe-field">
                     <label class="fe-label">{{ 'PROFILE.DELETE_MODAL_PASSWORD_LABEL' | translate }}</label>
-                    <input type="password" class="fe-input" [(ngModel)]="deletePassword" name="delpw"
-                        placeholder="••••••••" (keydown.enter)="confirmDeleteAccount()" />
+                    <div class="pw-wrap">
+                        <input [type]="deletePasswordVisible() ? 'text' : 'password'" class="fe-input"
+                            [(ngModel)]="deletePassword" name="delpw" placeholder="••••••••"
+                            (keydown.enter)="confirmDeleteAccount()" />
+                        <app-password-toggle [(visible)]="deletePasswordVisible" />
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

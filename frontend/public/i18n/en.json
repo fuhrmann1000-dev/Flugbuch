@@ -1,7 +1,10 @@
 {
   "COMMON": {
     "EMAIL": "Email",
+    "USERNAME": "Username",
     "PASSWORD": "Password",
+    "SHOW_PASSWORD": "Show password",
+    "HIDE_PASSWORD": "Hide password",
     "PASSWORD_CONFIRM": "Confirm Password",
     "FIRST_NAME": "First Name",
     "LAST_NAME": "Last Name",
@@ -33,7 +36,8 @@
     "DATA_MANAGEMENT": "Data Management",
     "SETTINGS": "Settings",
     "PROFILE": "Profile",
-    "PILOT_ROLE": "Pilot"
+    "PILOT_ROLE": "Pilot",
+    "LOGOUT": "Log out"
   },
   "LOGIN": {
     "TITLE": "Welcome back",
@@ -47,8 +51,29 @@
     "SUBTITLE": "Start your digital logbook in seconds.",
     "ALREADY_REGISTERED": "Already registered?",
     "PASSWORD_MISMATCH": "Passwords do not match.",
-    "USERNAME_TAKEN": "This username is already taken.",
+    "EMAIL_TAKEN": "This email is already registered.",
     "FAILED": "Registration failed. Please try again."
+  },
+  "FORGOT_PASSWORD": {
+    "TITLE": "Reset your password",
+    "SUBTITLE": "Enter your email and we'll send you a reset link.",
+    "SUBMIT": "Send reset link",
+    "SENDING": "Sending…",
+    "SUCCESS": "If an account exists for that email, we've sent a reset link. Check your inbox.",
+    "FAILED": "Something went wrong. Please try again.",
+    "BACK_TO_LOGIN": "Back to login"
+  },
+  "RESET_PASSWORD": {
+    "TITLE": "Set a new password",
+    "SUBTITLE": "Choose a new password for your account.",
+    "SUBMIT": "Update password",
+    "SUBMITTING": "Updating…",
+    "SUCCESS": "Your password has been updated. You can now log in.",
+    "INVALID_LINK": "This reset link is invalid or has expired.",
+    "PASSWORD_MISMATCH": "Passwords do not match.",
+    "PASSWORD_TOO_SIMPLE": "Password must contain at least one uppercase letter, one lowercase letter and one digit.",
+    "GO_TO_LOGIN": "Go to login",
+    "REQUEST_NEW_LINK": "Request a new link"
   },
   "DASHBOARD": {
     "GREETING": "Good morning, Pilot ✈",

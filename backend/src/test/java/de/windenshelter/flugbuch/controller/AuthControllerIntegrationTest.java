@@ -58,7 +58,8 @@ class AuthControllerIntegrationTest {
     @DisplayName("POST /api/v1/auth/register with valid data returns 201, no token required")
     void register_validRequest_returnsCreated() throws Exception {
         RegisterRequest request = new RegisterRequest();
-        request.setUsername("new.pilot");
+        request.setUsername("New Pilot");
+        request.setEmail("new.pilot@edpu.de");
         request.setPassword("aLongEnoughPassword");
 
         mockMvc.perform(post(BASE_URL + "/register")
@@ -68,10 +69,11 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/auth/register with a blank username is rejected before hitting the service")
-    void register_blankUsername_returnsBadRequest() throws Exception {
+    @DisplayName("POST /api/v1/auth/register with a blank email is rejected before hitting the service")
+    void register_blankEmail_returnsBadRequest() throws Exception {
         RegisterRequest request = new RegisterRequest();
-        request.setUsername("");
+        request.setUsername("New Pilot");
+        request.setEmail("");
         request.setPassword("aLongEnoughPassword");
 
         mockMvc.perform(post(BASE_URL + "/register")
@@ -81,12 +83,13 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/auth/register with a username already taken returns 409")
-    void register_duplicateUsername_returnsConflict() throws Exception {
+    @DisplayName("POST /api/v1/auth/register with an email already taken returns 409")
+    void register_duplicateEmail_returnsConflict() throws Exception {
         RegisterRequest request = new RegisterRequest();
-        request.setUsername("existing.pilot");
+        request.setUsername("Existing Pilot");
+        request.setEmail("existing.pilot@edpu.de");
         request.setPassword("aLongEnoughPassword");
-        willThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken"))
+        willThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered"))
                 .given(authService).register(any(RegisterRequest.class));
 
         mockMvc.perform(post(BASE_URL + "/register")
@@ -99,7 +102,7 @@ class AuthControllerIntegrationTest {
     @DisplayName("POST /api/v1/auth/login with valid credentials returns 200 and a token")
     void login_validCredentials_returnsToken() throws Exception {
         LoginRequest request = new LoginRequest();
-        request.setUsername("max.mustermann");
+        request.setEmail("max.mustermann@edpu.de");
         request.setPassword("correctPassword");
         given(authService.login(any(LoginRequest.class))).willReturn(new AuthResponse("signed-jwt-token"));
 
@@ -114,10 +117,10 @@ class AuthControllerIntegrationTest {
     @DisplayName("POST /api/v1/auth/login with wrong credentials returns 401")
     void login_invalidCredentials_returnsUnauthorized() throws Exception {
         LoginRequest request = new LoginRequest();
-        request.setUsername("max.mustermann");
+        request.setEmail("max.mustermann@edpu.de");
         request.setPassword("wrongPassword");
         given(authService.login(any(LoginRequest.class)))
-                .willThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password"));
+                .willThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
 
         mockMvc.perform(post(BASE_URL + "/login")
                         .contentType(MediaType.APPLICATION_JSON)

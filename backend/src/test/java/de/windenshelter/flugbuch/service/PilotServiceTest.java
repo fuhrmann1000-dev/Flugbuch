@@ -36,7 +36,7 @@ class PilotServiceTest {
     private Pilot samplePilot() {
         Pilot pilot = new Pilot();
         pilot.setId(1L);
-        pilot.setUsername("max.mustermann");
+        pilot.setUsername("Max Mustermann");
         pilot.setPassword("hashed-current-password");
         pilot.setFirstName("Max");
         pilot.setLastName("Mustermann");
@@ -54,11 +54,11 @@ class PilotServiceTest {
 
     @Test
     void getMyProfile_existingPilot_returnsMappedDto() {
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(samplePilot()));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(samplePilot()));
 
-        PilotProfileDto dto = pilotService.getMyProfile("max.mustermann");
+        PilotProfileDto dto = pilotService.getMyProfile("max.mustermann@edpu.de");
 
-        assertThat(dto.getUsername()).isEqualTo("max.mustermann");
+        assertThat(dto.getUsername()).isEqualTo("Max Mustermann");
         assertThat(dto.getFirstName()).isEqualTo("Max");
         assertThat(dto.getLastName()).isEqualTo("Mustermann");
         assertThat(dto.getEmail()).isEqualTo("max.mustermann@edpu.de");
@@ -66,10 +66,10 @@ class PilotServiceTest {
     }
 
     @Test
-    void getMyProfile_unknownUsername_throwsNotFound() {
-        when(pilotRepository.findByUsername("ghost")).thenReturn(Optional.empty());
+    void getMyProfile_unknownEmail_throwsNotFound() {
+        when(pilotRepository.findByEmail("ghost@edpu.de")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> pilotService.getMyProfile("ghost"))
+        assertThatThrownBy(() -> pilotService.getMyProfile("ghost@edpu.de"))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("404");
     }
@@ -81,27 +81,61 @@ class PilotServiceTest {
     @Test
     void updateMyProfile_validRequest_overwritesProfileFieldsAndSaves() {
         Pilot existing = samplePilot();
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(existing));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(existing));
         when(pilotRepository.save(any(Pilot.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         UpdatePilotProfileRequest request = new UpdatePilotProfileRequest();
         request.setFirstName("Erika");
         request.setLastName("Musterfrau");
-        request.setEmail("erika@edpu.de");
+        request.setEmail("max.mustermann@edpu.de");
         request.setPhone("+49 177 9999999");
         request.setLicenseType("CPL(A)");
         request.setLicenseNumber("D.CPL(A).99999");
         request.setHomeAirfield("EDKA — Kamenz");
 
-        PilotProfileDto result = pilotService.updateMyProfile("max.mustermann", request);
+        PilotProfileDto result = pilotService.updateMyProfile("max.mustermann@edpu.de", request);
 
         assertThat(result.getFirstName()).isEqualTo("Erika");
         assertThat(result.getLastName()).isEqualTo("Musterfrau");
-        assertThat(result.getEmail()).isEqualTo("erika@edpu.de");
         assertThat(result.getHomeAirfield()).isEqualTo("EDKA — Kamenz");
-        // Login identity must never be touched by this endpoint.
-        assertThat(result.getUsername()).isEqualTo("max.mustermann");
+        // Display name must never be touched by this endpoint.
+        assertThat(result.getUsername()).isEqualTo("Max Mustermann");
         verify(pilotRepository).save(existing);
+    }
+
+    @Test
+    void updateMyProfile_emailUnchanged_doesNotCheckForDuplicates() {
+        Pilot existing = samplePilot();
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(existing));
+        when(pilotRepository.save(any(Pilot.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UpdatePilotProfileRequest request = new UpdatePilotProfileRequest();
+        request.setEmail("max.mustermann@edpu.de");
+        request.setHomeAirfield("EDKA — Kamenz");
+
+        pilotService.updateMyProfile("max.mustermann@edpu.de", request);
+
+        verify(pilotRepository, never()).existsByEmail(any());
+    }
+
+    // Email is now the unique login identity - changing it to one another
+    // pilot already has must be rejected, not left to fail as a raw DB
+    // constraint violation.
+    @Test
+    void updateMyProfile_newEmailAlreadyTaken_throwsConflictAndDoesNotSave() {
+        Pilot existing = samplePilot();
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(existing));
+        when(pilotRepository.existsByEmail("erika@edpu.de")).thenReturn(true);
+
+        UpdatePilotProfileRequest request = new UpdatePilotProfileRequest();
+        request.setEmail("erika@edpu.de");
+        request.setHomeAirfield("EDKA — Kamenz");
+
+        assertThatThrownBy(() -> pilotService.updateMyProfile("max.mustermann@edpu.de", request))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("409");
+
+        verify(pilotRepository, never()).save(any());
     }
 
     // -------------------------------------------------------------------
@@ -111,13 +145,13 @@ class PilotServiceTest {
     @Test
     void updateProfilePicture_validRequest_overwritesPictureAndSaves() {
         Pilot existing = samplePilot();
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(existing));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(existing));
         when(pilotRepository.save(any(Pilot.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         UpdateProfilePictureRequest request = new UpdateProfilePictureRequest();
         request.setProfilePicture("data:image/png;base64,aGVsbG8=");
 
-        PilotProfileDto result = pilotService.updateProfilePicture("max.mustermann", request);
+        PilotProfileDto result = pilotService.updateProfilePicture("max.mustermann@edpu.de", request);
 
         assertThat(result.getProfilePicture()).isEqualTo("data:image/png;base64,aGVsbG8=");
         // Everything else must be untouched by this endpoint.
@@ -132,7 +166,7 @@ class PilotServiceTest {
     @Test
     void changePassword_correctCurrentPassword_hashesAndSavesNewPassword() {
         Pilot existing = samplePilot();
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(existing));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(existing));
         when(passwordEncoder.matches("oldPassword", "hashed-current-password")).thenReturn(true);
         when(passwordEncoder.encode("newPassword1")).thenReturn("hashed-new-password");
 
@@ -140,7 +174,7 @@ class PilotServiceTest {
         request.setCurrentPassword("oldPassword");
         request.setNewPassword("newPassword1");
 
-        pilotService.changePassword("max.mustermann", request);
+        pilotService.changePassword("max.mustermann@edpu.de", request);
 
         assertThat(existing.getPassword()).isEqualTo("hashed-new-password");
         verify(pilotRepository).save(existing);
@@ -152,7 +186,7 @@ class PilotServiceTest {
     void changePassword_correctCurrentPassword_incrementsTokenVersion() {
         Pilot existing = samplePilot();
         existing.setTokenVersion(2);
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(existing));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(existing));
         when(passwordEncoder.matches("oldPassword", "hashed-current-password")).thenReturn(true);
         when(passwordEncoder.encode("newPassword1")).thenReturn("hashed-new-password");
 
@@ -160,7 +194,7 @@ class PilotServiceTest {
         request.setCurrentPassword("oldPassword");
         request.setNewPassword("newPassword1");
 
-        pilotService.changePassword("max.mustermann", request);
+        pilotService.changePassword("max.mustermann@edpu.de", request);
 
         assertThat(existing.getTokenVersion()).isEqualTo(3);
     }
@@ -170,14 +204,14 @@ class PilotServiceTest {
     @Test
     void changePassword_wrongCurrentPassword_throwsBadRequestAndDoesNotSave() {
         Pilot existing = samplePilot();
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(existing));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(existing));
         when(passwordEncoder.matches("wrongPassword", "hashed-current-password")).thenReturn(false);
 
         ChangePasswordRequest request = new ChangePasswordRequest();
         request.setCurrentPassword("wrongPassword");
         request.setNewPassword("newPassword1");
 
-        assertThatThrownBy(() -> pilotService.changePassword("max.mustermann", request))
+        assertThatThrownBy(() -> pilotService.changePassword("max.mustermann@edpu.de", request))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("400");
 
@@ -190,14 +224,14 @@ class PilotServiceTest {
     @Test
     void changePassword_newPasswordSameAsCurrentPassword_throwsUnprocessableEntityAndDoesNotSave() {
         Pilot existing = samplePilot();
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(existing));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(existing));
         when(passwordEncoder.matches("samePassword1", "hashed-current-password")).thenReturn(true);
 
         ChangePasswordRequest request = new ChangePasswordRequest();
         request.setCurrentPassword("samePassword1");
         request.setNewPassword("samePassword1");
 
-        assertThatThrownBy(() -> pilotService.changePassword("max.mustermann", request))
+        assertThatThrownBy(() -> pilotService.changePassword("max.mustermann@edpu.de", request))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("422");
 
@@ -211,13 +245,13 @@ class PilotServiceTest {
     @Test
     void deleteMyAccount_correctPassword_deletesPilot() {
         Pilot existing = samplePilot();
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(existing));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(existing));
         when(passwordEncoder.matches("correctPassword", "hashed-current-password")).thenReturn(true);
 
         DeleteAccountRequest request = new DeleteAccountRequest();
         request.setPassword("correctPassword");
 
-        pilotService.deleteMyAccount("max.mustermann", request);
+        pilotService.deleteMyAccount("max.mustermann@edpu.de", request);
 
         verify(pilotRepository).delete(existing);
     }
@@ -225,13 +259,13 @@ class PilotServiceTest {
     @Test
     void deleteMyAccount_wrongPassword_throwsBadRequestAndDoesNotDelete() {
         Pilot existing = samplePilot();
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(existing));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(existing));
         when(passwordEncoder.matches("wrongPassword", "hashed-current-password")).thenReturn(false);
 
         DeleteAccountRequest request = new DeleteAccountRequest();
         request.setPassword("wrongPassword");
 
-        assertThatThrownBy(() -> pilotService.deleteMyAccount("max.mustermann", request))
+        assertThatThrownBy(() -> pilotService.deleteMyAccount("max.mustermann@edpu.de", request))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("400");
 

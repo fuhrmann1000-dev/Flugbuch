@@ -38,7 +38,7 @@ class DefaultAdminSeederTest {
     // First startup: no admin yet, so one gets created with the ADMIN role and a hashed password.
     @Test
     void run_noAdminYet_createsOneWithAdminRoleAndHashedPassword() {
-        when(pilotRepository.existsByUsername("admin")).thenReturn(false);
+        when(pilotRepository.existsByEmail("admin@flugbuch.local")).thenReturn(false);
         Role adminRole = Role.builder().id(1L).name("ADMIN").build();
         when(roleRepository.findByName("ADMIN")).thenReturn(Optional.of(adminRole));
         when(passwordEncoder.encode("plainTextPassword")).thenReturn("hashed-password");
@@ -67,7 +67,7 @@ class DefaultAdminSeederTest {
     // Every later startup: an admin already exists, so nothing should be created again.
     @Test
     void run_adminAlreadyExists_doesNothing() {
-        when(pilotRepository.existsByUsername("admin")).thenReturn(true);
+        when(pilotRepository.existsByEmail("admin@flugbuch.local")).thenReturn(true);
 
         seeder.run();
 
@@ -77,7 +77,7 @@ class DefaultAdminSeederTest {
     // Defensive check: if DefaultRoleSeeder somehow hasn't run yet, fail loudly instead of silently skipping.
     @Test
     void run_adminRoleMissing_throwsIllegalStateException() {
-        when(pilotRepository.existsByUsername("admin")).thenReturn(false);
+        when(pilotRepository.existsByEmail("admin@flugbuch.local")).thenReturn(false);
         when(roleRepository.findByName("ADMIN")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> seeder.run())

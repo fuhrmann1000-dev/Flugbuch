@@ -1,7 +1,10 @@
 {
   "COMMON": {
     "EMAIL": "E-Mail",
+    "USERNAME": "Benutzername",
     "PASSWORD": "Passwort",
+    "SHOW_PASSWORD": "Passwort anzeigen",
+    "HIDE_PASSWORD": "Passwort verbergen",
     "PASSWORD_CONFIRM": "Passwort wiederholen",
     "FIRST_NAME": "Vorname",
     "LAST_NAME": "Nachname",
@@ -33,7 +36,8 @@
     "DATA_MANAGEMENT": "Datenverwaltung",
     "SETTINGS": "Einstellungen",
     "PROFILE": "Profil",
-    "PILOT_ROLE": "Pilot"
+    "PILOT_ROLE": "Pilot",
+    "LOGOUT": "Abmelden"
   },
   "LOGIN": {
     "TITLE": "Willkommen zurück",
@@ -47,8 +51,29 @@
     "SUBTITLE": "Starte dein digitales Flugbuch in wenigen Sekunden.",
     "ALREADY_REGISTERED": "Bereits registriert?",
     "PASSWORD_MISMATCH": "Passwörter stimmen nicht überein.",
-    "USERNAME_TAKEN": "Dieser Benutzername ist bereits vergeben.",
+    "EMAIL_TAKEN": "Diese E-Mail-Adresse ist bereits registriert.",
     "FAILED": "Registrierung fehlgeschlagen. Bitte versuche es erneut."
+  },
+  "FORGOT_PASSWORD": {
+    "TITLE": "Passwort zurücksetzen",
+    "SUBTITLE": "Gib deine E-Mail-Adresse ein, wir senden dir einen Link zum Zurücksetzen.",
+    "SUBMIT": "Link senden",
+    "SENDING": "Senden…",
+    "SUCCESS": "Falls ein Konto mit dieser E-Mail existiert, haben wir einen Link zum Zurücksetzen gesendet. Bitte prüfe dein Postfach.",
+    "FAILED": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "BACK_TO_LOGIN": "Zurück zur Anmeldung"
+  },
+  "RESET_PASSWORD": {
+    "TITLE": "Neues Passwort festlegen",
+    "SUBTITLE": "Wähle ein neues Passwort für dein Konto.",
+    "SUBMIT": "Passwort aktualisieren",
+    "SUBMITTING": "Aktualisieren…",
+    "SUCCESS": "Dein Passwort wurde aktualisiert. Du kannst dich jetzt anmelden.",
+    "INVALID_LINK": "Dieser Link ist ungültig oder abgelaufen.",
+    "PASSWORD_MISMATCH": "Passwörter stimmen nicht überein.",
+    "PASSWORD_TOO_SIMPLE": "Das Passwort muss mindestens einen Großbuchstaben, einen Kleinbuchstaben und eine Ziffer enthalten.",
+    "GO_TO_LOGIN": "Zur Anmeldung",
+    "REQUEST_NEW_LINK": "Neuen Link anfordern"
   },
   "DASHBOARD": {
     "GREETING": "Guten Morgen, Pilot ✈",

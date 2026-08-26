@@ -44,8 +44,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(BEARER_PREFIX.length());
 
         if (jwtService.isTokenValid(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String username = jwtService.extractUsername(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            String email = jwtService.extractEmail(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
             // Design note (why tokenVersion, not a denylist table or a switch
             // to refresh tokens): CustomUserDetailsService already has to load

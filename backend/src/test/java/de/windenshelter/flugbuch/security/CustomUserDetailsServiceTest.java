@@ -26,14 +26,15 @@ class CustomUserDetailsServiceTest {
     @Test
     void loadUserByUsername_existingPilot_returnsUserDetailsWithRoles() {
         Pilot pilot = new Pilot();
-        pilot.setUsername("max.mustermann");
+        pilot.setUsername("Max Mustermann");
+        pilot.setEmail("max.mustermann@edpu.de");
         pilot.setPassword("hashed-password");
         pilot.setRoles(Set.of(Role.builder().name("USER").build()));
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(pilot));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(pilot));
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername("max.mustermann");
+        UserDetails userDetails = userDetailsService.loadUserByUsername("max.mustermann@edpu.de");
 
-        assertThat(userDetails.getUsername()).isEqualTo("max.mustermann");
+        assertThat(userDetails.getUsername()).isEqualTo("max.mustermann@edpu.de");
         assertThat(userDetails.getPassword()).isEqualTo("hashed-password");
         assertThat(userDetails.getAuthorities())
                 .extracting(Object::toString)
@@ -45,24 +46,25 @@ class CustomUserDetailsServiceTest {
     @Test
     void loadUserByUsername_existingPilot_returnsPilotUserDetailsWithTokenVersion() {
         Pilot pilot = new Pilot();
-        pilot.setUsername("max.mustermann");
+        pilot.setUsername("Max Mustermann");
+        pilot.setEmail("max.mustermann@edpu.de");
         pilot.setPassword("hashed-password");
         pilot.setRoles(Set.of(Role.builder().name("USER").build()));
         pilot.setTokenVersion(4);
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(pilot));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(pilot));
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername("max.mustermann");
+        UserDetails userDetails = userDetailsService.loadUserByUsername("max.mustermann@edpu.de");
 
         assertThat(userDetails).isInstanceOf(PilotUserDetails.class);
         assertThat(((PilotUserDetails) userDetails).getTokenVersion()).isEqualTo(4);
     }
 
-    // An unknown username must fail loudly instead of silently returning null.
+    // An unknown email must fail loudly instead of silently returning null.
     @Test
-    void loadUserByUsername_unknownUsername_throwsUsernameNotFoundException() {
-        when(pilotRepository.findByUsername("ghost")).thenReturn(Optional.empty());
+    void loadUserByUsername_unknownEmail_throwsUsernameNotFoundException() {
+        when(pilotRepository.findByEmail("ghost@edpu.de")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userDetailsService.loadUserByUsername("ghost"))
+        assertThatThrownBy(() -> userDetailsService.loadUserByUsername("ghost@edpu.de"))
                 .isInstanceOf(UsernameNotFoundException.class);
     }
 }

@@ -11,7 +11,7 @@ import de.windenshelter.flugbuch.model.Pilot;
 @Repository
 public interface PilotRepository extends JpaRepository<Pilot, Long> {
 
-    Optional<Pilot> findByUsername(String username);
+    Optional<Pilot> findByEmail(String email);
 
-    boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
 }

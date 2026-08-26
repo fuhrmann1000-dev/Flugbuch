@@ -18,6 +18,15 @@ services:
       retries: 30
       start_period: 30s
 
+  # SMTP-Catcher fuer "Passwort vergessen"-Mails im Dev-Betrieb - faengt jede
+  # gesendete Mail ab, ohne sie zuzustellen. Weboberflaeche: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: flugbuch_mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
   flugbuch-app:
     build: .
     container_name: flugbuch_backend
@@ -40,6 +49,12 @@ services:
       - FTP_REMOTE_FILE_PATH=/flugbuch.csv
       - FTP_LOCAL_DIRECTORY=/app/import
       - PRINT_OUTPUT_DIRECTORY=/app/print
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+      # TODO: replace with a real SMTP provider (and set SMTP_AUTH/SMTP_STARTTLS
+      # to true, plus SMTP_USERNAME/SMTP_PASSWORD) before going to production -
+      # Mailpit never actually delivers anything.
+      - PASSWORD_RESET_FRONTEND_URL=http://localhost:4200/reset-password
       # TODO: generate a strong random secret for production and put it here (or better, in a secrets manager)
       - JWT_SECRET=changeme-generate-a-strong-random-production-secret
       - JWT_EXPIRATION_MINUTES=60

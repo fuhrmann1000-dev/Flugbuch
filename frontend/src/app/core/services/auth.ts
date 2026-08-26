@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { API_BASE_URL } from '../config/api-config';
-import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.model';
+import { AuthResponse, ForgotPasswordRequest, LoginRequest, RegisterRequest, ResetPasswordRequest } from '../models/auth.model';
 
 const TOKEN_STORAGE_KEY = 'flugbuch_jwt';
 
@@ -20,16 +20,28 @@ export class AuthService {
   private readonly apiBaseUrl = `${API_BASE_URL}/auth`;
 
   /** Calls POST /auth/login; on success, stores the returned JWT. */
-  public login(username: string, password: string): Observable<AuthResponse> {
-    const request: LoginRequest = { username, password };
+  public login(email: string, password: string): Observable<AuthResponse> {
+    const request: LoginRequest = { email, password };
     return this.httpClient.post<AuthResponse>(`${this.apiBaseUrl}/login`, request)
       .pipe(tap(response => this.storeToken(response.token)));
   }
 
   /** Calls POST /auth/register. Does not log the pilot in automatically - they still have to log in afterwards. */
-  public register(username: string, password: string): Observable<void> {
-    const request: RegisterRequest = { username, password };
+  public register(username: string, email: string, password: string): Observable<void> {
+    const request: RegisterRequest = { username, email, password };
     return this.httpClient.post<void>(`${this.apiBaseUrl}/register`, request);
+  }
+
+  /** Calls POST /auth/forgot-password. Always resolves, whether or not the account exists. */
+  public forgotPassword(email: string): Observable<void> {
+    const request: ForgotPasswordRequest = { email };
+    return this.httpClient.post<void>(`${this.apiBaseUrl}/forgot-password`, request);
+  }
+
+  /** Calls POST /auth/reset-password with the token from the emailed link. */
+  public resetPassword(token: string, newPassword: string): Observable<void> {
+    const request: ResetPasswordRequest = { token, newPassword };
+    return this.httpClient.post<void>(`${this.apiBaseUrl}/reset-password`, request);
   }
 
   /** Discards the stored token, ending the session on this device. */

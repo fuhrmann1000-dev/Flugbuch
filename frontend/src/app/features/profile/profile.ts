@@ -7,11 +7,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { PilotService } from '../../core/services/pilot';
 import { AuthService } from '../../core/services/auth';
 import { PilotProfile } from '../../core/models/pilot-profile.model';
+import { PasswordToggleComponent } from '../../shared/password-toggle/password-toggle';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, FormsModule, TranslatePipe],
+    imports: [CommonModule, FormsModule, TranslatePipe, PasswordToggleComponent],
     templateUrl: './profile.html',
     styleUrls: ['./profile.scss'],
 })
@@ -70,6 +71,9 @@ export class ProfileComponent implements OnInit {
 
     // Password change
     public currentPw = ''; public newPw = ''; public confirmPw = '';
+    public currentPwVisible = signal(false);
+    public newPwVisible = signal(false);
+    public confirmPwVisible = signal(false);
     // Mirrors the backend's @Pattern on ChangePasswordRequest.newPassword (see
     // there) - checked client-side too so a pilot finds out immediately
     // instead of after a round trip to the server.
@@ -82,6 +86,7 @@ export class ProfileComponent implements OnInit {
     // Delete account
     public readonly showDeleteModal = signal(false);
     public deletePassword = '';
+    public deletePasswordVisible = signal(false);
     public readonly deleteLoading = signal(false);
     /** Holds a translation key (or null) - resolved via the translate pipe in the template. */
     public readonly deleteError = signal<string | null>(null);

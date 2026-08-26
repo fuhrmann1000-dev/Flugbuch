@@ -1,5 +1,6 @@
 package de.windenshelter.flugbuch.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -7,8 +8,13 @@ import lombok.Data;
 @Data
 public class RegisterRequest {
 
+    /** Display name only - not unique. See {@link #email} for the login identity. */
     @NotBlank
     private String username;
+
+    @NotBlank
+    @Email
+    private String email;
 
     @NotBlank
     @Size(min = 8, message = "Password must be at least 8 characters long")

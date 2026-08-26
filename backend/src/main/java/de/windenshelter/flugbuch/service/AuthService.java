@@ -33,10 +33,10 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-    /** Creates a new pilot account with the default USER role and a hashed password. Rejects duplicate usernames. */
+    /** Creates a new pilot account with the default USER role and a hashed password. Rejects a duplicate email. */
     public void register(RegisterRequest request) {
-        if (pilotRepository.existsByUsername(request.getUsername())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
+        if (pilotRepository.existsByEmail(request.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
 
         Role defaultRole = roleRepository.findByName(DEFAULT_ROLE)
@@ -44,6 +44,7 @@ public class AuthService {
 
         Pilot pilot = new Pilot();
         pilot.setUsername(request.getUsername());
+        pilot.setEmail(request.getEmail());
         pilot.setPassword(passwordEncoder.encode(request.getPassword()));
         pilot.setRoles(Set.of(defaultRole));
 
@@ -54,16 +55,16 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         } catch (BadCredentialsException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
 
         // authenticationManager.authenticate already proved these credentials
         // are correct, so this lookup can't reasonably fail - it's here to
         // hand JwtService the real Pilot entity (for tokenVersion), not to
         // re-check identity.
-        Pilot pilot = pilotRepository.findByUsername(request.getUsername())
+        Pilot pilot = pilotRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalStateException("Authenticated pilot vanished mid-request"));
         String token = jwtService.generateToken(pilot);
         return new AuthResponse(token);

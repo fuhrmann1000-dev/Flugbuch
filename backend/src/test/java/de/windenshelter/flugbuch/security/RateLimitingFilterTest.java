@@ -105,4 +105,30 @@ class RateLimitingFilterTest {
         // direct remote address is just the reverse proxy) so the limit still applies as one bucket.
         verify(response).sendError(eq(429), anyString());
     }
+
+    @Test
+    void doFilter_forgotPasswordEndpointExceedsCapacity_rejectsWith429() throws Exception {
+        HttpServletRequest request = requestTo("/api/v1/auth/forgot-password", "10.0.0.6");
+
+        for (int i = 0; i < RateLimitingFilter.FORGOT_PASSWORD_CAPACITY; i++) {
+            filter.doFilterInternal(request, response, filterChain);
+        }
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain, times(RateLimitingFilter.FORGOT_PASSWORD_CAPACITY)).doFilter(request, response);
+        verify(response).sendError(eq(429), anyString());
+    }
+
+    @Test
+    void doFilter_resetPasswordEndpointExceedsCapacity_rejectsWith429() throws Exception {
+        HttpServletRequest request = requestTo("/api/v1/auth/reset-password", "10.0.0.7");
+
+        for (int i = 0; i < RateLimitingFilter.RESET_PASSWORD_CAPACITY; i++) {
+            filter.doFilterInternal(request, response, filterChain);
+        }
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain, times(RateLimitingFilter.RESET_PASSWORD_CAPACITY)).doFilter(request, response);
+        verify(response).sendError(eq(429), anyString());
+    }
 }

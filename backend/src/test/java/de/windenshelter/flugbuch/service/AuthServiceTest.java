@@ -43,14 +43,15 @@ class AuthServiceTest {
     private final AuthService authService = new AuthService(pilotRepository, roleRepository, passwordEncoder,
             authenticationManager, jwtService);
 
-    // Happy path: new username, password gets hashed, default USER role gets assigned.
+    // Happy path: new email, password gets hashed, default USER role gets assigned.
     @Test
-    void register_newUsername_hashesPasswordAndSavesWithDefaultRole() {
+    void register_newEmail_hashesPasswordAndSavesWithDefaultRole() {
         RegisterRequest request = new RegisterRequest();
-        request.setUsername("new.pilot");
+        request.setUsername("New Pilot");
+        request.setEmail("new.pilot@edpu.de");
         request.setPassword("plainTextPassword");
 
-        when(pilotRepository.existsByUsername("new.pilot")).thenReturn(false);
+        when(pilotRepository.existsByEmail("new.pilot@edpu.de")).thenReturn(false);
         Role userRole = Role.builder().id(1L).name("USER").build();
         when(roleRepository.findByName("USER")).thenReturn(Optional.of(userRole));
         when(passwordEncoder.encode("plainTextPassword")).thenReturn("hashed-password");
@@ -61,18 +62,20 @@ class AuthServiceTest {
         verify(pilotRepository).save(pilotCaptor.capture());
         Pilot savedPilot = pilotCaptor.getValue();
 
-        assertThat(savedPilot.getUsername()).isEqualTo("new.pilot");
+        assertThat(savedPilot.getUsername()).isEqualTo("New Pilot");
+        assertThat(savedPilot.getEmail()).isEqualTo("new.pilot@edpu.de");
         assertThat(savedPilot.getPassword()).isEqualTo("hashed-password");
         assertThat(savedPilot.getRoles()).containsExactly(userRole);
     }
 
-    // Registering an already-taken username must be rejected before touching the password encoder.
+    // Registering an already-taken email must be rejected before touching the password encoder.
     @Test
-    void register_duplicateUsername_throwsConflict() {
+    void register_duplicateEmail_throwsConflict() {
         RegisterRequest request = new RegisterRequest();
-        request.setUsername("existing.pilot");
+        request.setUsername("Existing Pilot");
+        request.setEmail("existing.pilot@edpu.de");
         request.setPassword("somePassword");
-        when(pilotRepository.existsByUsername("existing.pilot")).thenReturn(true);
+        when(pilotRepository.existsByEmail("existing.pilot@edpu.de")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(ResponseStatusException.class)
@@ -86,13 +89,14 @@ class AuthServiceTest {
     @Test
     void login_validCredentials_returnsToken() {
         LoginRequest request = new LoginRequest();
-        request.setUsername("max.mustermann");
+        request.setEmail("max.mustermann@edpu.de");
         request.setPassword("correctPassword");
 
         Pilot pilot = new Pilot();
         pilot.setUsername("max.mustermann");
+        pilot.setEmail("max.mustermann@edpu.de");
         pilot.setPassword("hash");
-        when(pilotRepository.findByUsername("max.mustermann")).thenReturn(Optional.of(pilot));
+        when(pilotRepository.findByEmail("max.mustermann@edpu.de")).thenReturn(Optional.of(pilot));
         when(jwtService.generateToken(pilot)).thenReturn("signed-jwt-token");
 
         AuthResponse response = authService.login(request);
@@ -104,7 +108,7 @@ class AuthServiceTest {
     @Test
     void login_invalidCredentials_throwsUnauthorized() {
         LoginRequest request = new LoginRequest();
-        request.setUsername("max.mustermann");
+        request.setEmail("max.mustermann@edpu.de");
         request.setPassword("wrongPassword");
         when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("bad credentials"));
 

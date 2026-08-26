@@ -26,6 +26,11 @@ import lombok.RequiredArgsConstructor;
 @Order(2)
 public class DefaultAdminSeeder implements CommandLineRunner {
 
+    // Not sourced from AdminProperties/env vars - this account's email is a
+    // fixed bootstrap value, same spirit as the placeholder profile fields
+    // below, not something a deployment needs to configure.
+    private static final String ADMIN_EMAIL = "admin@flugbuch.local";
+
     private final PilotRepository pilotRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -33,7 +38,7 @@ public class DefaultAdminSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (pilotRepository.existsByUsername(adminProperties.getUsername())) {
+        if (pilotRepository.existsByEmail(ADMIN_EMAIL)) {
             return;
         }
 
@@ -52,7 +57,7 @@ public class DefaultAdminSeeder implements CommandLineRunner {
         // by hand first.
         admin.setFirstName("Admin");
         admin.setLastName("Pilot");
-        admin.setEmail("admin@flugbuch.local");
+        admin.setEmail(ADMIN_EMAIL);
         admin.setPhone("+49 000 0000000");
         admin.setLicenseType("ATPL");
         admin.setLicenseNumber("D.ATPL.00001");

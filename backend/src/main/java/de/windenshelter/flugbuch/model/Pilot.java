@@ -33,18 +33,26 @@ public class Pilot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    /**
+     * Display name only - NOT the login identity. Two pilots can share the
+     * same username; see {@link #email} for the field that must be unique.
+     */
+    @Column(nullable = false)
     private String username;
 
     @Column(nullable = false)
     private String password;
 
-    // Profile fields (ticket: functional profile page). All nullable - a pilot
-    // created via /auth/register only has username/password/roles until they
-    // fill these in on the Profile page themselves.
+    /** The pilot's login identity: unique, required, set at registration. */
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    // Remaining profile fields (ticket: functional profile page). All
+    // nullable - a pilot created via /auth/register only has
+    // username/email/password/roles until they fill these in on the Profile
+    // page themselves.
     private String firstName;
     private String lastName;
-    private String email;
     private String phone;
     private String licenseType;
     private String licenseNumber;
