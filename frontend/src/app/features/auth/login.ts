@@ -5,19 +5,19 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth';
+import { PasswordToggleComponent } from '../../shared/password-toggle/password-toggle';
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
+    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, PasswordToggleComponent],
     templateUrl: './login.html',
     styleUrls: ['./login.scss'],
 })
 export class LoginComponent {
-    // Bound to the "E-Mail" field in the template; sent to the backend as
-    // the pilot's username (the API has no separate email concept yet).
     public email: string = '';
     public password: string = '';
+    public passwordVisible = signal(false);
     public isLoading = signal(false);
     public hasError = signal(false);
     /** Holds a translation key - resolved via the translate pipe in the template. */

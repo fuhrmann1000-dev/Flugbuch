@@ -76,4 +76,14 @@ export class MainLayoutComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
+
+  /**
+   * Stops the click from bubbling up to the profile row's routerLink -
+   * otherwise clicking logout would also navigate to /profile right before
+   * the redirect to /login below fires.
+   */
+  public onLogoutClick(event: Event): void {
+    event.stopPropagation();
+    this.logout();
+  }
 }

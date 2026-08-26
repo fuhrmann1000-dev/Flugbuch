@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
  * Business logic behind the Profile page: reading/updating the logged-in
  * pilot's own profile, changing their password, and deleting their account.
  * Every method here operates on "the pilot behind the current request" -
- * the username comes from the JWT (see {@code PilotController}), never from
+ * the email comes from the JWT (see {@code PilotController}), never from
  * a path variable, so a pilot can only ever act on their own account.
  */
 @Service
@@ -28,12 +28,23 @@ public class PilotService {
     private final PilotRepository pilotRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public PilotProfileDto getMyProfile(String username) {
-        return toDto(findByUsername(username));
+    public PilotProfileDto getMyProfile(String email) {
+        return toDto(findByEmail(email));
     }
 
-    public PilotProfileDto updateMyProfile(String username, UpdatePilotProfileRequest request) {
-        Pilot pilot = findByUsername(username);
+    /**
+     * Since email is now the unique login identity (see {@code Pilot.email}),
+     * changing it here must be rejected if another pilot already has it -
+     * otherwise this would fail with a raw database constraint violation
+     * instead of a clean error.
+     */
+    public PilotProfileDto updateMyProfile(String email, UpdatePilotProfileRequest request) {
+        Pilot pilot = findByEmail(email);
+
+        if (!pilot.getEmail().equalsIgnoreCase(request.getEmail())
+                && pilotRepository.existsByEmail(request.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
+        }
 
         pilot.setFirstName(request.getFirstName());
         pilot.setLastName(request.getLastName());
@@ -55,8 +66,8 @@ public class PilotService {
      * Complexity of the new password itself is enforced declaratively by
      * {@link ChangePasswordRequest}'s {@code @Pattern}, so it never reaches here.
      */
-    public void changePassword(String username, ChangePasswordRequest request) {
-        Pilot pilot = findByUsername(username);
+    public void changePassword(String email, ChangePasswordRequest request) {
+        Pilot pilot = findByEmail(email);
         verifyPassword(request.getCurrentPassword(), pilot, "Current password is incorrect");
 
         // 422, not 400: this is a different failure mode than "you typed your
@@ -84,22 +95,22 @@ public class PilotService {
     }
 
     /** Overwrites the pilot's avatar image. The whole data URI is validated by {@link UpdateProfilePictureRequest}. */
-    public PilotProfileDto updateProfilePicture(String username, UpdateProfilePictureRequest request) {
-        Pilot pilot = findByUsername(username);
+    public PilotProfileDto updateProfilePicture(String email, UpdateProfilePictureRequest request) {
+        Pilot pilot = findByEmail(email);
         pilot.setProfilePicture(request.getProfilePicture());
         return toDto(pilotRepository.save(pilot));
     }
 
     /** Same 400-not-401 reasoning as {@link #changePassword} applies to the confirmation password here. */
-    public void deleteMyAccount(String username, DeleteAccountRequest request) {
-        Pilot pilot = findByUsername(username);
+    public void deleteMyAccount(String email, DeleteAccountRequest request) {
+        Pilot pilot = findByEmail(email);
         verifyPassword(request.getPassword(), pilot, "Password is incorrect");
 
         pilotRepository.delete(pilot);
     }
 
-    private Pilot findByUsername(String username) {
-        return pilotRepository.findByUsername(username)
+    private Pilot findByEmail(String email) {
+        return pilotRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pilot not found"));
     }
 

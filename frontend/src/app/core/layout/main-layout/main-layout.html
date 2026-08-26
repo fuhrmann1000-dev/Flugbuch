@@ -106,9 +106,12 @@
                 <span class="ml-profile-name">{{ 'NAV.PROFILE' | translate }}</span>
                 <span class="ml-profile-role">{{ 'NAV.PILOT_ROLE' | translate }}</span>
             </div>
-            <button class="ml-profile-chevron">
-                <svg viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M4 6l4 4 4-4" />
+            <button class="ml-profile-logout" [title]="'NAV.LOGOUT' | translate" (click)="onLogoutClick($event)">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M8 4H4.5a1 1 0 00-1 1v10a1 1 0 001 1H8" />
+                    <path d="M12.5 13.5L16 10l-3.5-3.5" />
+                    <path d="M16 10H7.5" />
                 </svg>
             </button>
         </div>

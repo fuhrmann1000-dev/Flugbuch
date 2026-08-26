@@ -41,6 +41,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     static final int LOGIN_CAPACITY = 20;
     static final int REGISTER_CAPACITY = 10;
     static final int CHANGE_PASSWORD_CAPACITY = 10;
+    static final int FORGOT_PASSWORD_CAPACITY = 10;
+    static final int RESET_PASSWORD_CAPACITY = 10;
     private static final Duration WINDOW = Duration.ofMinutes(1);
 
     /** One rate-limit rule: which request path it guards, and how many attempts it allows per {@link #WINDOW}. */
@@ -51,6 +53,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             new RateLimit("/api/v1/auth/login", LOGIN_CAPACITY),
             new RateLimit("/api/v1/auth/register", REGISTER_CAPACITY),
             new RateLimit("/api/v1/pilots/me/password", CHANGE_PASSWORD_CAPACITY),
+            new RateLimit("/api/v1/auth/forgot-password", FORGOT_PASSWORD_CAPACITY),
+            new RateLimit("/api/v1/auth/reset-password", RESET_PASSWORD_CAPACITY),
     };
 
     // One bucket per (client, endpoint) pair, created lazily on first use.

@@ -63,14 +63,14 @@ class PilotControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "max.mustermann")
+    @WithMockUser(username = "max.mustermann@edpu.de")
     @DisplayName("GET /api/v1/pilots/me returns the authenticated pilot's profile")
     void getMyProfile_authenticated_returnsProfile() throws Exception {
         PilotProfileDto dto = new PilotProfileDto();
         dto.setUsername("max.mustermann");
         dto.setFirstName("Max");
         dto.setHomeAirfield("EDPU — Altes Lager");
-        given(pilotService.getMyProfile("max.mustermann")).willReturn(dto);
+        given(pilotService.getMyProfile("max.mustermann@edpu.de")).willReturn(dto);
 
         mockMvc.perform(get(BASE_URL))
                 .andExpect(status().isOk())
@@ -79,29 +79,29 @@ class PilotControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "max.mustermann")
+    @WithMockUser(username = "max.mustermann@edpu.de")
     @DisplayName("PUT /api/v1/pilots/me updates the authenticated pilot's own profile")
     void updateMyProfile_authenticated_updatesProfile() throws Exception {
         PilotProfileDto updated = new PilotProfileDto();
         updated.setUsername("max.mustermann");
         updated.setFirstName("Erika");
-        given(pilotService.updateMyProfile(eq("max.mustermann"), any())).willReturn(updated);
+        given(pilotService.updateMyProfile(eq("max.mustermann@edpu.de"), any())).willReturn(updated);
 
         mockMvc.perform(put(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"firstName\":\"Erika\"}"))
+                        .content("{\"firstName\":\"Erika\",\"email\":\"max.mustermann@edpu.de\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("Erika"));
     }
 
     @Test
-    @WithMockUser(username = "max.mustermann")
+    @WithMockUser(username = "max.mustermann@edpu.de")
     @DisplayName("PUT /api/v1/pilots/me/picture with a valid data URI updates the picture")
     void updateProfilePicture_validRequest_updatesPicture() throws Exception {
         PilotProfileDto updated = new PilotProfileDto();
         updated.setUsername("max.mustermann");
         updated.setProfilePicture("data:image/png;base64,aGVsbG8=");
-        given(pilotService.updateProfilePicture(eq("max.mustermann"), any())).willReturn(updated);
+        given(pilotService.updateProfilePicture(eq("max.mustermann@edpu.de"), any())).willReturn(updated);
 
         mockMvc.perform(put(BASE_URL + "/picture")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -111,7 +111,7 @@ class PilotControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "max.mustermann")
+    @WithMockUser(username = "max.mustermann@edpu.de")
     @DisplayName("PUT /api/v1/pilots/me/picture with a non-image-data-URI value is rejected with 400")
     void updateProfilePicture_invalidFormat_returnsBadRequest() throws Exception {
         mockMvc.perform(put(BASE_URL + "/picture")
@@ -121,7 +121,7 @@ class PilotControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "max.mustermann")
+    @WithMockUser(username = "max.mustermann@edpu.de")
     @DisplayName("PUT /api/v1/pilots/me/password with a valid request returns 204")
     void changePassword_validRequest_returnsNoContent() throws Exception {
         mockMvc.perform(put(BASE_URL + "/password")
@@ -129,15 +129,15 @@ class PilotControllerIntegrationTest {
                         .content("{\"currentPassword\":\"oldPassword\",\"newPassword\":\"newPassword1\"}"))
                 .andExpect(status().isNoContent());
 
-        verify(pilotService).changePassword(eq("max.mustermann"), any());
+        verify(pilotService).changePassword(eq("max.mustermann@edpu.de"), any());
     }
 
     @Test
-    @WithMockUser(username = "max.mustermann")
+    @WithMockUser(username = "max.mustermann@edpu.de")
     @DisplayName("PUT /api/v1/pilots/me/password with the wrong current password surfaces as 400, not 401")
     void changePassword_wrongCurrentPassword_returnsBadRequest() throws Exception {
         willThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is incorrect"))
-                .given(pilotService).changePassword(eq("max.mustermann"), any());
+                .given(pilotService).changePassword(eq("max.mustermann@edpu.de"), any());
 
         mockMvc.perform(put(BASE_URL + "/password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +146,7 @@ class PilotControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "max.mustermann")
+    @WithMockUser(username = "max.mustermann@edpu.de")
     @DisplayName("PUT /api/v1/pilots/me/password with a new password missing complexity is rejected with 400 before reaching the service")
     void changePassword_newPasswordMissingComplexity_returnsBadRequest() throws Exception {
         mockMvc.perform(put(BASE_URL + "/password")
@@ -158,12 +158,12 @@ class PilotControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "max.mustermann")
+    @WithMockUser(username = "max.mustermann@edpu.de")
     @DisplayName("PUT /api/v1/pilots/me/password with a new password equal to the current one surfaces as 422")
     void changePassword_newPasswordSameAsCurrent_returnsUnprocessableEntity() throws Exception {
         willThrow(new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
                 "New password must be different from the current password"))
-                .given(pilotService).changePassword(eq("max.mustermann"), any());
+                .given(pilotService).changePassword(eq("max.mustermann@edpu.de"), any());
 
         mockMvc.perform(put(BASE_URL + "/password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -172,7 +172,7 @@ class PilotControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "max.mustermann")
+    @WithMockUser(username = "max.mustermann@edpu.de")
     @DisplayName("DELETE /api/v1/pilots/me with the correct password returns 204")
     void deleteMyAccount_correctPassword_returnsNoContent() throws Exception {
         mockMvc.perform(delete(BASE_URL)
@@ -180,15 +180,15 @@ class PilotControllerIntegrationTest {
                         .content("{\"password\":\"correctPassword\"}"))
                 .andExpect(status().isNoContent());
 
-        verify(pilotService).deleteMyAccount(eq("max.mustermann"), any());
+        verify(pilotService).deleteMyAccount(eq("max.mustermann@edpu.de"), any());
     }
 
     @Test
-    @WithMockUser(username = "max.mustermann")
+    @WithMockUser(username = "max.mustermann@edpu.de")
     @DisplayName("DELETE /api/v1/pilots/me with the wrong password surfaces as 400, not 401")
     void deleteMyAccount_wrongPassword_returnsBadRequest() throws Exception {
         willThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is incorrect"))
-                .given(pilotService).deleteMyAccount(eq("max.mustermann"), any());
+                .given(pilotService).deleteMyAccount(eq("max.mustermann@edpu.de"), any());
 
         mockMvc.perform(delete(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)

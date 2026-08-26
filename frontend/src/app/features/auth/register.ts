@@ -5,23 +5,27 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth';
+import { PasswordToggleComponent } from '../../shared/password-toggle/password-toggle';
 
 @Component({
     selector: 'app-register',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
+    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, PasswordToggleComponent],
     templateUrl: './register.html',
     styleUrls: ['./login.scss'],
 })
 export class RegisterComponent {
     public firstName: string = '';
     public lastName: string = '';
-    // Bound to the "E-Mail" field; sent to the backend as the pilot's
-    // username. firstName/lastName aren't sent - the backend doesn't have
-    // fields for a display name yet, only username + password.
+    // username is just a display name (not unique); email is the real login
+    // identity. firstName/lastName aren't sent - the backend's Profile page
+    // is where those get filled in.
+    public username: string = '';
     public email: string = '';
     public password: string = '';
     public passwordConfirm: string = '';
+    public passwordVisible = signal(false);
+    public passwordConfirmVisible = signal(false);
     public isLoading = signal(false);
     public hasError = signal(false);
     public errorMsg: string = '';
@@ -40,7 +44,7 @@ export class RegisterComponent {
         this.isLoading.set(true);
         this.hasError.set(false);
 
-        this.authService.register(this.email, this.password).subscribe({
+        this.authService.register(this.username, this.email, this.password).subscribe({
             next: () => this.router.navigate(['/login']),
             error: (error: HttpErrorResponse) => {
                 this.isLoading.set(false);
@@ -49,7 +53,7 @@ export class RegisterComponent {
                 // via the translate pipe so the message stays correct across language switches.
                 // 429 = too many registration attempts from this client (see RateLimitingFilter).
                 if (error.status === 409) {
-                    this.errorMsg = 'REGISTER.USERNAME_TAKEN';
+                    this.errorMsg = 'REGISTER.EMAIL_TAKEN';
                 } else if (error.status === 429) {
                     this.errorMsg = 'COMMON.RATE_LIMITED';
                 } else {

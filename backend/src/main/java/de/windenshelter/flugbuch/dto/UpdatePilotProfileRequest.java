@@ -1,5 +1,7 @@
 package de.windenshelter.flugbuch.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -13,6 +15,9 @@ public class UpdatePilotProfileRequest {
     @Size(max = 100)
     private String lastName;
 
+    /** The pilot's login identity - required and must stay unique; see {@code PilotService#updateMyProfile}. */
+    @NotBlank
+    @Email
     @Size(max = 150)
     private String email;
 

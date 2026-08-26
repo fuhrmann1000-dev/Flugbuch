@@ -24,10 +24,11 @@ public class JwtService {
     private final JwtProperties jwtProperties;
 
     /**
-     * Builds a signed token for {@code pilot}, embedding their username,
-     * roles and current tokenVersion. Takes the {@link Pilot} entity
-     * directly (rather than a Spring Security {@code UserDetails}) because
-     * tokenVersion is a Pilot-only concept - see {@link Pilot#getTokenVersion()}.
+     * Builds a signed token for {@code pilot}, embedding their email (the
+     * login identity), roles and current tokenVersion. Takes the
+     * {@link Pilot} entity directly (rather than a Spring Security
+     * {@code UserDetails}) because tokenVersion is a Pilot-only concept -
+     * see {@link Pilot#getTokenVersion()}.
      */
     public String generateToken(Pilot pilot) {
         Instant now = Instant.now();
@@ -36,7 +37,7 @@ public class JwtService {
                 .toList();
 
         return Jwts.builder()
-                .subject(pilot.getUsername())
+                .subject(pilot.getEmail())
                 .claim("roles", roles)
                 .claim("tokenVersion", pilot.getTokenVersion())
                 .issuedAt(Date.from(now))
@@ -45,8 +46,8 @@ public class JwtService {
                 .compact();
     }
 
-    /** Returns the username (subject) encoded in a JWT. Only call this after {@link #isTokenValid}. */
-    public String extractUsername(String token) {
+    /** Returns the email (subject) encoded in a JWT. Only call this after {@link #isTokenValid}. */
+    public String extractEmail(String token) {
         return parseClaims(token).getSubject();
     }
 

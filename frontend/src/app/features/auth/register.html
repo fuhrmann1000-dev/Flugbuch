@@ -43,16 +43,26 @@
                 <input type="email" class="auth-input" placeholder="pilot@example.com" [(ngModel)]="email"
                     name="email" />
             </div>
+            <div class="auth-field">
+                <label class="auth-label">{{ 'COMMON.USERNAME' | translate }}</label>
+                <input type="text" class="auth-input" placeholder="Maxi" [(ngModel)]="username" name="username" />
+            </div>
             <div class="auth-row">
                 <div class="auth-field">
                     <label class="auth-label">{{ 'COMMON.PASSWORD' | translate }}</label>
-                    <input type="password" class="auth-input" placeholder="••••••••" [(ngModel)]="password"
-                        name="password" />
+                    <div class="pw-wrap">
+                        <input [type]="passwordVisible() ? 'text' : 'password'" class="auth-input"
+                            placeholder="••••••••" [(ngModel)]="password" name="password" />
+                        <app-password-toggle [(visible)]="passwordVisible" />
+                    </div>
                 </div>
                 <div class="auth-field">
                     <label class="auth-label">{{ 'COMMON.PASSWORD_CONFIRM' | translate }}</label>
-                    <input type="password" class="auth-input" placeholder="••••••••" [(ngModel)]="passwordConfirm"
-                        name="passwordConfirm" />
+                    <div class="pw-wrap">
+                        <input [type]="passwordConfirmVisible() ? 'text' : 'password'" class="auth-input"
+                            placeholder="••••••••" [(ngModel)]="passwordConfirm" name="passwordConfirm" />
+                        <app-password-toggle [(visible)]="passwordConfirmVisible" />
+                    </div>
                 </div>
             </div>
 

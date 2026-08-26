@@ -395,6 +395,17 @@
     }
 }
 
+.pw-wrap {
+    position: relative;
+    display: block;
+
+    .fe-input {
+        display: block;
+        width: 100%;
+        padding-right: 2.4rem;
+    }
+}
+
 .fe-select {
     appearance: none;
     cursor: pointer;

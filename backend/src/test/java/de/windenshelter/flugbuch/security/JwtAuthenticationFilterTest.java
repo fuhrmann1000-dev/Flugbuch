@@ -41,7 +41,7 @@ class JwtAuthenticationFilterTest {
     }
 
     private PilotUserDetails pilotUserDetails(int tokenVersion) {
-        return new PilotUserDetails("max.mustermann", "hashed-password",
+        return new PilotUserDetails("max.mustermann@edpu.de", "hashed-password",
                 List.of(new SimpleGrantedAuthority("ROLE_USER")), tokenVersion);
     }
 
@@ -59,14 +59,14 @@ class JwtAuthenticationFilterTest {
     void doFilter_validTokenMatchingTokenVersion_authenticatesRequest() throws Exception {
         when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
         when(jwtService.isTokenValid("valid-token")).thenReturn(true);
-        when(jwtService.extractUsername("valid-token")).thenReturn("max.mustermann");
+        when(jwtService.extractEmail("valid-token")).thenReturn("max.mustermann@edpu.de");
         when(jwtService.extractTokenVersion("valid-token")).thenReturn(2);
-        when(userDetailsService.loadUserByUsername("max.mustermann")).thenReturn(pilotUserDetails(2));
+        when(userDetailsService.loadUserByUsername("max.mustermann@edpu.de")).thenReturn(pilotUserDetails(2));
 
         filter.doFilterInternal(request, response, filterChain);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
-        assertThat(SecurityContextHolder.getContext().getAuthentication().getName()).isEqualTo("max.mustermann");
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getName()).isEqualTo("max.mustermann@edpu.de");
         verify(filterChain).doFilter(request, response);
     }
 
@@ -77,9 +77,9 @@ class JwtAuthenticationFilterTest {
     void doFilter_validTokenStaleTokenVersion_leavesRequestUnauthenticated() throws Exception {
         when(request.getHeader("Authorization")).thenReturn("Bearer stale-token");
         when(jwtService.isTokenValid("stale-token")).thenReturn(true);
-        when(jwtService.extractUsername("stale-token")).thenReturn("max.mustermann");
+        when(jwtService.extractEmail("stale-token")).thenReturn("max.mustermann@edpu.de");
         when(jwtService.extractTokenVersion("stale-token")).thenReturn(1);
-        when(userDetailsService.loadUserByUsername("max.mustermann")).thenReturn(pilotUserDetails(2));
+        when(userDetailsService.loadUserByUsername("max.mustermann@edpu.de")).thenReturn(pilotUserDetails(2));
 
         filter.doFilterInternal(request, response, filterChain);
 

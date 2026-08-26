@@ -38,7 +38,8 @@ class JwtServiceTest {
         jwtService = new JwtService(jwtProperties);
 
         pilot = new Pilot();
-        pilot.setUsername("max.mustermann");
+        pilot.setUsername("Max Mustermann");
+        pilot.setEmail("max.mustermann@edpu.de");
         pilot.setRoles(Set.of(Role.builder().name("USER").build()));
         pilot.setTokenVersion(0);
     }
@@ -51,12 +52,12 @@ class JwtServiceTest {
         assertThat(jwtService.isTokenValid(token)).isTrue();
     }
 
-    // The username embedded at generation time must come back out unchanged.
+    // The email embedded at generation time must come back out unchanged.
     @Test
-    void generateToken_thenExtractUsername_returnsOriginalUsername() {
+    void generateToken_thenExtractEmail_returnsOriginalEmail() {
         String token = jwtService.generateToken(pilot);
 
-        assertThat(jwtService.extractUsername(token)).isEqualTo("max.mustermann");
+        assertThat(jwtService.extractEmail(token)).isEqualTo("max.mustermann@edpu.de");
     }
 
     // The pilot's tokenVersion at login time must come back out unchanged -
