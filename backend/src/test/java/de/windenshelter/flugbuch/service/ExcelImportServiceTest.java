@@ -23,54 +23,54 @@ class ExcelImportServiceTest {
     private final ExcelImportService service = new ExcelImportService(repository);
 
     @Test
-    void importiereAusStream_wirftException_wennStreamNull() {
-        assertThatThrownBy(() -> service.importiereAusStream(null))
+    void importFromStream_throwsException_whenStreamIsNull() {
+        assertThatThrownBy(() -> service.importFromStream(null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("InputStream");
     }
 
     @Test
-    void importiereAusStream_wirftException_beiKorrupterDatei() {
-        InputStream muell = new ByteArrayInputStream("kein excel".getBytes());
+    void importFromStream_throwsException_onCorruptFile() {
+        InputStream garbage = new ByteArrayInputStream("not excel".getBytes());
 
-        assertThatThrownBy(() -> service.importiereAusStream(muell))
+        assertThatThrownBy(() -> service.importFromStream(garbage))
                 .isInstanceOf(ExcelImportException.class);
     }
 
     @Test
-    void importiereAusStream_gibtLeereListeBeiLeeremSheet() throws Exception {
-        byte[] excelBytes = erzeugeLeeresExcel();
+    void importFromStream_returnsEmptyList_forEmptySheet() throws Exception {
+        byte[] excelBytes = buildEmptyExcel();
 
-        List<StagingSchleppkladdeEintrag> ergebnis = service.importiereAusStream(new ByteArrayInputStream(excelBytes));
+        List<StagingSchleppkladdeEintrag> result = service.importFromStream(new ByteArrayInputStream(excelBytes));
 
-        assertThat(ergebnis).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void importiereAusStream_extrahiertGueltigeZeile() throws Exception {
-        byte[] excelBytes = erzeugeExcelMitEinerDatenZeile();
+    void importFromStream_extractsValidRow() throws Exception {
+        byte[] excelBytes = buildExcelWithOneDataRow();
 
-        List<StagingSchleppkladdeEintrag> ergebnis = service.importiereAusStream(new ByteArrayInputStream(excelBytes));
+        List<StagingSchleppkladdeEintrag> result = service.importFromStream(new ByteArrayInputStream(excelBytes));
 
-        assertThat(ergebnis).hasSize(1);
-        assertThat(ergebnis.get(0).getKundenNummer()).isEqualTo("12345");
-        assertThat(ergebnis.get(0).getStatus()).isEqualTo("PENDING");
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getKundenNummer()).isEqualTo("12345");
+        assertThat(result.get(0).getStatus()).isEqualTo("PENDING");
     }
 
     @Test
-    void importiereAusStream_ueberspringtZeileMitFehler() throws Exception {
-        // Eine Zeile gültig, eine mit kaputtem Datums-Format
-        byte[] excelBytes = erzeugeExcelMitGuteUndKaputteZeile();
+    void importFromStream_skipsRowWithError() throws Exception {
+        // One valid row, one with a broken date format
+        byte[] excelBytes = buildExcelWithGoodAndBrokenRow();
 
-        List<StagingSchleppkladdeEintrag> ergebnis = service.importiereAusStream(new ByteArrayInputStream(excelBytes));
+        List<StagingSchleppkladdeEintrag> result = service.importFromStream(new ByteArrayInputStream(excelBytes));
 
-        // Die kaputte Zeile wird übersprungen, die gute aufgenommen
-        assertThat(ergebnis).hasSize(1);
+        // The broken row is skipped, the good one is kept
+        assertThat(result).hasSize(1);
     }
 
-    // --- Helper: minimale Excel-Files in Memory bauen ---
+    // --- Helper: build minimal in-memory Excel files ---
 
-    private byte[] erzeugeLeeresExcel() throws Exception {
+    private byte[] buildEmptyExcel() throws Exception {
         try (Workbook wb = new XSSFWorkbook();
                 var out = new java.io.ByteArrayOutputStream()) {
             wb.createSheet("Test");
@@ -79,42 +79,42 @@ class ExcelImportServiceTest {
         }
     }
 
-    private byte[] erzeugeExcelMitEinerDatenZeile() throws Exception {
+    private byte[] buildExcelWithOneDataRow() throws Exception {
         try (Workbook wb = new XSSFWorkbook();
                 var out = new java.io.ByteArrayOutputStream()) {
             Sheet sheet = wb.createSheet();
-            // Header-Zeilen 0-5 leer lassen
+            // Leave header rows 0-5 empty
             for (int i = 0; i < 6; i++)
                 sheet.createRow(i);
 
-            Row datenZeile = sheet.createRow(6);
-            datenZeile.createCell(1).setCellValue(LocalDateTime.now());
-            datenZeile.createCell(9).setCellValue("12345");
-            datenZeile.createCell(10).setCellValue("Mustermann, Max");
+            Row dataRow = sheet.createRow(6);
+            dataRow.createCell(1).setCellValue(LocalDateTime.now());
+            dataRow.createCell(9).setCellValue("12345");
+            dataRow.createCell(10).setCellValue("Mustermann, Max");
 
             wb.write(out);
             return out.toByteArray();
         }
     }
 
-    private byte[] erzeugeExcelMitGuteUndKaputteZeile() throws Exception {
+    private byte[] buildExcelWithGoodAndBrokenRow() throws Exception {
         try (Workbook wb = new XSSFWorkbook();
                 var out = new java.io.ByteArrayOutputStream()) {
             Sheet sheet = wb.createSheet();
             for (int i = 0; i < 6; i++)
                 sheet.createRow(i);
 
-            // Gute Zeile
-            Row gut = sheet.createRow(6);
-            gut.createCell(1).setCellValue(LocalDateTime.now());
-            gut.createCell(9).setCellValue("11111");
-            gut.createCell(10).setCellValue("Pilot Eins");
+            // Good row
+            Row good = sheet.createRow(6);
+            good.createCell(1).setCellValue(LocalDateTime.now());
+            good.createCell(9).setCellValue("11111");
+            good.createCell(10).setCellValue("Pilot One");
 
-            // Kaputte Zeile: Datums-Spalte enthält String statt Datum
-            Row kaputt = sheet.createRow(7);
-            kaputt.createCell(1).setCellValue("kein gültiges Datum");
-            kaputt.createCell(9).setCellValue("22222");
-            kaputt.createCell(10).setCellValue("Pilot Zwei");
+            // Broken row: date column contains a string instead of a date
+            Row broken = sheet.createRow(7);
+            broken.createCell(1).setCellValue("not a valid date");
+            broken.createCell(9).setCellValue("22222");
+            broken.createCell(10).setCellValue("Pilot Two");
 
             wb.write(out);
             return out.toByteArray();
@@ -122,8 +122,8 @@ class ExcelImportServiceTest {
     }
 
     @Test
-    void importiereMitUeberschreiben_machtNichtsBeiLeererListe() {
-        service.importiereMitUeberschreiben(List.of());
+    void importWithOverwrite_doesNothingForEmptyList() {
+        service.importWithOverwrite(List.of());
         org.mockito.Mockito.verifyNoInteractions(repository);
     }
 }

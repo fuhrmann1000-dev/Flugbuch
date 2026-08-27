@@ -126,7 +126,7 @@ public class MainFlightLogImportService {
         List<String> fields = splitLine(line, DIVIDING_CHARACTER);
         if (fields.size() < COLUMN_MINIMUM) {
             throw new SchleppbetriebImportException(String.format(
-                    "Zeile %d hat %d Spalten, erwartet werden mindestens %d.",
+                    "Line %d has %d columns, expected at least %d.",
                     lineNumber, fields.size(), COLUMN_MINIMUM));
         }
 

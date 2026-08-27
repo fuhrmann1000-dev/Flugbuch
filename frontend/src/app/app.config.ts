@@ -7,15 +7,15 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 import { LANGUAGE_STORAGE_KEY } from './core/config/i18n-config';
 
-// Deutsch ist die Standardsprache der App - nur ein zuvor gespeicherter
-// Wechsel zu einer anderen Sprache (siehe LanguageSwitcherComponent) weicht davon ab.
+// German is the app's default language - only a previously saved switch
+// to another language (see LanguageSwitcherComponent) deviates from this.
 const storedLang = typeof localStorage !== 'undefined' ? localStorage.getItem(LANGUAGE_STORAGE_KEY) : null;
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])), // Wichtig für den REST-API-Zugriff
+    provideHttpClient(withInterceptors([authInterceptor])), // Important for REST API access
     provideTranslateService({
       loader: provideTranslateHttpLoader({ prefix: '/i18n/', suffix: '.json' }),
       lang: storedLang ?? 'de',

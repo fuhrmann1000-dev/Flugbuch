@@ -25,81 +25,81 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ExcelImportService {
 
-    private static final int HEADER_ZEILEN = 6;
-    private static final int SPALTE_FLUG_DATUM = 1;
-    private static final int SPALTE_KUNDEN_NUMMER = 9;
-    private static final int SPALTE_PILOTEN_NAME = 10;
+    private static final int HEADER_ROWS = 6;
+    private static final int COLUMN_FLIGHT_DATE = 1;
+    private static final int COLUMN_CUSTOMER_NUMBER = 9;
+    private static final int COLUMN_PILOT_NAME = 10;
     private static final String STATUS_PENDING = "PENDING";
 
-    private final DataFormatter datenFormatter = new DataFormatter();
+    private final DataFormatter dataFormatter = new DataFormatter();
     private final StagingRepository stagingRepository;
 
-    public List<StagingSchleppkladdeEintrag> importiereAusStream(InputStream dateiInhalt) {
-        Objects.requireNonNull(dateiInhalt, "InputStream darf nicht null sein");
+    public List<StagingSchleppkladdeEintrag> importFromStream(InputStream fileContent) {
+        Objects.requireNonNull(fileContent, "InputStream must not be null");
 
-        List<StagingSchleppkladdeEintrag> ergebnisListe = new ArrayList<>();
+        List<StagingSchleppkladdeEintrag> resultList = new ArrayList<>();
 
-        try (Workbook arbeitsmappe = WorkbookFactory.create(dateiInhalt)) {
-            log.info("Excel-Datei erfolgreich geöffnet. Verarbeite Blätter...");
-            Sheet blatt = arbeitsmappe.getSheetAt(0);
+        try (Workbook workbook = WorkbookFactory.create(fileContent)) {
+            log.info("Excel file opened successfully. Processing sheets...");
+            Sheet sheet = workbook.getSheetAt(0);
 
-            for (Row zeile : blatt) {
-                if (zeile.getRowNum() < HEADER_ZEILEN || istZeileLeer(zeile)) {
+            for (Row row : sheet) {
+                if (row.getRowNum() < HEADER_ROWS || isRowEmpty(row)) {
                     continue;
                 }
-                verarbeiteZeile(zeile, ergebnisListe);
+                processRow(row, resultList);
             }
 
         } catch (java.io.IOException e) {
-            log.error("Fehler beim Lesen der Excel-Datei: {}", e.getMessage());
-            throw new ExcelImportException("Excel-Datei konnte nicht gelesen werden", e);
+            log.error("Error reading Excel file: {}", e.getMessage());
+            throw new ExcelImportException("Excel file could not be read", e);
         }
 
-        log.info("Import abgeschlossen. {} Datensätze extrahiert.", ergebnisListe.size());
-        return ergebnisListe;
+        log.info("Import complete: {} records extracted.", resultList.size());
+        return resultList;
     }
 
     @Transactional
-    public void importiereMitUeberschreiben(List<StagingSchleppkladdeEintrag> neueEintraege) {
-        for (StagingSchleppkladdeEintrag eintrag : neueEintraege) {
-            log.debug("Prüfe auf existierende Daten für: {} / {}",
-                    eintrag.getFlugDatum(), eintrag.getKundenNummer());
+    public void importWithOverwrite(List<StagingSchleppkladdeEintrag> newEntries) {
+        for (StagingSchleppkladdeEintrag entry : newEntries) {
+            log.debug("Checking for existing data for: {} / {}",
+                    entry.getFlugDatum(), entry.getKundenNummer());
 
             stagingRepository.deleteByFlugDatumAndKundenNummer(
-                    eintrag.getFlugDatum(), eintrag.getKundenNummer());
-            stagingRepository.save(eintrag);
+                    entry.getFlugDatum(), entry.getKundenNummer());
+            stagingRepository.save(entry);
         }
-        log.info("{} Einträge im Staging verarbeitet (Überschreiben aktiv).",
-                neueEintraege.size());
+        log.info("{} entries processed in staging (overwrite enabled).",
+                newEntries.size());
     }
 
-    private StagingSchleppkladdeEintrag mappeZeileZuEntity(Row zeile) {
+    private StagingSchleppkladdeEintrag mapRowToEntity(Row row) {
         return StagingSchleppkladdeEintrag.builder()
-                .flugDatum(zeile.getCell(SPALTE_FLUG_DATUM).getLocalDateTimeCellValue())
-                .kundenNummer(datenFormatter.formatCellValue(zeile.getCell(SPALTE_KUNDEN_NUMMER)))
-                .nameDesPiloten(leseStringZelle(zeile.getCell(SPALTE_PILOTEN_NAME)))
+                .flugDatum(row.getCell(COLUMN_FLIGHT_DATE).getLocalDateTimeCellValue())
+                .kundenNummer(dataFormatter.formatCellValue(row.getCell(COLUMN_CUSTOMER_NUMBER)))
+                .nameDesPiloten(readStringCell(row.getCell(COLUMN_PILOT_NAME)))
                 .status(STATUS_PENDING)
                 .build();
     }
 
-    private String leseStringZelle(Cell zelle) {
-        if (zelle == null) {
+    private String readStringCell(Cell cell) {
+        if (cell == null) {
             return "";
         }
-        return datenFormatter.formatCellValue(zelle);
+        return dataFormatter.formatCellValue(cell);
     }
 
-    private boolean istZeileLeer(Row zeile) {
-        Cell datumZelle = zeile.getCell(SPALTE_FLUG_DATUM);
-        return datumZelle == null || datumZelle.getCellType() == CellType.BLANK;
+    private boolean isRowEmpty(Row row) {
+        Cell dateCell = row.getCell(COLUMN_FLIGHT_DATE);
+        return dateCell == null || dateCell.getCellType() == CellType.BLANK;
     }
 
-    private void verarbeiteZeile(Row zeile, List<StagingSchleppkladdeEintrag> ergebnisListe) {
+    private void processRow(Row row, List<StagingSchleppkladdeEintrag> resultList) {
         try {
-            ergebnisListe.add(mappeZeileZuEntity(zeile));
+            resultList.add(mapRowToEntity(row));
         } catch (Exception e) {
-            log.warn("Fehler beim Verarbeiten von Zeile {}: {}",
-                    zeile.getRowNum(), e.getMessage());
+            log.warn("Error processing row {}: {}",
+                    row.getRowNum(), e.getMessage());
         }
     }
 }

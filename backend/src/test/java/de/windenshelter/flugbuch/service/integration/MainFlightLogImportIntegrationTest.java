@@ -66,6 +66,36 @@ class MainFlightLogImportIntegrationTest {
 
     }
 
+    // Regression test for the "flight imported 4 times" ticket: free/winch-launched
+    // flights have no registration (Kennzeichen = null). The dedup lookup used to
+    // rely on a plain JPQL "IN" clause, which never matches NULL columns (SQL
+    // three-valued logic) - so an already-stored flight without a registration was
+    // never recognized as known and got re-inserted on every re-import. See
+    // MainFlightLogStagingRepository#findByLicensePlateInAndDateIn.
+    @Test
+    void repeatedImport_flightWithoutRegistration_staysIdempotent() {
+        StagingMainFlightLog flightWithoutRegistration = StagingMainFlightLog.builder()
+                .datum(LocalDate.of(2026, 8, 25))
+                .startzeit(LocalTime.of(14, 0))
+                .landezeit(LocalTime.of(14, 20))
+                .pilot("Test Pilot")
+                .build();
+
+        mainFlightLogImportService.importIdempotent(List.of(flightWithoutRegistration));
+        assertThat(stagingRepository.count()).isEqualTo(1);
+
+        StagingMainFlightLog reimported = StagingMainFlightLog.builder()
+                .datum(LocalDate.of(2026, 8, 25))
+                .startzeit(LocalTime.of(14, 0))
+                .landezeit(LocalTime.of(14, 20))
+                .pilot("Test Pilot")
+                .build();
+
+        mainFlightLogImportService.importIdempotent(List.of(reimported));
+
+        assertThat(stagingRepository.count()).isEqualTo(1);
+    }
+
     @Test
     void partialAndShuffledReimport_staysIdempotent() {
         int countRowsInCsv = 37;

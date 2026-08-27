@@ -16,7 +16,7 @@ import de.windenshelter.flugbuch.repository.StagingRepository;
 import de.windenshelter.flugbuch.service.ExcelImportService;
 
 @SpringBootTest
-@Transactional // Rollback nach jedem Test für saubere Coverage-Läufe
+@Transactional // Rollback after every test, for clean coverage runs
 class ExcelImportIntegrationTest {
 
         @Autowired
@@ -26,49 +26,49 @@ class ExcelImportIntegrationTest {
         private StagingRepository stagingRepository;
 
         @Test
-        void testVollstaendigerImportInDatenbank() {
+        void fullImportIntoDatabase_succeeds() {
                 // Given
-                InputStream testDatei = getClass().getClassLoader()
+                InputStream testFile = getClass().getClassLoader()
                                 .getResourceAsStream("test-schleppkladde.xlsx");
 
                 // When
-                List<StagingSchleppkladdeEintrag> extrahiert = excelImportService.importiereAusStream(testDatei);
-                stagingRepository.saveAll(extrahiert);
+                List<StagingSchleppkladdeEintrag> extracted = excelImportService.importFromStream(testFile);
+                stagingRepository.saveAll(extracted);
 
                 // Then
-                long anzahlInDatenbank = stagingRepository.count();
-                assertThat(anzahlInDatenbank).isGreaterThan(0);
+                long countInDatabase = stagingRepository.count();
+                assertThat(countInDatabase).isGreaterThan(0);
 
-                // Stichprobe Business-Key (Datum + Kundennummer)
-                boolean gefunden = stagingRepository.findAll().stream()
+                // Spot-check the business key (date + customer number)
+                boolean found = stagingRepository.findAll().stream()
                                 .anyMatch(e -> e.getKundenNummer().equals("2025031020"));
-                assertThat(gefunden).isTrue();
+                assertThat(found).isTrue();
         }
 
         @Test
-        void testUeberschreibenFunktioniert() {
-                // 1. Ersten Eintrag speichern
-                StagingSchleppkladdeEintrag alterEintrag = StagingSchleppkladdeEintrag.builder()
+        void overwriteWorks() {
+                // 1. Save an initial entry
+                StagingSchleppkladdeEintrag oldEntry = StagingSchleppkladdeEintrag.builder()
                                 .flugDatum(LocalDateTime.of(2025, 5, 1, 12, 0))
                                 .kundenNummer("2025031020")
-                                .nameDesPiloten("Falscher Name")
+                                .nameDesPiloten("Wrong Name")
                                 .build();
-                stagingRepository.save(alterEintrag);
+                stagingRepository.save(oldEntry);
 
-                // 2. Neuen Eintrag mit gleichem Key aber anderem Namen importieren
-                StagingSchleppkladdeEintrag neuerEintrag = StagingSchleppkladdeEintrag.builder()
+                // 2. Import a new entry with the same key but a different name
+                StagingSchleppkladdeEintrag newEntry = StagingSchleppkladdeEintrag.builder()
                                 .flugDatum(LocalDateTime.of(2025, 5, 1, 12, 0))
                                 .kundenNummer("2025031020")
-                                .nameDesPiloten("Yousefi, Faroogh") // Korrigierter Name
+                                .nameDesPiloten("Yousefi, Faroogh") // Corrected name
                                 .build();
 
-                excelImportService.importiereMitUeberschreiben(List.of(neuerEintrag));
+                excelImportService.importWithOverwrite(List.of(newEntry));
 
-                // 3. Verifizieren
+                // 3. Verify
                 List<StagingSchleppkladdeEintrag> result = stagingRepository.findAll();
-                assertEquals(1, result.size(), "Es sollte nur ein Eintrag existieren");
+                assertEquals(1, result.size(), "Only one entry should exist");
                 assertEquals("Yousefi, Faroogh", result.get(0).getNameDesPiloten(),
-                                "Der Name sollte überschrieben sein");
+                                "The name should have been overwritten");
         }
 
 }
