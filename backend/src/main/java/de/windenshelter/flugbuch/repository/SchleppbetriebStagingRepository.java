@@ -16,10 +16,10 @@ public interface SchleppbetriebStagingRepository extends JpaRepository<StagingSc
     boolean existsByExternalId(Integer externalId);
 
     /**
-     * Liefert in EINER Abfrage die bereits bekannten external_ids aus der
-     * uebergebenen Menge. Ersetzt den N+1-Pattern von {@code existsByExternalId}
-     * je Zeile beim Massenimport. Aufrufer sollte die Eingabemenge in Chunks
-     * begrenzter Groesse aufteilen (gebundene IN-Liste).
+     * Returns, in ONE query, the external_ids from the given set that are
+     * already known. Replaces the N+1 pattern of calling
+     * {@code existsByExternalId} once per row during a bulk import. Callers
+     * should split the input set into bounded-size chunks (bounded IN list).
      */
     @Query("select e.externalId from StagingSchleppbetriebEintrag e where e.externalId in :externalIds")
     List<Integer> findExistingExternalIds(@Param("externalIds") Collection<Integer> externalIds);

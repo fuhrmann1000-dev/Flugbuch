@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Erzwinge das Scannen der HTML- und TS-Dateien */
+/* Force scanning of the HTML and TS files */
 @source "../src/app/**/*.html";
 @source "../src/app/**/*.ts";
 
@@ -8,7 +8,7 @@
     --color-logbook-dark: #0a1118;
 }
 
-/* Basis-Styling für den Hintergrund */
+/* Base styling for the background */
 html,
 body {
     margin: 0;

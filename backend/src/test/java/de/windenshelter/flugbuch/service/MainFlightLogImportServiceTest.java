@@ -22,11 +22,13 @@ class MainFlightLogImportServiceTest {
     private final MainFlightLogStagingRepository repository = mock(MainFlightLogStagingRepository.class);
     private final MainFlightLogImportService service = new MainFlightLogImportService(repository);
 
+    // Header text matches the real main flight log CSV export format - left
+    // in German since that's the actual external file format being parsed.
     private static final String HEADER =
             "Datum;Startzeit;Landezeit;Muster;Kennzeichen;Pilot;Gäste;Flugart;Startplatz;Zielplatz;Flugleiter;Geschleppter;Schlepphöhe;Betrag;Bemerkung;Fluganzahl";
 
     @Test
-    void importFromStream_extrahiertEineGueltigeZeile() {
+    void importFromStream_extractsOneValidRow() {
         String csv = HEADER + "\n"
                 + "16.12.2025;09:30;09:58;\"Minimum \";D-MIBY;\"Martin Odening\";0;VFR;\"Altes Lager\";\"Altes Lager \";\"Zur Hilfe befähigte Person\";;;0.0;;1\n";
         InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
@@ -34,19 +36,19 @@ class MainFlightLogImportServiceTest {
         List<StagingMainFlightLog> result = service.importFromStream(stream);
 
         assertThat(result).hasSize(1);
-        StagingMainFlightLog eintrag = result.get(0);
-        assertThat(eintrag.getDatum()).isEqualTo(LocalDate.of(2025, 12, 16));
-        assertThat(eintrag.getStartzeit()).isEqualTo(LocalTime.of(9, 30));
-        assertThat(eintrag.getLandezeit()).isEqualTo(LocalTime.of(9, 58));
-        assertThat(eintrag.getMuster()).isEqualTo("Minimum");
-        assertThat(eintrag.getKennzeichen()).isEqualTo("D-MIBY");
-        assertThat(eintrag.getPilot()).isEqualTo("Martin Odening");
-        assertThat(eintrag.getFlugLeiter()).isEqualTo("Zur Hilfe befähigte Person");
-        assertThat(eintrag.getFlugAnzahl()).isEqualTo(1);
+        StagingMainFlightLog entry = result.get(0);
+        assertThat(entry.getDatum()).isEqualTo(LocalDate.of(2025, 12, 16));
+        assertThat(entry.getStartzeit()).isEqualTo(LocalTime.of(9, 30));
+        assertThat(entry.getLandezeit()).isEqualTo(LocalTime.of(9, 58));
+        assertThat(entry.getMuster()).isEqualTo("Minimum");
+        assertThat(entry.getKennzeichen()).isEqualTo("D-MIBY");
+        assertThat(entry.getPilot()).isEqualTo("Martin Odening");
+        assertThat(entry.getFlugLeiter()).isEqualTo("Zur Hilfe befähigte Person");
+        assertThat(entry.getFlugAnzahl()).isEqualTo(1);
     }
 
     @Test
-    void importFromStream_ueberspringtHeader() {
+    void importFromStream_skipsHeader() {
         String csv = HEADER + "\n"
                 + "16.12.2025;09:30;09:58;Minimum;D-MIBY;Pilot;0;VFR;A;B;Leiter;;;0.0;;1\n";
         InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
@@ -57,7 +59,7 @@ class MainFlightLogImportServiceTest {
     }
 
     @Test
-    void importFromStream_parseGeschlepptenUndSchlepphoehe() {
+    void importFromStream_parsesTowedAircraftAndTowHeight() {
         String csv = HEADER + "\n"
                 + "12.12.2025;13:40;13:50;\"Merlin 1200\";D-MVBO;\"Odening, Martin\";0;\"Schlepp DoSi\";\"SLP Altes Lager\";\"SLP Altes Lager\";\"Kienöl, Volkmar\";\"Jeniya (Raimbekova, Yevgeniya)\";500;0.0;;1\n";
         InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
@@ -69,7 +71,7 @@ class MainFlightLogImportServiceTest {
     }
 
     @Test
-    void importFromStream_toleriertUtf8Bom() {
+    void importFromStream_toleratesUtf8Bom() {
         String csv = "﻿" + HEADER + "\n"
                 + "16.12.2025;09:30;09:58;Minimum;D-MIBY;Pilot;0;VFR;A;B;Leiter;;;0.0;;1\n";
         InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
@@ -81,7 +83,7 @@ class MainFlightLogImportServiceTest {
     }
 
     @Test
-    void importFromStream_erhaeltUmlauteInNamen() {
+    void importFromStream_preservesUmlautsInNames() {
         String csv = HEADER + "\n"
                 + "22.11.2025;13:15;13:30;Solanus;D-MESI;V.Kienöl;0;check;\"Altes Lager\";\"Altes Lager\";\"Martin Odening\";;;0.0;;1\n";
         InputStream stream = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
@@ -92,58 +94,75 @@ class MainFlightLogImportServiceTest {
     }
 
     @Test
-    void importFromStream_wirftBeiNullStream() {
+    void importFromStream_throwsOnNullStream() {
         assertThatThrownBy(() -> service.importFromStream(null))
                 .isInstanceOf(NullPointerException.class);
     }
 
     @Test
-    void importIdempotent_entferntDuplikateInnerhalbDerEingabe() {
-        // Gleiches Datum+Startzeit+Kennzeichen zweimal in derselben Eingabe -> nur einmal speichern
-        StagingMainFlightLog a = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
-        StagingMainFlightLog b = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
+    void importIdempotent_removesDuplicatesWithinTheInput() {
+        // Same date+startTime+registration twice in the same input -> saved only once
+        StagingMainFlightLog a = flight(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
+        StagingMainFlightLog b = flight(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
         when(repository.findByLicensePlateInAndDateIn(anyCollection(), anyCollection())).thenReturn(List.of());
 
         service.importIdempotent(List.of(a, b));
 
-        verifyGespeichertCount(1);
+        verifySavedCount(1);
     }
 
     @Test
-    void importIdempotent_speichertNeuenFlug() {
-        StagingMainFlightLog neu = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
+    void importIdempotent_savesNewFlight() {
+        StagingMainFlightLog newFlight = flight(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
         when(repository.findByLicensePlateInAndDateIn(anyCollection(), anyCollection())).thenReturn(List.of());
 
-        service.importIdempotent(List.of(neu));
+        service.importIdempotent(List.of(newFlight));
 
-        org.mockito.Mockito.verify(repository).saveAll(List.of(neu));
+        org.mockito.Mockito.verify(repository).saveAll(List.of(newFlight));
     }
 
     @Test
-    void importIdempotent_ueberspringtBekanntenFlug() {
-        StagingMainFlightLog neuerVersuch = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
-        StagingMainFlightLog bereitsGespeichert = flug(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
+    void importIdempotent_skipsKnownFlight() {
+        StagingMainFlightLog newAttempt = flight(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
+        StagingMainFlightLog alreadyStored = flight(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
         when(repository.findByLicensePlateInAndDateIn(anyCollection(), anyCollection()))
-                .thenReturn(List.of(bereitsGespeichert));
+                .thenReturn(List.of(alreadyStored));
 
-        service.importIdempotent(List.of(neuerVersuch));
+        service.importIdempotent(List.of(newAttempt));
 
-        verifyGespeichertCount(0);
+        verifySavedCount(0);
     }
 
-    private StagingMainFlightLog flug(LocalDate datum, LocalTime startzeit, String kennzeichen) {
+    // Registration (Kennzeichen) is null for unregistered free-flight aircraft
+    // (e.g. a winch launch with no registration requirement) - duplicate
+    // detection must still catch these. See
+    // MainFlightLogStagingRepository#findByLicensePlateInAndDateIn: a bugfix
+    // there is what actually closes this duplicates ticket.
+    @Test
+    void importIdempotent_skipsKnownFlightWithoutRegistration() {
+        StagingMainFlightLog newAttempt = flight(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), null);
+        StagingMainFlightLog alreadyStored = flight(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), null);
+        when(repository.findByLicensePlateInAndDateIn(anyCollection(), anyCollection()))
+                .thenReturn(List.of(alreadyStored));
+
+        service.importIdempotent(List.of(newAttempt));
+
+        verifySavedCount(0);
+    }
+
+    private StagingMainFlightLog flight(LocalDate date, LocalTime startTime, String registration) {
         return StagingMainFlightLog.builder()
-                .datum(datum)
-                .startzeit(startzeit)
-                .kennzeichen(kennzeichen)
+                .datum(date)
+                .startzeit(startTime)
+                .kennzeichen(registration)
                 .build();
     }
 
-    private void verifyGespeichertCount(int expected) {
+    private void verifySavedCount(int expected) {
         org.mockito.ArgumentCaptor<List<StagingMainFlightLog>> captor =
                 org.mockito.ArgumentCaptor.forClass(List.class);
         org.mockito.Mockito.verify(repository, org.mockito.Mockito.atLeastOnce()).saveAll(captor.capture());
-        long gesamtGespeichert = captor.getAllValues().stream().mapToLong(List::size).sum();
-        assertThat(gesamtGespeichert).isEqualTo(expected);
+        long totalSaved = captor.getAllValues().stream().mapToLong(List::size).sum();
+        assertThat(totalSaved).isEqualTo(expected);
     }
 }

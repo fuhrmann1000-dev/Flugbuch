@@ -28,22 +28,22 @@ class SchleppbetriebImportIntegrationTest {
     private SchleppbetriebStagingRepository stagingRepository;
 
     @Test
-    void importiertCsvDateiVollstaendig() {
+    void importsCsvFileCompletely() {
         InputStream csv = getClass().getClassLoader()
                 .getResourceAsStream("test-windenkladde.csv");
 
-        List<StagingSchleppbetriebEintrag> extrahiert = schleppbetriebImportService.importFromStream(csv);
-        schleppbetriebImportService.importIdempotent(extrahiert);
+        List<StagingSchleppbetriebEintrag> extracted = schleppbetriebImportService.importFromStream(csv);
+        schleppbetriebImportService.importIdempotent(extracted);
 
-        long anzahl = stagingRepository.count();
-        assertThat(anzahl).isEqualTo(3);
+        long count = stagingRepository.count();
+        assertThat(count).isEqualTo(3);
         assertThat(stagingRepository.existsByExternalId(198765)).isTrue();
         assertThat(stagingRepository.existsByExternalId(198766)).isTrue();
         assertThat(stagingRepository.existsByExternalId(198767)).isTrue();
     }
 
     @Test
-    void wiederholterImport_erzeugtKeineDuplikate() {
+    void repeatedImport_createsNoDuplicates() {
         InputStream csv1 = getClass().getClassLoader()
                 .getResourceAsStream("test-windenkladde.csv");
         schleppbetriebImportService.importIdempotent(schleppbetriebImportService.importFromStream(csv1));
@@ -56,62 +56,62 @@ class SchleppbetriebImportIntegrationTest {
     }
 
     /**
-     * Grosser, realitaetsnaher Datensatz: anonymisierter Echt-Export von
-     * schleppbetrieb.de (3409 Zeilen, UTF-8-BOM, gequotetes Zeitpunkt-Feld,
-     * Umlaute). Stellt sicher, dass Parser und idempotente Persistenz auch
-     * mit Produktionsvolumen umgehen.
+     * Large, realistic dataset: an anonymized real export from
+     * schleppbetrieb.de (3409 rows, UTF-8 BOM, quoted timestamp field,
+     * umlauts). Makes sure the parser and idempotent persistence hold up at
+     * production volume too.
      */
     @Test
-    void importiertGrossenEchtExportUndIstIdempotent() {
-        List<StagingSchleppbetriebEintrag> extrahiert = schleppbetriebImportService.importFromStream(
+    void importsLargeRealExport_andStaysIdempotent() {
+        List<StagingSchleppbetriebEintrag> extracted = schleppbetriebImportService.importFromStream(
                 getClass().getClassLoader().getResourceAsStream("anonymized-export-sample.csv"));
 
-        assertThat(extrahiert).hasSize(3409);
-        assertThat(extrahiert).allSatisfy(e -> {
+        assertThat(extracted).hasSize(3409);
+        assertThat(extracted).allSatisfy(e -> {
             assertThat(e.getExternalId()).isNotNull();
             assertThat(e.getZeitpunkt()).isNotNull();
             assertThat(e.getStatus()).isEqualTo("PENDING");
         });
 
-        schleppbetriebImportService.importIdempotent(extrahiert);
+        schleppbetriebImportService.importIdempotent(extracted);
         assertThat(stagingRepository.count()).isEqualTo(3409);
 
-        // Zweiter Durchlauf darf keine Duplikate erzeugen (existsByExternalId)
+        // A second run must not create any duplicates (existsByExternalId).
         schleppbetriebImportService.importIdempotent(schleppbetriebImportService.importFromStream(
                 getClass().getClassLoader().getResourceAsStream("anonymized-export-sample.csv")));
         assertThat(stagingRepository.count()).isEqualTo(3409);
     }
 
     /**
-     * Idempotenz auch bei TEIL-ueberlappenden und PERMUTIERTEN Re-Imports:
-     * Erst eine Haelfte, dann der ganze (gemischte) Datensatz - am Ende muss
-     * jede external_id genau einmal vorhanden sein, unabhaengig von Reihenfolge.
+     * Idempotency also holds for PARTIALLY overlapping and SHUFFLED
+     * re-imports: first half the dataset, then the whole (shuffled) thing -
+     * in the end every external_id must exist exactly once, regardless of order.
      */
     @Test
-    void teilmengeUndPermutation_bleibtIdempotent() {
-        List<StagingSchleppbetriebEintrag> alle = schleppbetriebImportService.importFromStream(
+    void partialSubsetAndPermutation_staysIdempotent() {
+        List<StagingSchleppbetriebEintrag> all = schleppbetriebImportService.importFromStream(
                 getClass().getClassLoader().getResourceAsStream("anonymized-export-sample.csv"));
-        assertThat(alle).hasSize(3409);
+        assertThat(all).hasSize(3409);
 
-        // 1. Nur die erste Haelfte importieren
-        List<StagingSchleppbetriebEintrag> ersteHaelfte = new ArrayList<>(alle.subList(0, 1700));
-        schleppbetriebImportService.importIdempotent(ersteHaelfte);
+        // 1. Import only the first half.
+        List<StagingSchleppbetriebEintrag> firstHalf = new ArrayList<>(all.subList(0, 1700));
+        schleppbetriebImportService.importIdempotent(firstHalf);
         assertThat(stagingRepository.count()).isEqualTo(1700);
 
-        // 2. Gesamten Datensatz in zufaelliger Reihenfolge nachimportieren
-        List<StagingSchleppbetriebEintrag> permutiert = schleppbetriebImportService.importFromStream(
+        // 2. Re-import the full dataset in random order.
+        List<StagingSchleppbetriebEintrag> shuffled = schleppbetriebImportService.importFromStream(
                 getClass().getClassLoader().getResourceAsStream("anonymized-export-sample.csv"));
-        Collections.shuffle(permutiert, new Random(42));
-        schleppbetriebImportService.importIdempotent(permutiert);
+        Collections.shuffle(shuffled, new Random(42));
+        schleppbetriebImportService.importIdempotent(shuffled);
 
-        // Genau die volle Menge, keine Duplikate trotz Ueberlappung + Permutation
+        // Exactly the full count, no duplicates despite overlap + permutation.
         assertThat(stagingRepository.count()).isEqualTo(3409);
 
-        // Jede external_id existiert genau einmal (Stichprobe auf Eindeutigkeit der ersten 50)
-        long distinct = permutiert.stream().limit(50)
+        // Every external_id exists exactly once (spot-check uniqueness of the first 50).
+        long distinct = shuffled.stream().limit(50)
                 .map(StagingSchleppbetriebEintrag::getExternalId)
                 .distinct().count();
-        assertThat(permutiert.stream().limit(50)).hasSize(50);
+        assertThat(shuffled.stream().limit(50)).hasSize(50);
         assertThat(distinct).isEqualTo(50);
     }
 }

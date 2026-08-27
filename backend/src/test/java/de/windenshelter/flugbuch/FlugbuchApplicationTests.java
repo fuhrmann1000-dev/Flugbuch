@@ -8,6 +8,6 @@ class FlugbuchApplicationTests {
 
     @Test
     void contextLoads() {
-        // Testet, ob der ApplicationContext erfolgreich geladen werden kann
+        // Tests that the ApplicationContext can be loaded successfully
     }
 }

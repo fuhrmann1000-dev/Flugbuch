@@ -3,7 +3,7 @@ import { MainLayoutComponent } from './core/layout/main-layout/main-layout';
 import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
-    // ── Auth (kein Layout) ───────────────────────────────────────
+    // ── Auth (no layout) ───────────────────────────────────────
     {
         path: 'login',
         loadComponent: () => import('./features/auth/login')
@@ -25,7 +25,7 @@ export const routes: Routes = [
             .then(c => c.ResetPasswordComponent)
     },
 
-    // ── App (mit Sidebar-Layout) ─────────────────────────────────
+    // ── App (with sidebar layout) ─────────────────────────────────
     {
         path: '',
         component: MainLayoutComponent,

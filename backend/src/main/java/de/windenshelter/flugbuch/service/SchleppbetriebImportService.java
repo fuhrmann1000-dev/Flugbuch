@@ -33,18 +33,18 @@ public class SchleppbetriebImportService {
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     private static final int COLUMN_ID = 0;
-    private static final int COLUMN_VEREIN = 1;
-    private static final int COLUMN_ZEITPUNKT = 2;
-    private static final int COLUMN_PILOT_NR = 3;
+    private static final int COLUMN_CLUB = 1;
+    private static final int COLUMN_TIMESTAMP = 2;
+    private static final int COLUMN_PILOT_NUMBER = 3;
     private static final int COLUMN_PILOT = 4;
-    private static final int COLUMN_TYP = 5;
-    private static final int COLUMN_WINDENFAHRER_NR = 6;
-    private static final int COLUMN_WINDENFAHRER = 7;
-    private static final int COLUMN_STARTLEITER_NR = 8;
-    private static final int COLUMN_STARTLEITER = 9;
-    private static final int COLUMN_WINDE = 10;
-    private static final int COLUMN_ZUSATZ = 11;
-    private static final int COLUMN_MINIMUM = COLUMN_WINDE + 1;
+    private static final int COLUMN_TYPE = 5;
+    private static final int COLUMN_WINCH_DRIVER_NUMBER = 6;
+    private static final int COLUMN_WINCH_DRIVER = 7;
+    private static final int COLUMN_LAUNCH_DIRECTOR_NUMBER = 8;
+    private static final int COLUMN_LAUNCH_DIRECTOR = 9;
+    private static final int COLUMN_WINCH = 10;
+    private static final int COLUMN_ADDITIONAL_INFO = 11;
+    private static final int COLUMN_MINIMUM = COLUMN_WINCH + 1;
 
     private final SchleppbetriebStagingRepository stagingRepository;
 
@@ -118,17 +118,17 @@ public class SchleppbetriebImportService {
 
         return StagingSchleppbetriebEintrag.builder()
                 .externalId(parseInteger(fields, COLUMN_ID, lineNumber))
-                .vereinId(parseInteger(fields, COLUMN_VEREIN, lineNumber))
-                .zeitpunkt(parseDateTime(field(fields, COLUMN_ZEITPUNKT), DAYTIME_FORMAT, lineNumber))
-                .pilotNr(parseInteger(fields, COLUMN_PILOT_NR, lineNumber))
+                .vereinId(parseInteger(fields, COLUMN_CLUB, lineNumber))
+                .zeitpunkt(parseDateTime(field(fields, COLUMN_TIMESTAMP), DAYTIME_FORMAT, lineNumber))
+                .pilotNr(parseInteger(fields, COLUMN_PILOT_NUMBER, lineNumber))
                 .pilot(field(fields, COLUMN_PILOT))
-                .typ(field(fields, COLUMN_TYP))
-                .windenfahrerNr(parseInteger(fields, COLUMN_WINDENFAHRER_NR, lineNumber))
-                .windenfahrer(field(fields, COLUMN_WINDENFAHRER))
-                .startleiterNr(parseInteger(fields, COLUMN_STARTLEITER_NR, lineNumber))
-                .startleiter(field(fields, COLUMN_STARTLEITER))
-                .windeName(field(fields, COLUMN_WINDE))
-                .zusatz(field(fields, COLUMN_ZUSATZ))
+                .typ(field(fields, COLUMN_TYPE))
+                .windenfahrerNr(parseInteger(fields, COLUMN_WINCH_DRIVER_NUMBER, lineNumber))
+                .windenfahrer(field(fields, COLUMN_WINCH_DRIVER))
+                .startleiterNr(parseInteger(fields, COLUMN_LAUNCH_DIRECTOR_NUMBER, lineNumber))
+                .startleiter(field(fields, COLUMN_LAUNCH_DIRECTOR))
+                .windeName(field(fields, COLUMN_WINCH))
+                .zusatz(field(fields, COLUMN_ADDITIONAL_INFO))
                 .status(STATUS_PENDING)
                 .build();
     }
