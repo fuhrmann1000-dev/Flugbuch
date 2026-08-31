@@ -5,11 +5,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth';
+import { LanguageSwitcherComponent } from '../../core/layout/language-switcher/language-switcher';
 
 @Component({
     selector: 'app-forgot-password',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
+    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, LanguageSwitcherComponent],
     templateUrl: './forgot-password.html',
     styleUrls: ['./login.scss'],
 })

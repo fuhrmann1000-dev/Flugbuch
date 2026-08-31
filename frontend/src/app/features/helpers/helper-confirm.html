@@ -1,0 +1,41 @@
+<div class="auth-shell">
+    <div class="auth-lang-switch">
+        <app-language-switcher />
+    </div>
+    <div class="auth-bg">
+        <div class="auth-glow auth-glow-1"></div>
+        <div class="auth-glow auth-glow-2"></div>
+        <div class="auth-glow auth-glow-3"></div>
+    </div>
+
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L3 7l9 5 9-5-9-5z" opacity="0.9" />
+                    <path d="M3 12l9 5 9-5" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6" />
+                </svg>
+            </div>
+            <div>
+                <div class="auth-logo-top">AERO</div>
+                <div class="auth-logo-bottom">LOGBOOK</div>
+            </div>
+        </div>
+
+        <h2 class="auth-title">{{ 'HELPERS.CONFIRM_TITLE' | translate }}</h2>
+
+        @if (isLoading()) {
+        <p class="auth-sub">{{ 'HELPERS.CONFIRM_LOADING' | translate }}</p>
+        } @else if (isConfirmed()) {
+        <div class="auth-success">{{ 'HELPERS.CONFIRM_SUCCESS' | translate }}</div>
+        } @else if (hasError()) {
+        <div class="auth-error"><span>⚠</span> {{ 'HELPERS.CONFIRM_FAILED' | translate }}</div>
+        }
+
+        <p class="auth-footer">
+            <a routerLink="/helpers">{{ 'HELPERS.VIEW_LIST_LINK' | translate }}</a>
+            &nbsp;·&nbsp;
+            <a routerLink="/login">{{ 'FORGOT_PASSWORD.BACK_TO_LOGIN' | translate }}</a>
+        </p>
+    </div>
+</div>

@@ -18,8 +18,9 @@ services:
       retries: 30
       start_period: 30s
 
-  # SMTP-Catcher fuer "Passwort vergessen"-Mails im Dev-Betrieb - faengt jede
-  # gesendete Mail ab, ohne sie zuzustellen. Weboberflaeche: http://localhost:8025
+  # SMTP catcher for dev-environment emails (password reset, helper sign-up
+  # confirmations) - captures every email sent without actually delivering
+  # it. Web UI: http://localhost:8025
   mailpit:
     image: axllent/mailpit:latest
     container_name: flugbuch_mailpit

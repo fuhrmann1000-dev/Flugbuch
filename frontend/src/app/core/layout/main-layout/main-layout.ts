@@ -37,13 +37,24 @@ export class MainLayoutComponent implements OnInit {
     return initials || 'P'; // 'P' placeholder until the real profile loads (or if it fails to)
   });
 
-  public readonly navItems: NavItem[] = [
+  private readonly baseNavItems: NavItem[] = [
     { label: 'NAV.DASHBOARD', icon: 'grid', route: '/dashboard' },
     { label: 'NAV.LOGBOOK', icon: 'book', route: '/flights' },
     { label: 'NAV.ADD_FLIGHT', icon: 'plus', route: '/flights/new' },
     { label: 'NAV.DATA_MANAGEMENT', icon: 'database', route: '/data' },
     { label: 'NAV.SETTINGS', icon: 'settings', route: '/settings' },
   ];
+
+  /**
+   * Every logged-in pilot gets the Helpers section (ticket #54) - not just
+   * ADMIN - so any pilot who is also a competition helper can sign up or
+   * edit their own details without leaving the app. What that page actually
+   * shows (full contact details vs. the same reduced view as the public
+   * listing) scales with role instead; see HelpersListComponent.
+   */
+  public readonly navItems = computed<NavItem[]>(() =>
+    [...this.baseNavItems, { label: 'NAV.HELPERS', icon: 'users', route: '/helpers/list' }]
+  );
 
   public ngOnInit(): void {
     // Triggers the initial load into PilotService.currentProfile (see there);

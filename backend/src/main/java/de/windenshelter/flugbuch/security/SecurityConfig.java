@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,8 +23,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Wires up stateless, JWT-based authentication: {@code /api/v1/auth/**} and
- * Swagger stay public, everything else requires a valid Bearer token.
+ * Wires up stateless, JWT-based authentication: {@code /api/v1/auth/**},
+ * Swagger and the public parts of the helper sign-up (ticket #54) stay
+ * public, everything else requires a valid Bearer token - and the
+ * full-detail helper listing additionally requires the ADMIN role.
  * {@link CustomUserDetailsService} + {@link #passwordEncoder()} are picked
  * up automatically by Spring Security to build the {@link AuthenticationManager}.
  */
@@ -83,6 +86,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").permitAll()
+                        // Helper sign-up (ticket #54): reachable without a login, same as
+                        // /api/v1/auth/** above - registering/editing/viewing the reduced
+                        // helper list must not require a Flugbuch pilot account. The
+                        // full-detail listing (plain GET /api/v1/helpers, no extra path
+                        // segment) stays ADMIN-only.
+                        .requestMatchers(HttpMethod.POST, "/api/v1/helpers/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/helpers/confirm").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/helpers/public").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/helpers").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 // Without this, Spring Security's default behaviour for a missing/invalid
                 // token is 403 Forbidden (it treats the request as an anonymous user that

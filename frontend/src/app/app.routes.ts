@@ -25,6 +25,25 @@ export const routes: Routes = [
             .then(c => c.ResetPasswordComponent)
     },
 
+    // ── Helper sign-up (ticket #54, no layout, no login required) ─
+    {
+        path: 'helpers',
+        loadComponent: () => import('./features/helpers/helpers-public')
+            .then(c => c.HelpersPublicComponent)
+    },
+    {
+        // Not "register": one and the same form is used to sign up a new
+        // helper AND to edit an already-known one - see HelperFormComponent.
+        path: 'helpers/form',
+        loadComponent: () => import('./features/helpers/helper-form')
+            .then(c => c.HelperFormComponent)
+    },
+    {
+        path: 'helpers/confirm',
+        loadComponent: () => import('./features/helpers/helper-confirm')
+            .then(c => c.HelperConfirmComponent)
+    },
+
     // ── App (with sidebar layout) ─────────────────────────────────
     {
         path: '',
@@ -69,6 +88,15 @@ export const routes: Routes = [
                 path: 'data',
                 loadComponent: () => import('./features/data-management/data-management')
                     .then(c => c.DataManagementComponent)
+            },
+            {
+                // Open to every logged-in pilot, not ADMIN-only - see
+                // HelpersListComponent's doc comment for how the amount of
+                // detail shown (and the backend access control behind it)
+                // scales with role.
+                path: 'helpers/list',
+                loadComponent: () => import('./features/helpers-list/helpers-list')
+                    .then(c => c.HelpersListComponent)
             },
             {
                 path: 'profile',

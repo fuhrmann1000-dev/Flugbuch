@@ -1,0 +1,122 @@
+<div class="pl-page">
+
+    <div class="pl-header">
+        <div>
+            <nav class="pl-breadcrumb"><span>{{ 'COMMON.DASHBOARD_BREADCRUMB' | translate }}</span><span
+                    class="sep">›</span><span class="active">{{ 'NAV.HELPERS' | translate }}</span></nav>
+            <h1 class="pl-title">{{ (isAdmin() ? 'HELPERS.ADMIN_TITLE' : 'HELPERS.LIST_TITLE') | translate }}</h1>
+        </div>
+        <a class="btn btn-primary" routerLink="/helpers/form">＋ {{ 'HELPERS.FORM_LINK' | translate }}</a>
+    </div>
+
+    <p class="pl-sub">{{ (isAdmin() ? 'HELPERS.ADMIN_SUBTITLE' : 'HELPERS.LIST_SUBTITLE') | translate }}</p>
+
+    <div class="pl-toolbar">
+        <div class="pl-search-wrap">
+            <span class="pl-search-icon">⌕</span>
+            <input type="text" class="pl-search" [placeholder]="'COMMON.SEARCH_PLACEHOLDER' | translate"
+                [(ngModel)]="searchTerm" name="search" />
+        </div>
+    </div>
+
+    @if (hasError()) {
+    <div class="pl-card">
+        <p class="pl-empty">{{ 'HELPERS.ADMIN_LOAD_ERROR' | translate }}</p>
+    </div>
+    } @else if (isAdmin()) {
+    <!-- Full contact details - ADMIN only, see HelpersListComponent's doc comment. -->
+    <div class="pl-card">
+        <div class="pl-scroll">
+            <table class="pl-table">
+                <thead>
+                    <tr>
+                        <th>{{ 'PILOTS.TABLE_NAME' | translate }}</th>
+                        <th>{{ 'HELPERS.TABLE_PHONE' | translate }}</th>
+                        <th>{{ 'HELPERS.TABLE_EMAIL' | translate }}</th>
+                        <th class="center">{{ 'HELPERS.COMPETITION' | translate }}</th>
+                        <th>{{ 'HELPERS.SKILLS' | translate }}</th>
+                        <th>{{ 'HELPERS.AVAILABLE_DAYS' | translate }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (helper of filteredAdmin; track helper.id) {
+                    <tr class="pl-row">
+                        <td>
+                            <div class="pl-avatar-row">
+                                <div class="pl-avatar">{{ helper.firstName[0] }}{{ helper.lastName[0] }}</div>
+                                <div class="pl-name">{{ helper.lastName }}, {{ helper.firstName }}</div>
+                            </div>
+                        </td>
+                        <td class="mono">{{ helper.phone }}</td>
+                        <td class="pl-email">{{ helper.email }}</td>
+                        <td class="center"><span class="pl-license">{{ helper.competition }}</span></td>
+                        <td>{{ helper.skills }}</td>
+                        <td>
+                            <div class="ha-days-pills">
+                                @for (day of allDays; track day) {
+                                <span class="ha-day-pill" [class.ha-day-pill-active]="isAvailable(helper, day)"
+                                    [title]="('HELPERS.DAY_' + day) | translate">
+                                    {{ ('HELPERS.DAY_SHORT_' + day) | translate }}
+                                </span>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                    @empty {
+                    <tr>
+                        <td colspan="6" class="pl-empty">{{ 'HELPERS.ADMIN_EMPTY' | translate }}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    } @else {
+    <!-- Reduced view - same fields as the public listing, see HelpersPublicComponent. -->
+    <div class="pl-card">
+        <div class="pl-scroll">
+            <table class="pl-table">
+                <thead>
+                    <tr>
+                        <th>{{ 'COMMON.FIRST_NAME' | translate }}</th>
+                        <th class="center">{{ 'HELPERS.COMPETITION' | translate }}</th>
+                        <th>{{ 'HELPERS.SKILLS' | translate }}</th>
+                        <th>{{ 'HELPERS.AVAILABLE_DAYS' | translate }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (helper of filteredPublic; track helper.firstName + helper.competition) {
+                    <tr class="pl-row">
+                        <td>
+                            <div class="pl-avatar-row">
+                                <div class="pl-avatar">{{ helper.firstName[0] }}</div>
+                                <div class="pl-name">{{ helper.firstName }}</div>
+                            </div>
+                        </td>
+                        <td class="center"><span class="pl-license">{{ helper.competition }}</span></td>
+                        <td>{{ helper.skills }}</td>
+                        <td>
+                            <div class="ha-days-pills">
+                                @for (day of allDays; track day) {
+                                <span class="ha-day-pill" [class.ha-day-pill-active]="isAvailable(helper, day)"
+                                    [title]="('HELPERS.DAY_' + day) | translate">
+                                    {{ ('HELPERS.DAY_SHORT_' + day) | translate }}
+                                </span>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                    @empty {
+                    <tr>
+                        <td colspan="4" class="pl-empty">{{ 'HELPERS.LIST_EMPTY' | translate }}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+
+</div>
