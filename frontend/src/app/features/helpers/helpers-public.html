@@ -1,0 +1,75 @@
+<div class="auth-shell">
+    <div class="auth-lang-switch">
+        <app-language-switcher />
+    </div>
+    <div class="auth-bg">
+        <div class="auth-glow auth-glow-1"></div>
+        <div class="auth-glow auth-glow-2"></div>
+        <div class="auth-glow auth-glow-3"></div>
+    </div>
+
+    <div class="auth-card auth-card-wide">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L3 7l9 5 9-5-9-5z" opacity="0.9" />
+                    <path d="M3 12l9 5 9-5" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6" />
+                </svg>
+            </div>
+            <div>
+                <div class="auth-logo-top">AERO</div>
+                <div class="auth-logo-bottom">LOGBOOK</div>
+            </div>
+        </div>
+
+        <h2 class="auth-title">{{ 'HELPERS.LIST_TITLE' | translate }}</h2>
+        <p class="auth-sub">{{ 'HELPERS.LIST_SUBTITLE' | translate }}</p>
+
+        @if (hasError()) {
+        <div class="auth-error"><span>⚠</span> {{ 'HELPERS.LIST_FAILED' | translate }}</div>
+        } @else if (isLoading()) {
+        <p class="auth-sub">{{ 'HELPERS.LOADING' | translate }}</p>
+        } @else {
+        <table class="hlp-list-table">
+            <thead>
+                <tr>
+                    <th>{{ 'COMMON.FIRST_NAME' | translate }}</th>
+                    <th>{{ 'HELPERS.COMPETITION' | translate }}</th>
+                    <th>{{ 'HELPERS.SKILLS' | translate }}</th>
+                    <th>{{ 'HELPERS.AVAILABLE_DAYS' | translate }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (helper of helpers(); track helper.firstName + helper.competition) {
+                <tr>
+                    <td>{{ helper.firstName }}</td>
+                    <td><span class="hlp-competition-badge">{{ helper.competition }}</span></td>
+                    <td>{{ helper.skills }}</td>
+                    <td>
+                        <div class="hlp-days-pills">
+                            @for (day of allDays; track day) {
+                            <span class="hlp-day-pill" [class.hlp-day-pill-active]="isAvailable(helper, day)"
+                                [title]="('HELPERS.DAY_' + day) | translate">
+                                {{ ('HELPERS.DAY_SHORT_' + day) | translate }}
+                            </span>
+                            }
+                        </div>
+                    </td>
+                </tr>
+                }
+                @empty {
+                <tr>
+                    <td colspan="4" class="hlp-empty">{{ 'HELPERS.LIST_EMPTY' | translate }}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+
+        <p class="auth-footer">
+            <a routerLink="/helpers/form">{{ 'HELPERS.FORM_LINK' | translate }}</a>
+            &nbsp;·&nbsp;
+            <a routerLink="/login">{{ 'FORGOT_PASSWORD.BACK_TO_LOGIN' | translate }}</a>
+        </p>
+    </div>
+</div>

@@ -70,6 +70,14 @@ password-reset:
     frontend-reset-url: ${PASSWORD_RESET_FRONTEND_URL:http://localhost:4200/reset-password}
     mail-from: ${PASSWORD_RESET_MAIL_FROM:no-reply@flugbuch.local}
 
+# Helper sign-up confirmation links (ticket #54): how long a pending
+# create/update stays valid, where the frontend's confirm page lives (used
+# to build the link sent by email), and the "from" address on that email.
+helper-confirmation:
+    token-expiration-minutes: ${HELPER_CONFIRMATION_TOKEN_EXPIRATION_MINUTES:60}
+    frontend-confirm-url: ${HELPER_CONFIRMATION_FRONTEND_URL:http://localhost:4200/helpers/confirm}
+    mail-from: ${HELPER_CONFIRMATION_MAIL_FROM:no-reply@flugbuch.local}
+
 # JWT signing secret for pilot login. The default below is fine for local
 # development/tests only; production must override it via the JWT_SECRET
 # environment variable with its own strong, random value (see docker-compose.yml).

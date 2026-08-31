@@ -1,5 +1,7 @@
 // ═══════════════════════════════════════════════════════
-// AUTH PAGES — Login / Register
+// HELPERS — public sign-up / list / confirm (ticket #54)
+// Same visual language as the auth pages (login.scss) since these are
+// public pages too, plus the day-availability table and public list.
 // ═══════════════════════════════════════════════════════
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -16,6 +18,7 @@
     position: relative;
     overflow: hidden;
     background: linear-gradient(160deg, #0d1b3e 0%, #0f2252 40%, #0d1b3e 100%);
+    padding: 2rem 1rem;
 }
 
 .auth-bg {
@@ -24,10 +27,8 @@
     pointer-events: none;
 }
 
-// The sidebar's DE/EN switcher (app-language-switcher) only exists once
-// logged in - these public auth pages need their own, so a pilot arriving
-// at login (or a visitor on the public helper pages, see helpers.scss)
-// isn't stuck on whatever language the browser happened to default to.
+// See login.scss for why these public pages need their own switcher instead
+// of relying on the sidebar's (which only exists once logged in).
 .auth-lang-switch {
     position: absolute;
     top: 1.5rem;
@@ -82,7 +83,7 @@
 }
 
 .auth-card-wide {
-    max-width: 560px;
+    max-width: 620px;
 }
 
 .auth-logo {
@@ -207,6 +208,9 @@
     padding: 0.6rem 0.85rem;
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+    box-sizing: border-box;
+    appearance: none;
 
     &::placeholder {
         color: #4a5568;
@@ -216,29 +220,9 @@
         border-color: rgba(56, 139, 253, 0.6);
         box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.12);
     }
-}
 
-.pw-wrap {
-    position: relative;
-    display: block;
-
-    .auth-input {
-        display: block;
-        width: 100%;
-        padding-right: 2.4rem;
-    }
-}
-
-.auth-forgot {
-    font-size: 0.68rem;
-    color: #388bfd;
-    text-decoration: none;
-    text-align: right;
-    margin-top: 0.2rem;
-    align-self: flex-end;
-
-    &:hover {
-        text-decoration: underline;
+    option {
+        background: #1c2333;
     }
 }
 
@@ -306,19 +290,140 @@
     }
 }
 
-.auth-divider {
+// ── Day-availability table ───────────────────────────────────
+.hlp-days-header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    color: #4a5568;
-    font-size: 0.7rem;
-    margin: 0.5rem 0;
+    justify-content: space-between;
+}
 
-    &::before,
-    &::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: rgba(255, 255, 255, 0.08);
+.hlp-mark-all {
+    background: none;
+    border: none;
+    color: #388bfd;
+    font-size: 0.68rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+
+    &:hover {
+        text-decoration: underline;
     }
+}
+
+.hlp-days-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0.35rem;
+    table-layout: fixed;
+}
+
+.hlp-day-cell {
+    background: rgba(8, 18, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 0.5rem 0.25rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    user-select: none;
+
+    &:hover {
+        border-color: rgba(56, 139, 253, 0.4);
+    }
+}
+
+.hlp-day-selected {
+    background: rgba(56, 139, 253, 0.18);
+    border-color: rgba(56, 139, 253, 0.6);
+}
+
+.hlp-day-label {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: #e6edf3;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+}
+
+.hlp-day-checkbox {
+    pointer-events: none;
+    accent-color: #388bfd;
+}
+
+// ── Public helper listing ────────────────────────────────────
+.hlp-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+    margin-bottom: 1rem;
+
+    thead tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    th {
+        padding: 0.6rem 0.5rem;
+        font-size: 0.62rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #4a5568;
+        text-align: left;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    td {
+        padding: 0.65rem 0.5rem;
+        color: #8b949e;
+        vertical-align: middle;
+    }
+}
+
+.hlp-competition-badge {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    background: rgba(56, 139, 253, 0.12);
+    color: #388bfd;
+    border: 1px solid rgba(56, 139, 253, 0.2);
+}
+
+.hlp-days-pills {
+    display: flex;
+    gap: 0.2rem;
+    flex-wrap: wrap;
+}
+
+.hlp-day-pill {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-size: 0.55rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.06);
+    color: #4a5568;
+
+    &.hlp-day-pill-active {
+        background: rgba(52, 211, 153, 0.15);
+        color: #34d399;
+    }
+}
+
+.hlp-empty {
+    text-align: center;
+    padding: 2rem;
+    color: #4a5568;
+    font-style: italic;
 }

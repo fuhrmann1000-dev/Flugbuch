@@ -6,11 +6,12 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth';
 import { PasswordToggleComponent } from '../../shared/password-toggle/password-toggle';
+import { LanguageSwitcherComponent } from '../../core/layout/language-switcher/language-switcher';
 
 @Component({
     selector: 'app-register',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, PasswordToggleComponent],
+    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, PasswordToggleComponent, LanguageSwitcherComponent],
     templateUrl: './register.html',
     styleUrls: ['./login.scss'],
 })

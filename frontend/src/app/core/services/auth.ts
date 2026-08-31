@@ -75,13 +75,37 @@ export class AuthService {
 
   private isTokenExpired(token: string): boolean {
     try {
-      const payloadSegment = token.split('.')[1];
-      const base64 = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
-      const payload = JSON.parse(atob(base64));
+      const payload = this.decodePayload(token);
       return Date.now() >= payload.exp * 1000;
     } catch {
       return true; // malformed token - treat it as invalid/expired
     }
+  }
+
+  /**
+   * True if the logged-in pilot carries the ADMIN role (see JwtService on
+   * the backend, which embeds "ROLE_ADMIN" etc. as a "roles" claim). Used to
+   * show/hide the ADMIN-only Helpers section (ticket #54) in the sidebar -
+   * the backend enforces the real access control regardless of what the UI
+   * shows, this is purely a display concern.
+   */
+  public isAdmin(): boolean {
+    const token = this.getToken();
+    if (!token) {
+      return false;
+    }
+    try {
+      const roles: string[] = this.decodePayload(token).roles ?? [];
+      return roles.includes('ROLE_ADMIN');
+    } catch {
+      return false;
+    }
+  }
+
+  private decodePayload(token: string): any {
+    const payloadSegment = token.split('.')[1];
+    const base64 = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64));
   }
 
   private storeToken(token: string): void {
