@@ -72,6 +72,24 @@
     }
 }
 
+// ── Loading / Error States ──────────────────────────────────────
+.dash-state {
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.dash-state-error {
+    color: #fb923c;
+}
+
+.dash-table-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 1.5rem 1rem !important;
+}
+
 // ── Stat Cards ────────────────────────────────────────────────
 .dash-stats {
     display: grid;

@@ -106,9 +106,11 @@ class MainFlightLogImportServiceTest {
         StagingMainFlightLog b = flight(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
         when(repository.findByLicensePlateInAndDateIn(anyCollection(), anyCollection())).thenReturn(List.of());
 
-        service.importIdempotent(List.of(a, b));
+        var result = service.importIdempotent(List.of(a, b));
 
         verifySavedCount(1);
+        assertThat(result.stored()).isEqualTo(1);
+        assertThat(result.skipped()).isEqualTo(1);
     }
 
     @Test
@@ -116,9 +118,11 @@ class MainFlightLogImportServiceTest {
         StagingMainFlightLog newFlight = flight(LocalDate.of(2025, 12, 16), LocalTime.of(9, 30), "D-MIBY");
         when(repository.findByLicensePlateInAndDateIn(anyCollection(), anyCollection())).thenReturn(List.of());
 
-        service.importIdempotent(List.of(newFlight));
+        var result = service.importIdempotent(List.of(newFlight));
 
         org.mockito.Mockito.verify(repository).saveAll(List.of(newFlight));
+        assertThat(result.stored()).isEqualTo(1);
+        assertThat(result.skipped()).isEqualTo(0);
     }
 
     @Test
@@ -128,9 +132,11 @@ class MainFlightLogImportServiceTest {
         when(repository.findByLicensePlateInAndDateIn(anyCollection(), anyCollection()))
                 .thenReturn(List.of(alreadyStored));
 
-        service.importIdempotent(List.of(newAttempt));
+        var result = service.importIdempotent(List.of(newAttempt));
 
         verifySavedCount(0);
+        assertThat(result.stored()).isEqualTo(0);
+        assertThat(result.skipped()).isEqualTo(1);
     }
 
     // Registration (Kennzeichen) is null for unregistered free-flight aircraft

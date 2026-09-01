@@ -63,8 +63,8 @@
     </style>
 </head>
 <body>
-    <h1>Flugbuch - Tagesauszug</h1>
-    <p class="subtitle" th:text="${date}">01.01.2026</p>
+    <h1 th:text="${title}">Flugbuch - Tagesauszug</h1>
+    <p class="subtitle" th:text="${subtitle}">01.01.2026</p>
 
     <table th:if="${not #lists.isEmpty(rows)}">
         <thead>

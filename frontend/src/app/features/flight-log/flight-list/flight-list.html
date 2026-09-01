@@ -12,13 +12,13 @@
         </div>
 
         <div class="fl-actions">
-            <button class="btn btn-primary">
-                <span class="btn-icon">＋</span> {{ 'FLIGHT_LIST.QUICK_ADD' | translate }}
+            <button class="btn btn-primary" routerLink="/flights/new">
+                <span class="btn-icon">＋</span> {{ 'DASHBOARD.QUICK_NEW_FLIGHT' | translate }}
             </button>
-            <button class="btn btn-ghost">
+            <button class="btn btn-ghost" routerLink="/data">
                 <span class="btn-icon">↓</span> {{ 'FLIGHT_LIST.IMPORT' | translate }}
             </button>
-            <button class="btn btn-ghost">
+            <button class="btn btn-ghost" routerLink="/data">
                 <span class="btn-icon">↑</span> {{ 'FLIGHT_LIST.EXPORT_CSV_PDF' | translate }}
             </button>
         </div>
@@ -28,7 +28,7 @@
     <div class="fl-toolbar">
         <label class="fl-show-entries">
             <span>{{ 'FLIGHT_LIST.SHOW' | translate }}</span>
-            <select [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()" class="fl-select">
+            <select [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)" class="fl-select">
                 <option *ngFor="let opt of pageSizeOptions" [value]="opt">{{ opt }}</option>
             </select>
             <span>{{ 'FLIGHT_LIST.ENTRIES' | translate }}</span>
@@ -37,12 +37,29 @@
         <div class="fl-toolbar-right">
             <div class="fl-search-wrap">
                 <span class="fl-search-icon">⌕</span>
-                <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" class="fl-search"
-                    [placeholder]="'COMMON.SEARCH_PLACEHOLDER' | translate" />
+                <input type="text" [ngModel]="searchTerm()" (ngModelChange)="onSearchTermChange($event)"
+                    class="fl-search" [placeholder]="'COMMON.SEARCH_PLACEHOLDER' | translate" />
             </div>
-            <button class="btn btn-ghost btn-sm">
-                <span class="btn-icon">⇅</span> {{ 'FLIGHT_LIST.SORT' | translate }}
-            </button>
+            <div class="fl-sort-wrap">
+                <button class="btn btn-ghost btn-sm" (click)="toggleSortMenu()">
+                    <span class="btn-icon">{{ sortDirection() === 'ASC' ? '↑' : '↓' }}</span>
+                    {{ 'FLIGHT_LIST.SORT' | translate }}
+                </button>
+                @if (isSortMenuOpen()) {
+                <div class="fl-sort-backdrop" (click)="closeSortMenu()"></div>
+                <div class="fl-sort-menu">
+                    @for (option of sortOptions; track option.field) {
+                    <button class="fl-sort-option" [class.active]="sortField() === option.field"
+                        (click)="selectSort(option.field)">
+                        <span>{{ option.labelKey | translate }}</span>
+                        @if (sortField() === option.field) {
+                        <span class="fl-sort-arrow">{{ sortDirection() === 'ASC' ? '↑' : '↓' }}</span>
+                        }
+                    </button>
+                    }
+                </div>
+                }
+            </div>
             <button class="btn btn-ghost btn-sm">
                 <span class="btn-icon">▽</span> {{ 'FLIGHT_LIST.FILTER' | translate }}
             </button>
@@ -176,21 +193,21 @@
     <div class="fl-pagination">
         <span class="fl-count">
             {{ 'FLIGHT_LIST.SHOWING' | translate:{ from: showingFrom, to: showingTo, total:
-            filteredFlights().length } }}
+            totalCount() } }}
         </span>
 
         <div class="fl-pages">
-            <button class="fl-page-btn" [disabled]="currentPage === 1" (click)="prevPage()">‹</button>
+            <button class="fl-page-btn" [disabled]="currentPage() === 1" (click)="prevPage()">‹</button>
 
             @for (p of pageNumbers(); track $index) {
             @if (p === '…') {
             <span class="fl-page-ellipsis">…</span>
             } @else {
-            <button class="fl-page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+            <button class="fl-page-btn" [class.active]="p === currentPage()" (click)="goToPage(p)">{{ p }}</button>
             }
             }
 
-            <button class="fl-page-btn" [disabled]="currentPage === totalPages()" (click)="nextPage()">›</button>
+            <button class="fl-page-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()">›</button>
         </div>
     </div>
 
@@ -201,11 +218,11 @@
             <button class="fl-ops-toggle">∧</button>
         </div>
         <div class="fl-ops-body">
-            <button class="fl-ops-btn">
+            <button class="fl-ops-btn" routerLink="/data">
                 <span class="fl-ops-icon">📄</span>
                 <span>{{ 'FLIGHT_LIST.OPS_CSV_EXPORT' | translate }}</span>
             </button>
-            <button class="fl-ops-btn">
+            <button class="fl-ops-btn" routerLink="/data">
                 <span class="fl-ops-icon">📋</span>
                 <span>{{ 'FLIGHT_LIST.OPS_PDF_PRINT' | translate }}</span>
             </button>

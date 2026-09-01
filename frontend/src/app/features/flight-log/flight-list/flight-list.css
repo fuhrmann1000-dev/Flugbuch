@@ -232,6 +232,64 @@
     box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.15);
 }
 
+/* ── Sort Menu ───────────────────────────────────────────── */
+.fl-sort-wrap {
+    position: relative;
+}
+
+.fl-sort-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+}
+
+.fl-sort-menu {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    z-index: 11;
+    min-width: 180px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    padding: 0.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.fl-sort-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0.45rem 0.6rem;
+    color: var(--text-secondary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+}
+
+.fl-sort-option:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.fl-sort-option.active {
+    color: var(--accent-blue);
+    font-weight: 600;
+}
+
+.fl-sort-arrow {
+    font-family: 'IBM Plex Mono', monospace;
+}
+
 /* ── Table Wrapper ───────────────────────────────────────── */
 .fl-table-wrap {
     background: var(--bg-surface);

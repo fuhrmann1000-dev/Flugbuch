@@ -1,5 +1,6 @@
 package de.windenshelter.flugbuch.service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -25,9 +26,13 @@ import de.windenshelter.flugbuch.dto.PrintableFlightRow;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Renders that day's flight log as a PDF ("Flugbuch – Tagesauszug") using the
- * {@code flight-log-print.html} Thymeleaf template, and writes it to the
- * configured print output directory as {@code flugbuch-<yyyy-MM-dd>.pdf}.
+ * Renders a flight log excerpt as a PDF using the {@code flight-log-print.html}
+ * Thymeleaf template. {@link #generateDailyPrint} is the original use (one
+ * day, written to the print output directory as
+ * {@code flugbuch-<yyyy-MM-dd>.pdf}, ticket #daily-print); {@link
+ * #generateExportPdf} is the newer on-demand "Export Data" use (an
+ * arbitrary date range, returned as bytes for a controller to stream back
+ * to the browser instead of writing to disk).
  *
  * A day with zero flights still produces a PDF - just with the template's
  * empty-state message instead of a table - so there's always exactly one
@@ -53,29 +58,50 @@ public class DailyFlightLogPrintService {
         criteria.setDate(date);
         Page<FlightLogEntryDto> flights = flightService.findAll(criteria, Pageable.unpaged());
 
-        String html = renderHtml(date, flights.getContent());
+        String html = renderHtml("Flugbuch - Tagesauszug", date.format(DISPLAY_DATE), flights.getContent());
 
         Path outputDirectory = Path.of(printProperties.getOutputDirectory());
         Files.createDirectories(outputDirectory);
         Path outputFile = outputDirectory.resolve("flugbuch-" + date.format(FILE_DATE) + ".pdf");
 
         try (OutputStream out = Files.newOutputStream(outputFile)) {
-            PdfRendererBuilder builder = new PdfRendererBuilder();
-            builder.useFastMode();
-            // No external resources (images, CSS files) are referenced by the
-            // template, so there's nothing for a base URI to resolve - an
-            // empty string is the safe choice OpenHTMLtoPDF expects here.
-            builder.withHtmlContent(html, "");
-            builder.toStream(out);
-            builder.run();
+            renderPdf(html, out);
         }
 
         return outputFile;
     }
 
-    private String renderHtml(LocalDate date, List<FlightLogEntryDto> flights) {
+    /**
+     * Generates a PDF for an arbitrary date range (see {@code
+     * FlightExportService#resolveRange}) and returns it as bytes, for the
+     * "Export Data" card on the Data Management page - no file is written
+     * to disk, unlike {@link #generateDailyPrint}.
+     */
+    public byte[] generateExportPdf(FlightSearchCriteria criteria, String title, String subtitle) throws IOException {
+        Page<FlightLogEntryDto> flights = flightService.findAll(criteria, FlightExportService.EXPORT_SORT);
+        String html = renderHtml(title, subtitle, flights.getContent());
+
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            renderPdf(html, out);
+            return out.toByteArray();
+        }
+    }
+
+    private void renderPdf(String html, OutputStream out) throws IOException {
+        PdfRendererBuilder builder = new PdfRendererBuilder();
+        builder.useFastMode();
+        // No external resources (images, CSS files) are referenced by the
+        // template, so there's nothing for a base URI to resolve - an
+        // empty string is the safe choice OpenHTMLtoPDF expects here.
+        builder.withHtmlContent(html, "");
+        builder.toStream(out);
+        builder.run();
+    }
+
+    private String renderHtml(String title, String subtitle, List<FlightLogEntryDto> flights) {
         Context context = new Context();
-        context.setVariable("date", date.format(DISPLAY_DATE));
+        context.setVariable("title", title);
+        context.setVariable("subtitle", subtitle);
         context.setVariable("rows", flights.stream().map(this::toRow).toList());
         context.setVariable("generatedAt", "Erstellt am " + LocalDateTime.now().format(DISPLAY_TIMESTAMP));
         return templateEngine.process("flight-log-print", context);

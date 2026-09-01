@@ -9,19 +9,27 @@
         <a routerLink="/flights/new" class="btn btn-primary">＋ {{ 'NAV.ADD_FLIGHT' | translate }}</a>
     </div>
 
+    @if (isLoading()) {
+    <p class="dash-state">{{ 'DASHBOARD.LOADING' | translate }}</p>
+    }
+    @if (hasError() && !isLoading()) {
+    <p class="dash-state dash-state-error">{{ 'DASHBOARD.ERROR_LOADING' | translate }}</p>
+    }
+
+    @if (!isLoading() && !hasError()) {
     <!-- Stat Cards -->
     <div class="dash-stats">
-        @for (stat of stats; track stat.label) {
+        @for (stat of stats(); track stat.label) {
         <div class="stat-card">
             <div class="stat-icon">{{ stat.icon }}</div>
             <div class="stat-body">
                 <div class="stat-value">{{ stat.value }}</div>
                 <div class="stat-label">{{ stat.label | translate }}</div>
-                <div class="stat-sub">{{ stat.sub | translate }}</div>
+                <div class="stat-sub">{{ stat.sub | translate:stat.subParams }}</div>
             </div>
             @if (stat.trend) {
             <div class="stat-trend" [class.up]="stat.trendUp">
-                {{ stat.trendUp ? '↑' : '↓' }} {{ stat.trend | translate }}
+                {{ stat.trendUp ? '↑' : '↓' }} {{ stat.trend | translate:stat.trendParams }}
             </div>
             }
         </div>
@@ -34,17 +42,18 @@
         <div class="dash-card dash-chart-card">
             <div class="dash-card-header">
                 <span class="dash-card-title">{{ 'DASHBOARD.CHART_TITLE' | translate }}</span>
-                <span class="dash-card-sub">2026</span>
+                <span class="dash-card-sub">{{ chartRangeLabel() }}</span>
             </div>
             <div class="dash-chart">
-                @for (h of monthlyHours; track $index) {
+                @for (h of monthlyHours(); track $index) {
                 <div class="bar-col">
                     <div class="bar-wrap">
-                        <div class="bar-fill" [style.height.%]="(h / maxHours) * 100" [class.bar-active]="$index === 4">
-                            <span class="bar-tooltip">{{ h }}h</span>
+                        <div class="bar-fill" [style.height.%]="(h / maxHours()) * 100"
+                            [class.bar-active]="$index === monthLabels().length - 1">
+                            <span class="bar-tooltip">{{ h | number:'1.0-1' }}h</span>
                         </div>
                     </div>
-                    <span class="bar-label">{{ months[$index] }}</span>
+                    <span class="bar-label">{{ monthLabels()[$index] }}</span>
                 </div>
                 }
             </div>
@@ -62,9 +71,9 @@
                         'DASHBOARD.QUICK_OPEN_LOGBOOK' | translate }}</span><span class="qi-arrow">›</span></a>
                 <a routerLink="/pilots" class="quick-item"><span class="qi-icon">👤</span><span>{{
                         'DASHBOARD.QUICK_MANAGE_PILOTS' | translate }}</span><span class="qi-arrow">›</span></a>
-                <a routerLink="/data/import" class="quick-item"><span class="qi-icon">↓</span><span>{{
+                <a routerLink="/data" class="quick-item"><span class="qi-icon">↓</span><span>{{
                         'DASHBOARD.QUICK_IMPORT' | translate }}</span><span class="qi-arrow">›</span></a>
-                <a routerLink="/data/export" class="quick-item"><span class="qi-icon">↑</span><span>{{
+                <a routerLink="/data" class="quick-item"><span class="qi-icon">↑</span><span>{{
                         'DASHBOARD.QUICK_EXPORT' | translate }}</span><span class="qi-arrow">›</span></a>
                 <a routerLink="/profile" class="quick-item"><span class="qi-icon">⚙</span><span>{{
                         'DASHBOARD.QUICK_EDIT_PROFILE' | translate }}</span><span class="qi-arrow">›</span></a>
@@ -91,7 +100,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for (f of recentFlights; track $index) {
+                    @for (f of recentFlights(); track $index) {
                     <tr>
                         <td class="mono">{{ f.date }}</td>
                         <td class="mono accent">{{ f.reg }}</td>
@@ -100,9 +109,15 @@
                         <td class="mono">{{ f.duration }}</td>
                     </tr>
                     }
+                    @empty {
+                    <tr>
+                        <td colspan="5" class="dash-table-empty">{{ 'DASHBOARD.EMPTY_RECENT_FLIGHTS' | translate }}</td>
+                    </tr>
+                    }
                 </tbody>
             </table>
         </div>
     </div>
+    }
 
 </div>
