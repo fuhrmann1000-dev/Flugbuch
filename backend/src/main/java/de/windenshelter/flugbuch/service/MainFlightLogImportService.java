@@ -92,7 +92,7 @@ public class MainFlightLogImportService {
     }
 
     @Transactional
-    public void importIdempotent(List<StagingMainFlightLog> entries) {
+    public ChunkedDeduplicatingSaver.Result importIdempotent(List<StagingMainFlightLog> entries) {
         ChunkedDeduplicatingSaver<StagingMainFlightLog, NaturalKey> saver =
                 new ChunkedDeduplicatingSaver<>(CHUNK_SIZE, NaturalKey::of, this::findKnownKeys);
 
@@ -100,6 +100,8 @@ public class MainFlightLogImportService {
 
         log.info("Main flight log import idempotent: {} saved, {} already known/duplicated.",
                 result.stored(), result.skipped());
+
+        return result;
     }
 
     private Set<NaturalKey> findKnownKeys(List<StagingMainFlightLog> chunk) {

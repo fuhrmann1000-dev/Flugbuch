@@ -28,7 +28,8 @@
                 </div>
 
                 <!-- Drop Zone -->
-                <div class="dm-dropzone">
+                <div class="dm-dropzone" [class.dragging]="isDraggingOverDropzone()" (dragover)="onDropzoneDragOver($event)"
+                    (dragleave)="onDropzoneDragLeave($event)" (drop)="onDropzoneDrop($event)">
                     <span class="dm-drop-icon">📂</span>
                     <p class="dm-drop-text">
                         {{ 'DATA_MANAGEMENT.DROP_TEXT' | translate }}
@@ -74,8 +75,10 @@
                 }
 
                 @if (importSuccess()) {
-                <div class="dm-banner dm-success">✓ {{ 'DATA_MANAGEMENT.IMPORT_SUCCESS' | translate:{ count:
-                    importPreview().length } }}</div>
+                <div class="dm-banner dm-success">✓ {{ importResultMessage() }}</div>
+                }
+                @if (importError()) {
+                <div class="dm-banner dm-error">✕ {{ importError() }}</div>
                 }
 
                 <button class="btn btn-primary" [disabled]="!importFile || importLoading()" (click)="startImport()">
@@ -123,6 +126,9 @@
 
                 @if (exportSuccess()) {
                 <div class="dm-banner dm-success">✓ {{ 'DATA_MANAGEMENT.EXPORT_SUCCESS' | translate }}</div>
+                }
+                @if (exportError()) {
+                <div class="dm-banner dm-error">✕ {{ exportError() }}</div>
                 }
 
                 <button class="btn btn-primary" [disabled]="exportLoading()" (click)="startExport()">

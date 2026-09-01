@@ -126,7 +126,8 @@ class DailyFlightLogPrintServiceTest {
         org.mockito.Mockito.verify(templateEngine).process(eq("flight-log-print"), contextCaptor.capture());
         Context context = contextCaptor.getValue();
 
-        assertThat(context.getVariable("date")).isEqualTo("18.08.2026");
+        assertThat(context.getVariable("title")).isEqualTo("Flugbuch - Tagesauszug");
+        assertThat(context.getVariable("subtitle")).isEqualTo("18.08.2026");
 
         @SuppressWarnings("unchecked")
         List<PrintableFlightRow> rows = (List<PrintableFlightRow>) context.getVariable("rows");
@@ -157,5 +158,42 @@ class DailyFlightLogPrintServiceTest {
         Path result = service.generateDailyPrint(LocalDate.of(2026, 8, 20));
 
         assertThat(Files.exists(result)).isTrue();
+    }
+
+    // -------------------------------------------------------------------
+    // generateExportPdf
+    // -------------------------------------------------------------------
+
+    @Test
+    void generateExportPdf_returnsValidPdfBytes() throws IOException {
+        initService();
+        Page<FlightLogEntryDto> page = new PageImpl<>(List.of(sampleFlight()));
+        when(flightService.findAll(any(FlightSearchCriteria.class), eq(FlightExportService.EXPORT_SORT)))
+                .thenReturn(page);
+        when(templateEngine.process(eq("flight-log-print"), any(IContext.class)))
+                .thenReturn("<html><body><h1>Flugbuch</h1></body></html>");
+
+        byte[] pdf = service.generateExportPdf(new FlightSearchCriteria(), "Flugbuch - Gesamtauszug", "Alle Einträge");
+
+        assertThat(new String(pdf, 0, 4, StandardCharsets.ISO_8859_1)).isEqualTo("%PDF");
+    }
+
+    @Test
+    void generateExportPdf_passesGivenTitleAndSubtitleToTheTemplate() throws IOException {
+        initService();
+        when(flightService.findAll(any(FlightSearchCriteria.class), eq(FlightExportService.EXPORT_SORT)))
+                .thenReturn(Page.empty());
+        when(templateEngine.process(eq("flight-log-print"), any(IContext.class)))
+                .thenReturn("<html><body>irrelevant for this test</body></html>");
+
+        service.generateExportPdf(new FlightSearchCriteria(), "Flugbuch - Jahresauszug 2026",
+                "Zeitraum: 01.01.2026 - 31.12.2026");
+
+        ArgumentCaptor<Context> contextCaptor = ArgumentCaptor.forClass(Context.class);
+        org.mockito.Mockito.verify(templateEngine).process(eq("flight-log-print"), contextCaptor.capture());
+        Context context = contextCaptor.getValue();
+
+        assertThat(context.getVariable("title")).isEqualTo("Flugbuch - Jahresauszug 2026");
+        assertThat(context.getVariable("subtitle")).isEqualTo("Zeitraum: 01.01.2026 - 31.12.2026");
     }
 }

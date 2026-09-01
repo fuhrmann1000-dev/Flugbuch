@@ -27,6 +27,15 @@ spring:
                 order_inserts: true
                 order_updates: true
 
+    # Manual CSV upload (Data Management page): matches the frontend's
+    # "CSV files up to 10 MB" copy. Without this, Spring Boot's default
+    # (1 MB) would silently reject anything larger before it even reaches
+    # ImportController.
+    servlet:
+        multipart:
+            max-file-size: 10MB
+            max-request-size: 10MB
+
     # SMTP server used to send "forgot password" emails. Defaults to
     # Mailpit (see docker-compose.yml) - a local mail catcher with no auth/TLS,
     # so nothing is actually delivered outside the dev environment. Override
@@ -90,6 +99,16 @@ jwt:
 # has a real production URL (see docker-compose.yml).
 cors:
     allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:4200}
+
+# Without this, Spring Boot's default error body omits "message" entirely,
+# which would silently break ImportController's ResponseStatusException
+# reasons (e.g. "Line 2 has 3 columns...") ever reaching the frontend.
+# Every ResponseStatusException in this app is already written with a safe,
+# user-facing reason text (see HelperService), so there's nothing sensitive
+# at risk of leaking here.
+server:
+    error:
+        include-message: always
 
 # Always-present ADMIN account, created on startup if it doesn't exist yet
 # (see DefaultAdminSeeder). The password below is a local development/tests
